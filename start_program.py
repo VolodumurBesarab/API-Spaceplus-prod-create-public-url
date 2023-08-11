@@ -1,3 +1,5 @@
+import json
+
 import requests
 
 from modules.auth_manager import AuthManager
@@ -18,42 +20,26 @@ class StartProgram:
         headers = self.auth_manager.get_default_header(access_token=access_token)
         excel_file_name = "sklad.xlsx"
 
-        "Step 1: Find Site Id by Site Name"
-        site_id1 = "spacelpus.sharepoint.com,c2babb4d-6ad3-4b18-a4c8-7366095d82f4,8c6031b4-1201-423f-bb24-f913fb141d81"
-        site_id2 = "spacelpus-my.sharepoint.com,11befae9-0831-409a-83f8-5b32a2f05c83,ab7ba235-20df-4df4-88fd-d8d7cf277d53"
+        root_folder_onedrive = self.onedrive_manager.get_root_folder_json(one_drive_url=one_drive_url, headers=headers)
 
-        "Step 2: Find Drive Id by Document Library name"
-        drive_id1 = 'b!Tbu6wtNqGEukyHNmCV2C9LQxYIwBEj9CuyT5E_sUHYHL2RIQsYQDSK4f_qlK2qlS'
-        drive_id2 = 'b!6fq-ETEImkCD-FsyovBcgzWie6vfIPRNiP3Y188nfVNklHx9RhlARoA2_keutH84'
-        "Write your requests here"
-        # test_url = f"https://graph.microsoft.com/v1.0/sites/{site_id1}/drives"
-        # response = requests.get(test_url, headers=headers)
-        # print(response.json())
+        file_content = self.excel_handler.get_exel_file(root_folder_onedrive=root_folder_onedrive, name=excel_file_name)
 
-        test_url2 = f"https://graph.microsoft.com/v1.0/sites/{site_id2}/drives"
-        response = requests.get(test_url2, headers=headers)
-        print(response.json())
+        # Робота з Excel-файлами
+        df1 = self.excel_handler.read_excel(file_content, sheet_name='Sheet1')
+        print(df1)
+        df2 = self.excel_handler.read_excel(file_content, sheet_name='Sheet2')
+        print(df2)
+        df2 = self.excel_handler.fill_missing_values(df2, 'write here', '400$')
+        print(df2)
 
-        # root_folder_onedrive = self.onedrive_manager.get_root_folder_json(one_drive_url=one_drive_url, headers=headers)
-        #
-        # file_content = self.excel_handler.get_exel_file(root_folder_onedrive=root_folder_onedrive, name=excel_file_name)
-        #
-        # # Робота з Excel-файлами
-        # df1 = self.excel_handler.read_excel(file_content, sheet_name='Sheet1')
-        # print(df1)
-        # df2 = self.excel_handler.read_excel(file_content, sheet_name='Sheet2')
-        # print(df2)
-        # df2 = self.excel_handler.fill_missing_values(df2, 'write here', '400$')
-        # print(df2)
-        #
-        # self.excel_handler.save_excel(df1, df2, output_excel_filename=excel_file_name)
-        #
-        # upload_url = endpoint + "drive/items/root:/sklad.xlsx:/content"
-        # excel_file_path = 'sklad.xlsx'
-        # self.onedrive_manager.upload_excel_to_onedrive(access_token=access_token,
-        #                                                file_path=excel_file_path,
-        #                                                upload_url=upload_url)
-        #
+        self.excel_handler.save_excel(df1, df2, output_excel_filename=excel_file_name)
+
+        upload_url = endpoint + "drive/items/root:/sklad.xlsx:/content"
+        excel_file_path = 'sklad.xlsx'
+        self.onedrive_manager.upload_excel_to_onedrive(access_token=access_token,
+                                                       file_path=excel_file_path,
+                                                       upload_url=upload_url)
+
 
         """
         Ця частина працює, а може не, хто знає
@@ -104,6 +90,15 @@ class StartProgram:
             'Content-Type': 'application/json'
         }
 
+        create_link_url = endpoint + f"drive/items/{photo_id_list[0]}/createLink"
+        create_link_response = requests.post(url=create_link_url, headers=post_headers, json=create_link_payload)
+
+        if create_link_response.status_code == 200:
+            create_link_response_json = create_link_response.json()
+            created_link = create_link_response_json["link"]["webUrl"]
+            test = requests.get(created_link).content
+            print(test)
+
         for item_id in photo_id_list:
             create_link_url = endpoint + f"drive/items/{item_id}/createLink"
 
@@ -112,5 +107,14 @@ class StartProgram:
             if create_link_response.status_code == 200:
                 create_link_response_json = create_link_response.json()
                 created_link = create_link_response_json["link"]["webUrl"]
-                print(created_link)
+                # print(created_link.content)
+                print(create_link_response.json())
+
+                # image_data = {
+                #     "file": ("image.jpg", requests.get(created_link).content, "image/jpeg")
+                # }
+                #
+                # print(image_data)
+
+
 

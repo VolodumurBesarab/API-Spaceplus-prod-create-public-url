@@ -1,2 +1,5 @@
 secrets.json
 sklad.xlsx
+.idea
+__pycache__
+modules

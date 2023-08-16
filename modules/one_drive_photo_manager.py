@@ -1,8 +1,7 @@
 import requests as requests
 
-
-# import self as self
 NL_FOLDER_ID = "01GK3VGRXOWQGPB72LHVB2WIIN642U4NKK"
+
 
 class OneDrivePhotoManager:
     def __init__(self, endpoint: str, headers, access_token):

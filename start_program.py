@@ -50,3 +50,36 @@ class StartProgram:
 
         self.one_drive_photo_manager.get_photos("CP06C")
 
+
+
+    #otomoto api connection
+
+    url = "https://www.otomoto.pl/api/open/oauth/token"
+    client_id = "1399"
+    client_secret = "62ef409424513c656da791bcb052ee67"
+    username = "andrewb200590@gmail.com"
+    password = "6925Papa@"
+
+    headers = {
+        "Content-Type": "application/x-www-form-urlencoded"
+    }
+
+    data = {
+        "grant_type": "password",
+        "username": username,
+        "password": password
+    }
+
+    response = requests.post(url, data=data, headers=headers, auth=(client_id, client_secret))
+
+    if response.status_code == 200:
+        access_token = response.json().get("access_token")
+        print("Access Token:", access_token)
+    else:
+        print("Error:", response.status_code, response.text)
+
+    #otomoto api створення нового оголошення
+
+    url_new_advert = "https://www.otomoto.pl/api/open/account/adverts"
+
+

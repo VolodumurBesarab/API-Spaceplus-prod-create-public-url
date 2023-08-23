@@ -78,8 +78,188 @@ class StartProgram:
     else:
         print("Error:", response.status_code, response.text)
 
-    #otomoto api створення нового оголошення
+    #otomoto api виведення в консоль даних про оголошення
 
-    url_new_advert = "https://www.otomoto.pl/api/open/account/adverts"
+    url = "https://www.otomoto.pl/api/open/account/adverts"
+    user_email = "andrewb200590@gmail.com"
+    access_token = "693ee8ced9d252f4448c8d019d394f68926fdd66"
+    limit = 10
+    page = 1
+
+    headers = {
+        "User-Agent": user_email,
+        "Content-Type": "application/json",
+        "Authorization": f"Bearer {access_token}"
+    }
+
+    params = {
+        "limit": limit,
+        "page": page
+    }
+
+    response = requests.get(url, headers=headers, params=params)
+
+    if response.status_code == 200:
+        adverts_data = response.json()
+        # Process the adverts_data as needed
+        print("Adverts data:", adverts_data)
+    else:
+        print("Error:", response.status_code, response.text)
+
+
+    #створення колекції з фото (код не тестований, вже як матимемо фото варто спробувати + дописати рядок до data "image_collection_id": 821165355"
+    # def create_image_collection(user_email, access_token, image_urls):
+    #     url = "https://www.otomoto.pl/api/open/imageCollections"
+    #
+    #     headers = {
+    #         "User-Agent": user_email,
+    #         "Content-Type": "application/json",
+    #         "Authorization": f"Bearer {access_token}"
+    #     }
+    #
+    #     data = image_urls
+    #
+    #     response = requests.post(url, json=data, headers=headers)
+    #
+    #     if response.status_code == 200:
+    #         collection_id = response.json().get("id")
+    #         print(f"Image collection successfully created with ID: {collection_id}")
+    #         return collection_id
+    #     else:
+    #         print("Error:", response.status_code, response.text)
+    #         return None
+    #
+    # # Replace these with your actual values
+    # user_email = "your_user_email"
+    # access_token = "your_access_token"
+    #
+    # image_urls = {
+    #     "1": "http://lorempixel.com/800/600/transport/",
+    #     "2": "http://lorempixel.com/800/600/transport/",
+    #     "3": "http://lorempixel.com/800/600/transport/"
+    # }
+
+    #створення нового оголошення otomoto
+
+    def activate_advert(advert_id, user_email, access_token):
+        url = f"https://www.otomoto.pl/api/open/account/adverts/{advert_id}/activate"
+
+        headers = {
+            "User-Agent": user_email,
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {access_token}"
+        }
+
+        response = requests.post(url, headers=headers)
+
+        if response.status_code == 200:
+            print(f"Advert with ID {advert_id} successfully activated!")
+        else:
+            print("Error:", response.status_code, response.text)
+
+    def post_advert(user_email, access_token):
+        url = "https://www.otomoto.pl/api/open/account/adverts"
+
+        headers = {
+            "User-Agent": user_email,
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {access_token}"
+        }
+
+        #треба поміняти тут код на змінні які будемо отримувати з таблиці
+        data = {
+            "status": "unpaid",
+            'title': 'Poprzeczki Belki bagaznik Thule Aerobar 3',
+            'description': 'Poprzeczki Thule Aerobar\n108cm-200zł\n120cm-230zł\n127 cm-270zł\n135cm-300zł\n150cm- 350zł\nDostępność proszę sprawdz.\nWystawiam Fakturę VAT marża.\nWysyłka kurierem za pobraniem.',
+            'category_id': 173,
+            'region_id': 8,
+            'city_id': 10119,
+            'municipality': 'Lublin',
+            'city': {
+                'pl': 'Lublin',
+                'en': 'Lublin'
+            },
+            'coordinates': {
+                'latitude': 51.23955,
+                'longitude': 22.55257,
+                'radius': 0,
+                'zoom_level': 13
+            },
+            'advertiser_type': 'business',
+            'contact': {
+                'person': 'Andrzej Besarab',
+                'phone_numbers': [
+                    '+48660086570'
+                ]
+            },
+            "params": {
+                'tire-brand': 'others',
+                'delivery': '1',
+                'title_parts': 'Poprzeczki Belki bagaznik Thule Aerobar delux',
+                'manufacturer': 'Thule',
+                "price": {
+                    '0': 'price',
+                    '1': 200,
+                    'currency': 'PLN',
+                    'gross_net': 'gross'
+                },
+            },
+            'new_used': 'used',
+            'visible_in_profile': '1',
+        }
+
+        response = requests.post(url, json=data, headers=headers)
+
+        if response.status_code == 201:
+            advert_id = response.json().get("id")
+            print(f"Advert successfully posted with ID: {advert_id}")
+            return advert_id
+        else:
+            print("Error:", response.status_code, response.text)
+            return None
+
+    # Replace these with your actual values
+    user_email = "andrewb200590@gmail.com"
+    access_token = "693ee8ced9d252f4448c8d019d394f68926fdd66"
+
+    advert_id = post_advert(user_email, access_token)
+
+    #collection_id = create_image_collection(user_email, access_token, image_urls)
+
+
+    #цей кусок має активувати оголошення але чомусь цього не робить тому оголошення додається до вкладки "активуйте оголошення"
+    #звідки його вручну можна активувати
+
+    # if advert_id is not None:
+    #     activate_advert(advert_id, user_email, access_token)
+
+    #видалення оголошення
+
+    def deactivate_advert(advert_id, user_email, access_token):
+        url = f"https://www.otomoto.pl/api/open/account/adverts/{advert_id}/deactivate"
+
+        headers = {
+            "User-Agent": user_email,
+            "Content-Type": "application/json",
+            "Authorization": f"Bearer {access_token}"
+        }
+
+        data = {
+            "reason": {
+                "id": "1",
+                "description": "Reason to deactivate the Ad"
+            }
+        }
+
+        response = requests.post(url, json=data, headers=headers)
+
+        if response.status_code == 200:
+            print(f"Advert with ID {advert_id} successfully deactivated.")
+        else:
+            print("Error:", response.status_code, response.text)
+
+    advert_id = "6113956279"
+
+    deactivate_advert(advert_id, user_email, access_token)
 
 

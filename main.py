@@ -5,4 +5,4 @@ start_program = StartProgram()
 
 
 # one_drive_photo_manager
-start_program.start()
+start_program.otomoto()

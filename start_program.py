@@ -7,6 +7,11 @@ from modules.excel_handler import ExcelHandler
 from modules.one_drive_photo_manager import OneDrivePhotoManager
 from modules.onedrive_manager import OneDriveManager
 
+CLIENT_ID = "e3608d4cee384d3b9adc39b2e5f2f92f"  # wprowadź Client_ID aplikacji
+CLIENT_SECRET = "xoDO0ODIDd0yaH0y5H3Gn0fVMCpfzujZ6rfrsXBYIMPKnh24Dwm08NTB3OusLky4"  # wprowadź Client_Secret aplikacji
+TOKEN_URL = "https://allegro.pl/auth/oauth/token"
+API_BASE_URL = "https://allegro.pl"
+
 
 class StartProgram:
     def __init__(self):
@@ -52,6 +57,43 @@ class StartProgram:
 
 
 
+    # #підключення до allegro api
+    # def get_access_token():
+    #     try:
+    #         data = {'grant_type': 'client_credentials'}
+    #         access_token_response = requests.post(TOKEN_URL, data=data, verify=False,
+    #                                               allow_redirects=False, auth=(CLIENT_ID, CLIENT_SECRET))
+    #         print(access_token_response.text)  # Додайте цей рядок для виводу вмісту відповіді сервера
+    #         tokens = json.loads(access_token_response.text)
+    #         access_token = tokens['access_token']
+    #         return access_token
+    #     except requests.exceptions.HTTPError as err:
+    #         raise SystemExit(err)
+    #
+    # access_token = get_access_token()
+    # print("access token = " + access_token)
+    #
+    #
+    # #запит на отримання даних про оголошення по ід
+    # # Приклад виклику API для отримання інформації про продукт за ID
+    # try:
+    #     headers = {
+    #         "Authorization": f"Bearer {access_token}"
+    #     }
+    #
+    #     product_id = "13067041315"
+    #     endpoint = f"https://allegro.pl/sale/products/13067041315"
+    #
+    #     response = requests.get(endpoint, headers=headers)
+    #     if response.status_code == 200:
+    #         product_info = response.json()
+    #         print(product_info)
+    #     else:
+    #         print(f"API request failed: {response.text}")
+    # except Exception as e:
+    #     print(f"Error: {e}")
+
+
     #otomoto api connection
 
     url = "https://www.otomoto.pl/api/open/oauth/token"
@@ -82,7 +124,6 @@ class StartProgram:
 
     url = "https://www.otomoto.pl/api/open/account/adverts"
     user_email = "andrewb200590@gmail.com"
-    access_token = "693ee8ced9d252f4448c8d019d394f68926fdd66"
     limit = 10
     page = 1
 
@@ -220,7 +261,6 @@ class StartProgram:
 
     # Replace these with your actual values
     user_email = "andrewb200590@gmail.com"
-    access_token = "693ee8ced9d252f4448c8d019d394f68926fdd66"
 
     advert_id = post_advert(user_email, access_token)
 
@@ -233,33 +273,33 @@ class StartProgram:
     # if advert_id is not None:
     #     activate_advert(advert_id, user_email, access_token)
 
-    #видалення оголошення
-
-    def deactivate_advert(advert_id, user_email, access_token):
-        url = f"https://www.otomoto.pl/api/open/account/adverts/{advert_id}/deactivate"
-
-        headers = {
-            "User-Agent": user_email,
-            "Content-Type": "application/json",
-            "Authorization": f"Bearer {access_token}"
-        }
-
-        data = {
-            "reason": {
-                "id": "1",
-                "description": "Reason to deactivate the Ad"
-            }
-        }
-
-        response = requests.post(url, json=data, headers=headers)
-
-        if response.status_code == 200:
-            print(f"Advert with ID {advert_id} successfully deactivated.")
-        else:
-            print("Error:", response.status_code, response.text)
-
-    advert_id = "6113956279"
-
-    deactivate_advert(advert_id, user_email, access_token)
+    # #видалення оголошення
+    #
+    # def deactivate_advert(advert_id, user_email, access_token):
+    #     url = f"https://www.otomoto.pl/api/open/account/adverts/{advert_id}/deactivate"
+    #
+    #     headers = {
+    #         "User-Agent": user_email,
+    #         "Content-Type": "application/json",
+    #         "Authorization": f"Bearer {access_token}"
+    #     }
+    #
+    #     data = {
+    #         "reason": {
+    #             "id": "1",
+    #             "description": "Reason to deactivate the Ad"
+    #         }
+    #     }
+    #
+    #     response = requests.post(url, json=data, headers=headers)
+    #
+    #     if response.status_code == 200:
+    #         print(f"Advert with ID {advert_id} successfully deactivated.")
+    #     else:
+    #         print("Error:", response.status_code, response.text)
+    #
+    # advert_id = "6113956279"
+    #
+    # deactivate_advert(advert_id, user_email, access_token)
 
 

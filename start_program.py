@@ -106,16 +106,17 @@ class StartProgram:
         "Content-Type": "application/x-www-form-urlencoded"
     }
 
-    data = {
+    start_data = {
         "grant_type": "password",
         "username": username,
         "password": password
     }
 
-    response = requests.post(url, data=data, headers=headers, auth=(client_id, client_secret))
-
+    response = requests.post(url, data=start_data, headers=headers, auth=(client_id, client_secret))
+    access_token = None
     if response.status_code == 200:
         access_token = response.json().get("access_token")
+        #remove
         print("Access Token:", access_token)
     else:
         print("Error:", response.status_code, response.text)
@@ -138,16 +139,17 @@ class StartProgram:
         "page": page
     }
 
-    response = requests.get(url, headers=headers, params=params)
+    def print_adverts_list(self):
+        response = requests.get(url, headers=headers, params=params)
 
-    if response.status_code == 200:
-        adverts_data = response.json()
-        # Process the adverts_data as needed
-        print("Adverts data:", adverts_data)
-    else:
-        print("Error:", response.status_code, response.text)
+        if response.status_code == 200:
+            adverts_data = response.json()
+            # Process the adverts_data as needed
+            print("Adverts data:", adverts_data)
+        else:
+            print("Error:", response.status_code, response.text)
 
-
+    print_adverts_list()
     #створення колекції з фото (код не тестований, вже як матимемо фото варто спробувати + дописати рядок до data "image_collection_id": 821165355"
     # def create_image_collection(user_email, access_token, image_urls):
     #     url = "https://www.otomoto.pl/api/open/imageCollections"
@@ -185,12 +187,6 @@ class StartProgram:
     def activate_advert(advert_id, user_email, access_token):
         url = f"https://www.otomoto.pl/api/open/account/adverts/{advert_id}/activate"
 
-        headers = {
-            "User-Agent": user_email,
-            "Content-Type": "application/json",
-            "Authorization": f"Bearer {access_token}"
-        }
-
         response = requests.post(url, headers=headers)
 
         if response.status_code == 200:
@@ -198,26 +194,91 @@ class StartProgram:
         else:
             print("Error:", response.status_code, response.text)
 
-    def post_advert(user_email, access_token):
-        url = "https://www.otomoto.pl/api/open/account/adverts"
 
-        headers = {
-            "User-Agent": user_email,
-            "Content-Type": "application/json",
-            "Authorization": f"Bearer {access_token}"
-        }
+    # def post_advert(user_email, access_token):
+    #     url = "https://www.otomoto.pl/api/open/account/adverts"
+    #
+    #     headers = {
+    #         "User-Agent": user_email,
+    #         "Content-Type": "application/json",
+    #         "Authorization": f"Bearer {access_token}"
+    #     }
 
-        #треба поміняти тут код на змінні які будемо отримувати з таблиці
-        data = {
+
+        # Винести статичні данні і поміняти
+        CITY = "Lublin"
+
+    # Зчитуєм данні з таблиці
+    # Зберігаєм данні в словнику
+    # Передаєм словник генератору дати
+    # В даті розпаковуєм і створюєм
+
+
+
+    # треба поміняти тут код на змінні які будемо отримувати з таблиці
+    custom_otomoto_data = {
+        "status": "unpaid",
+        'title': 'Poprzeczki Belki bagaznik Thule Aerobar 3',
+        'description': 'Poprzeczki Thule Aerobar\n108cm-200zł\n120cm-230zł\n127 cm-270zł\n135cm-300zł\n150cm- 350zł\nDostępność proszę sprawdz.\nWystawiam Fakturę VAT marża.\nWysyłka kurierem za pobraniem.',
+        'category_id': 173,
+        'region_id': 8,
+        'city_id': 10119,
+        'municipality': 'Lublin',
+        'city': {
+            'pl': CITY,
+            'en': 'Lublin'
+        },
+        'coordinates': {
+            'latitude': 51.23955,
+            'longitude': 22.55257,
+            'radius': 0,
+            'zoom_level': 13
+        },
+        'advertiser_type': 'business',
+        'contact': {
+            'person': 'Andrzej Besarab',
+            'phone_numbers': [
+                '+48660086570'
+            ]
+        },
+        "params": {
+            'tire-brand': 'others',
+            'delivery': '1',
+            'title_parts': 'Poprzeczki Belki bagaznik Thule Aerobar delux',
+            'manufacturer': 'Thule',
+            "price": {
+                '0': 'price',
+                '1': 200,
+                'currency': 'PLN',
+                'gross_net': 'gross'
+            },
+        },
+        'new_used': 'used',
+        'visible_in_profile': '1',
+    }
+    def exel_info_dict_creator(self, title, description, price, new_used, manufacturer):
+        exel_info_dict = {
+            "title": title,
+            "description": description,
+            "price": price,
+            "new_used": new_used,
+            "manufacturer": manufacturer,
+             }
+        return exel_info_dict
+
+    def data_creator(self, exel_info_dict) -> Json:
+        if dict == None or dict == {}:
+            print("Dictionaty is empty")
+        otomoto_data = {
             "status": "unpaid",
-            'title': 'Poprzeczki Belki bagaznik Thule Aerobar 3',
-            'description': 'Poprzeczki Thule Aerobar\n108cm-200zł\n120cm-230zł\n127 cm-270zł\n135cm-300zł\n150cm- 350zł\nDostępność proszę sprawdz.\nWystawiam Fakturę VAT marża.\nWysyłka kurierem za pobraniem.',
+            'title': exel_info_dict["title"],
+            'description': exel_info_dict["description"],
             'category_id': 173,
             'region_id': 8,
             'city_id': 10119,
             'municipality': 'Lublin',
             'city': {
-                'pl': 'Lublin',
+                'pl': CITY,
                 'en': 'Lublin'
             },
             'coordinates': {
@@ -237,19 +298,21 @@ class StartProgram:
                 'tire-brand': 'others',
                 'delivery': '1',
                 'title_parts': 'Poprzeczki Belki bagaznik Thule Aerobar delux',
-                'manufacturer': 'Thule',
+                'manufacturer': exel_info_dict["manufacturer"],
                 "price": {
                     '0': 'price',
-                    '1': 200,
+                    '1': exel_info_dict["price"],
                     'currency': 'PLN',
                     'gross_net': 'gross'
                 },
             },
-            'new_used': 'used',
+            'new_used': exel_info_dict["new_used"],
             'visible_in_profile': '1',
         }
+        return otomoto_data
 
-        response = requests.post(url, json=data, headers=headers)
+    def create_otomoto_advert(self, otomoto_data):
+        response = requests.post(url, json=otomoto_data, headers=headers)
 
         if response.status_code == 201:
             advert_id = response.json().get("id")
@@ -260,9 +323,13 @@ class StartProgram:
             return None
 
     # Replace these with your actual values
-    user_email = "andrewb200590@gmail.com"
+    # user_email = "andrewb200590@gmail.com"
+    #
+    # advert_id = post_advert(user_email, access_token)
 
-    advert_id = post_advert(user_email, access_token)
+    first_item = exel_info_dict_creator(title="Title 1", description="Description 1", price=101, new_used="used", manufacturer="Manufacturer 1")
+    first_item_dict = data_creator(first_item)
+    advert_id = create_otomoto_advert(first_item_dict)
 
     #collection_id = create_image_collection(user_email, access_token, image_urls)
 

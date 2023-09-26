@@ -95,11 +95,7 @@ class StartProgram:
 
         #otomoto api connection
 
-        url = "https://www.otomoto.pl/api/open/oauth/token"
-        client_id = "1399"
-        client_secret = "62ef409424513c656da791bcb052ee67"
-        username = "andrewb200590@gmail.com"
-        password = "6925Papa@"
+
 
         headers = {
             "Content-Type": "application/x-www-form-urlencoded"

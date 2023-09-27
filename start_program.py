@@ -3,6 +3,7 @@ import json
 import requests
 
 from modules.Images.images_api import ImagesApi
+from modules.Otomoto.otomoto_manager import OtomotoManager
 from modules.auth_manager import AuthManager
 from modules.excel_handler import ExcelHandler
 from modules.one_drive_photo_manager import OneDriveHelper
@@ -14,6 +15,7 @@ class StartProgram:
         self.excel_handler = ExcelHandler()
         self.onedrive_manager = OneDriveManager()
         self.images_api = ImagesApi()
+        self.otomoto_manager = OtomotoManager(file_name="storage 09_23_site", sheet_name="OtoMoto")
 
     def start(self):
 
@@ -57,6 +59,8 @@ class StartProgram:
 
         self.find_folder_by_name(folder_name="CP07A")
 
+    def otomoto_test(self):
+        self.otomoto_manager.read_all_items()
 
 
 

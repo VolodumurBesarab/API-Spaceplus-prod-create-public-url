@@ -3,7 +3,20 @@ import requests
 from openpyxl import Workbook
 from openpyxl.utils.dataframe import dataframe_to_rows
 
+from modules.auth_manager import AuthManager
+from modules.onedrive_manager import OneDriveManager
+
+
 class ExcelHandler:
+    def __init__(self):
+        self.onedrive_manager = OneDriveManager()
+        self.auth_manager = AuthManager()
+
+        self.endpoint = self.auth_manager.get_endpoint()
+        self.access_token = self.auth_manager.get_access_token_default_scopes()
+        self.one_drive_url = self.auth_manager.get_endpoint() + "drive/root/children"
+        self.headers = self.auth_manager.get_default_header(access_token=self.access_token)
+
     def read_excel(self, file_content, sheet_name):
         df = pd.read_excel(file_content, sheet_name=sheet_name)
         return df
@@ -36,7 +49,9 @@ class ExcelHandler:
 
         print("Excel файл успішно збережено!")
 
-    def get_exel_file(self, root_folder_onedrive, name: str):
+    def get_exel_file(self, name: str):
+        root_folder_onedrive = self.onedrive_manager.get_root_folder_json(one_drive_url=self.one_drive_url,
+                                                                          headers=self.headers)
         exel_file = None
         file_content = None
         for file in root_folder_onedrive['value']:

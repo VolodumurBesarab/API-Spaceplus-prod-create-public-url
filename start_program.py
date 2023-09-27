@@ -2,9 +2,10 @@ import json
 
 import requests
 
+from modules.Images.images_api import ImagesApi
 from modules.auth_manager import AuthManager
 from modules.excel_handler import ExcelHandler
-from modules.one_drive_photo_manager import OneDrivePhotoManager
+from modules.one_drive_photo_manager import OneDriveHelper
 from modules.onedrive_manager import OneDriveManager
 
 class StartProgram:
@@ -12,6 +13,7 @@ class StartProgram:
         self.auth_manager = AuthManager()
         self.excel_handler = ExcelHandler()
         self.onedrive_manager = OneDriveManager()
+        self.images_api = ImagesApi()
 
     def start(self):
 
@@ -23,7 +25,7 @@ class StartProgram:
 
         excel_file_name = "sklad.xlsx"
 
-        self.one_drive_photo_manager = OneDrivePhotoManager(endpoint=endpoint,headers=headers, access_token=access_token)
+        #self.one_drive_photo_manager = OneDrivePhotoManager(endpoint=endpoint,headers=headers, access_token=access_token)
 
         root_folder_onedrive = self.onedrive_manager.get_root_folder_json(one_drive_url=one_drive_url, headers=headers)
 
@@ -36,7 +38,6 @@ class StartProgram:
         print(df2)
         df2 = self.excel_handler.fill_missing_values(df2, 'write here', '400$')
         print(df2)
-
         self.excel_handler.save_excel(df1, df2, output_excel_filename=excel_file_name)
 
         upload_url = endpoint + "drive/items/root:/sklad.xlsx:/content"
@@ -50,46 +51,14 @@ class StartProgram:
         Ця частина працює, а може не, хто знає
         """
 
-        self.one_drive_photo_manager.get_photos("CP06C")
+        #self.one_drive_photo_manager.get_photos("CP06C")
 
-    #def otomoto(self):
-        # підключення до allegro api def get_access_token():
-        #     try:
-        #         data = {'grant_type': 'client_credentials'}
-        #         access_token_response = requests.post(TOKEN_URL, data=data, verify=False,
-        #                                               allow_redirects=False, auth=(CLIENT_ID, CLIENT_SECRET))
-        #         print(access_token_response.text)  # Додайте цей рядок для виводу вмісту відповіді сервера
-        #         tokens = json.loads(access_token_response.text)
-        #         access_token = tokens['access_token']
-        #         return access_token
-        #     except requests.exceptions.HTTPError as err:
-        #         raise SystemExit(err)
-        #
-        # access_token = get_access_token()
-        # print("access token = " + access_token)
-        #
-        #
-        # #запит на отримання даних про оголошення по ід
-        # # Приклад виклику API для отримання інформації про продукт за ID
-        # try:
-        #     headers = {
-        #         "Authorization": f"Bearer {access_token}"
-        #     }
-        #
-        #     product_id = "13067041315"
-        #     endpoint = f"https://allegro.pl/sale/products/13067041315"
-        #
-        #     response = requests.get(endpoint, headers=headers)
-        #     if response.status_code == 200:
-        #         product_info = response.json()
-        #         print(product_info)
-        #     else:
-        #         print(f"API request failed: {response.text}")
-        # except Exception as e:
-        #     print(f"Error: {e}")
+        #self.images_api.upload_image_to_imgur()
+
+        self.find_folder_by_name(folder_name="CP07A")
 
 
-        #otomoto api connection
+
 
 
 

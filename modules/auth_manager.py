@@ -6,6 +6,12 @@ class AuthManager:
         with open("secrets.json") as secrets:
             secrets = json.load(secrets)
 
+        self.otomoto_url = secrets.get("otomoto_url")
+        self.otomoto_client_id = secrets.get("otomoto_client_id")
+        self.otomoto_client_secret = secrets.get("otomoto_client_secret")
+        self.otomoto_username = secrets.get("otomoto_username")
+        self.otomoto_password = secrets.get("otomoto_password")
+
         self.application_id = secrets.get("VLAD_APPLICATION_ID")
         self.client_secret = secrets.get("VLAD_CLIENT_SECRET")
         self.authority_url = secrets.get("authority_url")
@@ -17,6 +23,21 @@ class AuthManager:
             client_credential=self.client_secret,
             authority=self.authority_url
         )
+
+    def get_otomoto_url(self) -> str:
+        return self.otomoto_url
+
+    def get_otomoto_client_id(self) -> str:
+        return self.otomoto_client_id
+
+    def get_otomoto_client_secret(self) -> str:
+        return self.otomoto_client_secret
+
+    def get_otomoto_username(self) -> str:
+        return self.otomoto_username
+
+    def get_otomoto_password(self) -> str:
+        return self.otomoto_password
 
     def get_endpoint(self) -> str:
         return self.endpoint

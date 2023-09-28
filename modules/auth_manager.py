@@ -24,6 +24,8 @@ class AuthManager:
             authority=self.authority_url
         )
 
+        self.access_token = None
+
     def get_otomoto_url(self) -> str:
         return self.otomoto_url
 
@@ -46,19 +48,20 @@ class AuthManager:
         return self.base_url
 
     def get_access_token_default_scopes(self) -> str:
-        access_token = None
-        token_result = self.client.acquire_token_silent(self.default_scope, account=None)
-        # If the token is available in cache, save it to a variable
-        if token_result:
-            access_token = 'Bearer ' + token_result['access_token']
-            print('Access token was loaded from cache')
+        if not self.access_token:
+            token_result = self.client.acquire_token_silent(self.default_scope, account=None)
+            # If the token is available in cache, save it to a variable
+            if token_result:
+                access_token = 'Bearer ' + token_result['access_token']
+                print('Access token was loaded from cache')
 
-        # If the token is not available in cache, acquire a new one from Azure AD and save it to a variable
-        if not token_result:
-            token_result = self.client.acquire_token_for_client(scopes=self.default_scope)
-            access_token = 'Bearer ' + token_result['access_token']
-            print('New access token was acquired from Azure AD')
-        return access_token
+            # If the token is not available in cache, acquire a new one from Azure AD and save it to a variable
+            if not token_result:
+                token_result = self.client.acquire_token_for_client(scopes=self.default_scope)
+                self.access_token = 'Bearer ' + token_result['access_token']
+                print('New access token was acquired from Azure AD')
+            return self.access_token
+        return self.access_token
 
     def get_access_token(self, scopes) -> str:
         access_token = None

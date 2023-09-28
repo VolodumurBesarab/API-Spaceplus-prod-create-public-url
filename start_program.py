@@ -2,7 +2,7 @@ import json
 
 import requests
 
-from modules.Images.images_api import ImagesApi
+# from modules.Images.images_api import ImagesApi
 from modules.Otomoto.otomoto_manager import OtomotoManager
 from modules.auth_manager import AuthManager
 from modules.excel_handler import ExcelHandler
@@ -14,8 +14,8 @@ class StartProgram:
         self.auth_manager = AuthManager()
         self.excel_handler = ExcelHandler()
         self.onedrive_manager = OneDriveManager()
-        self.images_api = ImagesApi()
-        self.otomoto_manager = OtomotoManager(file_name="storage 09_23_site", sheet_name="OtoMoto")
+        # self.images_api = ImagesApi()
+        self.otomoto_manager = OtomotoManager(file_name="Test_docs.xlsx", sheet_name="OtoMoto")
 
     def start(self):
 

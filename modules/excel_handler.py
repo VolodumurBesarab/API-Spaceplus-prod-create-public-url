@@ -58,6 +58,10 @@ class ExcelHandler:
             if file['name'] == name:
                 exel_file = file
                 break
+            # rework this
+            # else:
+            #     print("Name of exel file not found")
+            #     print(file['name'])
 
         if exel_file:
             # Отримайте URL для звернення до вмісту файлу
@@ -69,4 +73,5 @@ class ExcelHandler:
             # Перевірте, чи успішно отримано вміст файлу
             if response.status_code == 200:
                 file_content = response.content
+                print("file created secsessful")
         return file_content

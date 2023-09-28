@@ -15,7 +15,7 @@ class StartProgram:
         self.excel_handler = ExcelHandler()
         self.onedrive_manager = OneDriveManager()
         # self.images_api = ImagesApi()
-        self.otomoto_manager = OtomotoManager(file_name="Test_docs.xlsx", sheet_name="OtoMoto")
+        self.otomoto_manager = OtomotoManager(file_name=r"Test_doc.xlsx", sheet_name="OtoMoto")
 
     def start(self):
 

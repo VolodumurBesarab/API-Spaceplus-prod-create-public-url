@@ -1,3 +1,5 @@
+import os
+
 import pandas as pd
 import requests
 from openpyxl import Workbook
@@ -75,3 +77,16 @@ class ExcelHandler:
                 file_content = response.content
                 print("file created secsessful")
         return file_content
+
+    def get_file_path(self, file_name) -> str:
+        current_directory = os.getcwd()
+        save_path = os.path.join(current_directory, 'Data', file_name)
+        return save_path
+
+    def create_file_on_data(self, file_content, file_name):
+        save_path = self.get_file_path(file_name=file_name)
+        with open(save_path, 'wb') as file:
+            file.write(file_content)
+
+    def create_lines_list(self):
+        pass

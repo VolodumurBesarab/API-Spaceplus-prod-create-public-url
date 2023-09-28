@@ -28,12 +28,13 @@ class OtomotoApi:
 
             response = requests.post(otomoto_url, data=start_data, headers=headers, auth=(otomoto_client_id, otomoto_client_secret))
             if response.status_code == 200:
-                access_token = response.json().get("access_token")
+                self.access_token = response.json().get("access_token")
                 print("New access token was acquired from OtoMoto")
+                return self.access_token
             else:
                 print("Error:", response.status_code, response.text)
-            return self.access_token
         return self.access_token
+
         # otomoto api виведення в консоль даних про оголошення
 
     def _get_basic_headers(self, access_token):
@@ -153,8 +154,9 @@ class OtomotoApi:
         'visible_in_profile': '1',
     }
 
-    def _exel_info_dict_creator(self, title, description, price, new_used, manufacturer):
+    def _exel_info_dict_creator(self, product_id, title, description, price, new_used, manufacturer):
         exel_info_dict = {
+            "id": product_id,
             "title": title,
             "description": description,
             "price": price,
@@ -208,8 +210,9 @@ class OtomotoApi:
         }
         return otomoto_data
 
-    def create_otomoto_advert(self, title, description, price, new_used, manufacturer):
-        exel_info_dict = self._exel_info_dict_creator(title=title,
+    def create_otomoto_advert(self, product_id, title, description, price, new_used, manufacturer) -> str:
+        exel_info_dict = self._exel_info_dict_creator(product_id=product_id,
+                                                      title=title,
                                                       description=description,
                                                       price=price,
                                                       new_used=new_used,
@@ -217,6 +220,7 @@ class OtomotoApi:
         otomoto_data = self._data_creator(exel_info_dict=exel_info_dict)
         url = self._get_basic_url()
         access_token = self.get_token()
+        print(access_token)
         headers = self._get_basic_headers(access_token=access_token)
         response = requests.post(url, json=otomoto_data, headers=headers)
 
@@ -225,8 +229,8 @@ class OtomotoApi:
             print(f"Advert successfully posted with ID: {advert_id}")
             return advert_id
         else:
-            print("Error:", response.status_code, response.text)
-            return None
+            error = ("Error:", response.status_code, response.text)
+            return str(error)
 
         # Replace these with your actual values
         # user_email = "andrewb200590@gmail.com"

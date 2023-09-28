@@ -6,14 +6,14 @@ from pandas import DataFrame
 from modules.Otomoto.otomoto_api import OtomotoApi
 from modules.excel_handler import ExcelHandler
 
-def read_page_line():
 
+def read_page_line():
     status = "Error"
     # read article count in storage
-        # read article id
-            # create product
-            # read other atribbutes
-                #edit atributes
+    # read article id
+    # create product
+    # read other atribbutes
+    # edit atributes
     #
 
     status = "Complete"
@@ -46,22 +46,79 @@ class OtomotoManager:
         for row in list_ready_to_create:
             for column_name, value in row.items():
                 advert_dict.update({column_name: value})
-            # print(advert_dict)
             list_of_adverts_dict.append(advert_dict)
             advert_dict = {}
         return list_of_adverts_dict
 
-    def post_adverts(self, list_ready_to_create: list[DataFrame]):
-        testttt = self._convert_adverts_to_dict(list_ready_to_create)
-        print(testttt)
-        # advert_dict = {}
-        # for row in list_ready_to_create:
-        #     for column_name, value in row.items():
-        #         advert_dict.update({column_name: value})
-        #     print(advert_dict)
-        #     advert_dict = {}
-                # print(f"{column_name}: {value}")
-        # self.otomoto_api.create_otomoto_advert()
+    # def _create_report(self, list_created_adverts_id, list_of_errors):
+    #     try:
+    #         reports_folder = os.path.join(os.getcwd(), "Reports")
+    #
+    #         if not os.path.exists(reports_folder):
+    #             os.makedirs(reports_folder)
+    #
+    #         full_path = os.path.join(reports_folder, "report.txt")
+    #
+    #         with open(full_path, 'w') as file:
+    #             file.write("Список створених оголошень:\n")
+    #             for advert_id in list_created_adverts_id:
+    #                 file.write(f"Номер на складі: {product_id}, ID створеного оголошення: {advert_id}\n")
+    #
+    #             file.write("\nСписок помилок:\n")
+    #             for error_message in list_of_errors:
+    #                 file.write(f"Номер на складі: {product_id}, {error_message}\n")
+    #
+    #         print(f"Репорт збережено у файлі {full_path}")
+    #         with open(full_path, 'r') as file:
+    #             report_contents = file.read()
+    #             print(report_contents)
+    #     except Exception as e:
+    #         print(f"Помилка при створенні репорту: {str(e)}")
+
+    def _create_report(self, list_created_adverts_id, list_of_errors):
+        try:
+            reports_folder = os.path.join(os.getcwd(), "Reports")
+
+            if not os.path.exists(reports_folder):
+                os.makedirs(reports_folder)
+
+            full_path = os.path.join(reports_folder, "report.txt")
+
+            with open(full_path, 'w') as file:
+                file.write("Список створених оголошень:\n")
+                for product_id, advert_id in list_created_adverts_id:
+                    file.write(f"Номер на складі: {product_id}, ID створеного оголошення: {advert_id}\n")
+
+                file.write("\nСписок помилок:\n")
+                for product_id, error_message in list_of_errors:
+                    file.write(f"Номер на складі: {product_id}, Повідомлення про помилку: {error_message}\n")
+
+            print(f"Репорт збережено у файлі {full_path}")
+            with open(full_path, 'r') as file:
+                report_contents = file.read()
+                print(report_contents)
+        except Exception as e:
+            print(f"Сталася помилка при створенні звіту: {e}")
+
+    def post_adverts(self, list_ready_to_create: list[DataFrame]) -> tuple[list, list]:
+        list_created_adverts_id = []
+        list_of_errors = []
+        adverts_dict = self._convert_adverts_to_dict(list_ready_to_create)
+        for item in adverts_dict:
+            created_advert_id = self.otomoto_api.create_otomoto_advert(product_id=item.get("номер на складі"),
+                                                                       title=item.get("title"),
+                                                                       description=item.get("description"),
+                                                                       price=item.get("price"),
+                                                                       new_used=item.get("new_used"),
+                                                                       manufacturer="Sony Ericsson")
+            if "Error:" in item:
+                list_of_errors.append((item.get("номер на складі"), created_advert_id))
+            else:
+                list_created_adverts_id.append((item.get("номер на складі"), created_advert_id))
+        self._create_report(list_created_adverts_id=list_created_adverts_id,
+                            list_of_errors=list_of_errors)
+        return list_created_adverts_id, list_of_errors
+
 
     def create_list_need_to_create(self, in_stock: list[DataFrame]) -> tuple[list[DataFrame], list[DataFrame]]:
         list_check_need_to_edit = []  # Ліст для товарів з непорожнім полем "ID otomoto"
@@ -79,10 +136,10 @@ class OtomotoManager:
         status = "Error"
 
         # read article count in storage
-            # read article id
-                # create product
-                # read other atribbutes
-            # edit atributes
+        # read article id
+        # create product
+        # read other atribbutes
+        # edit atributes
         #
 
         status = "Complete"
@@ -114,18 +171,11 @@ class OtomotoManager:
 
         self.post_adverts(list_ready_to_create)
 
-
-
         # first_row_values = df1.iloc[32]
         # for line_count
         #
         # for column_name, value in first_row_values.items():
         #     print(f"{column_name}: {value}")
-
-
-
-
-
 
         # for column in df1.columns:
         #     print(f"Column: {column}")

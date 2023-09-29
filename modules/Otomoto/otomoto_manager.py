@@ -85,13 +85,13 @@ class OtomotoManager:
             full_path = os.path.join(reports_folder, "report.txt")
 
             with open(full_path, 'w') as file:
-                file.write("Список створених оголошень:\n")
+                file.write("List of created ads:\n")
                 for product_id, advert_id in list_created_adverts_id:
-                    file.write(f"Номер на складі: {product_id}, ID створеного оголошення: {advert_id}\n")
+                    file.write(f"Stock number: {product_id}, ID created ads: {advert_id}\n")
 
-                file.write("\nСписок помилок:\n")
+                file.write("\nError List:\n")
                 for product_id, error_message in list_of_errors:
-                    file.write(f"Номер на складі: {product_id}, Повідомлення про помилку: {error_message}\n")
+                    file.write(f"Stock number: {product_id}, Error message: {error_message}\n")
 
             print(f"Репорт збережено у файлі {full_path}")
             with open(full_path, 'r') as file:
@@ -118,7 +118,6 @@ class OtomotoManager:
         self._create_report(list_created_adverts_id=list_created_adverts_id,
                             list_of_errors=list_of_errors)
         return list_created_adverts_id, list_of_errors
-
 
     def create_list_need_to_create(self, in_stock: list[DataFrame]) -> tuple[list[DataFrame], list[DataFrame]]:
         list_check_need_to_edit = []  # Ліст для товарів з непорожнім полем "ID otomoto"

@@ -220,7 +220,6 @@ class OtomotoApi:
         otomoto_data = self._data_creator(exel_info_dict=exel_info_dict)
         url = self._get_basic_url()
         access_token = self.get_token()
-        print(access_token)
         headers = self._get_basic_headers(access_token=access_token)
         response = requests.post(url, json=otomoto_data, headers=headers)
 

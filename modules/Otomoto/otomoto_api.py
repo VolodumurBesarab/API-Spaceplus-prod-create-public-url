@@ -7,6 +7,8 @@ class OtomotoApi:
     def __init__(self):
         self.auth_manager = AuthManager()
         self.access_token = None
+        self.base_url = "https://www.otomoto.pl/api/open/"
+
 
     def get_token(self):
         if not self.access_token:
@@ -205,10 +207,42 @@ class OtomotoApi:
                     'gross_net': 'gross'
                 },
             },
+            # "image_collection_id": 1007188815,
             'new_used': exel_info_dict["new_used"],
             'visible_in_profile': '1',
         }
         return otomoto_data
+
+    def create_otomoto_images_collection(self):
+        url = self.base_url + "imageCollections"  # Замініть на правильний URL
+
+        # Зображення для додавання
+        image_data = {
+            "1": "https://i.imgur.com/x9c4rhA.jpeg",
+            "2": "https://i.imgur.com/pbUDT54.jpeg",
+            "3": "https://i.imgur.com/WVXzjrn.jpeg"
+        }
+        access_token = self.get_token()
+        headers = self._get_basic_headers(access_token)
+
+        # Відправка POST-запиту
+        response = requests.post(url, headers=headers, data=json.dumps(image_data))
+
+        # Перевірка статусу відповіді
+        if response.status_code == 201:
+            print("Колекцію зображень успішно створено.")
+            response_data = response.json()
+            print(response_data)
+            print("ID колекції:", response_data.get("id"))
+            print("Посилання на зображення:")
+            for image_id, urls in response_data.get("images").items():
+                print(f"Зображення {image_id}:")
+                for i, url in enumerate(urls):
+                    print(f"    {i}: {url}")
+        else:
+            print("Помилка при створенні колекції зображень. Код статусу:", response.status_code)
+            print("Текст помилки:", response.text)
+
 
     def create_otomoto_advert(self, product_id, title, description, price, new_used, manufacturer) -> str:
         exel_info_dict = self._exel_info_dict_creator(product_id=product_id,

@@ -231,10 +231,8 @@ class OtomotoApi:
             error = ("Error:", response.status_code, response.text)
             return str(error)
 
-        # Replace these with your actual values
-        # user_email = "andrewb200590@gmail.com"
-        #
-        # advert_id = post_advert(user_email, access_token)
+
+
     def api_test(self):
         my_30_char_description = "qwertyuio qwertyuio qwertyuio zaoza"
         first_item = self.exel_info_dict_creator(title="Title 1", description=my_30_char_description, price=101, new_used="used",

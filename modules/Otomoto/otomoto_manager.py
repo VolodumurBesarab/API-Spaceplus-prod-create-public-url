@@ -105,16 +105,22 @@ class OtomotoManager:
         list_of_errors = []
         adverts_dict = self._convert_adverts_to_dict(list_ready_to_create)
         for item in adverts_dict:
-            created_advert_id = self.otomoto_api.create_otomoto_advert(product_id=item.get("номер на складі"),
-                                                                       title=item.get("title"),
-                                                                       description=item.get("description"),
-                                                                       price=item.get("price"),
-                                                                       new_used=item.get("new_used"),
-                                                                       manufacturer="Sony Ericsson")
-            if "Error:" in item:
-                list_of_errors.append((item.get("номер на складі"), created_advert_id))
-            else:
-                list_created_adverts_id.append((item.get("номер на складі"), created_advert_id))
+            try:
+                created_advert_id = self.otomoto_api.create_otomoto_advert(product_id=item.get("номер на складі"),
+                                                                           title=item.get("title"),
+                                                                           description=item.get("description"),
+                                                                           price=item.get("price"),
+                                                                           new_used=item.get("new_used"),
+                                                                           manufacturer="Sony Ericsson")
+                if "Error:" in item:
+                    list_of_errors.append((item.get("номер на складі"), created_advert_id))
+                else:
+                    list_created_adverts_id.append((item.get("номер на складі"), created_advert_id))
+            except Exception as e:
+                self._create_report(list_created_adverts_id=list_created_adverts_id,
+                                    list_of_errors=list_of_errors)
+                print(f"Помилка при створенні {item}: {e}")
+
         self._create_report(list_created_adverts_id=list_created_adverts_id,
                             list_of_errors=list_of_errors)
         return list_created_adverts_id, list_of_errors

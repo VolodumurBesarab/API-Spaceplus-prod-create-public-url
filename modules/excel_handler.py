@@ -2,8 +2,8 @@ import os
 
 import pandas as pd
 import requests
-from openpyxl import Workbook
-from openpyxl.utils.dataframe import dataframe_to_rows
+# from openpyxl import Workbook
+# from openpyxl.utils.dataframe import dataframe_to_rows
 
 from modules.auth_manager import AuthManager
 from modules.onedrive_manager import OneDriveManager

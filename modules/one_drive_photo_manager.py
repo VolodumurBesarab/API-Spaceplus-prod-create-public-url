@@ -49,6 +49,28 @@ class OneDrivePhotoManager:
         self.headers = headers
         self.access_token = access_token
 
+    def _get_folder_id_by_name(self, folder_name) -> str:
+        # Складаємо URL для пошуку папки за ім'ям
+        url = f"{self.endpoint}/me/drive/root/children"
+        params = {
+            "filter": f"name eq '{folder_name}'",
+            "$select": "id"
+        }
+
+        # Виконуємо GET-запит до OneDrive API
+        response = requests.get(url, headers=self.headers, params=params)
+
+        if response.status_code == 200:
+            data = response.json()
+            # Перевіряємо, чи знайдена папка
+            if 'value' in data and len(data['value']) > 0:
+                # Повертаємо ідентифікатор першої знайденої папки (якщо є кілька з однаковим ім'ям)
+                return data['value'][0]['id']
+            else:
+                raise Exception(f"Папка з іменем '{folder_name}' не знайдена в OneDrive.")
+        else:
+            raise Exception(f"Не вдалося виконати запит до OneDrive API. Код статусу: {response.status_code}")
+
     def get_photos(self, folder_name: str):
         response = requests.get(url=self.endpoint + f"drive/items/{NL_FOLDER_ID}/children",
                                 headers=self.headers)

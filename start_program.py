@@ -18,7 +18,6 @@ class StartProgram:
         self.otomoto_manager = OtomotoManager(file_name=r"Test_doc.xlsx", sheet_name="OtoMoto")
 
     def start(self):
-
         endpoint = self.auth_manager.get_endpoint()
         access_token = self.auth_manager.get_access_token_default_scopes()
         one_drive_url = self.auth_manager.get_endpoint() + "drive/root/children"

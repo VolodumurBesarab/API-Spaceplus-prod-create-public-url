@@ -59,7 +59,7 @@ class StartProgram:
         self.find_folder_by_name(folder_name="CP07A")
 
     def otomoto_test(self):
-        self.otomoto_manager.read_all_items()
+        self.otomoto_manager.create_page()
 
 
 

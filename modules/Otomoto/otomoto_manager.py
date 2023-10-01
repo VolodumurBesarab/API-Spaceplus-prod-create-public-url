@@ -150,7 +150,7 @@ class OtomotoManager:
         status = "Complete"
         return status
 
-    def _create_page(self):
+    def create_page(self):
         file_content = self.excel_handler.get_exel_file(self.file_name)
         # create file
         self.excel_handler.create_file_on_data(file_content=file_content, file_name=self.file_name)
@@ -190,6 +190,6 @@ class OtomotoManager:
         return self
 
     def read_all_items(self):
-        self._create_page()
+        self.create_page()
 
         pass

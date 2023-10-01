@@ -1,5 +1,7 @@
 import json
 import requests
+
+from modules.Images.images_api import ImagesApi
 from modules.auth_manager import AuthManager
 
 
@@ -8,6 +10,7 @@ class OtomotoApi:
         self.auth_manager = AuthManager()
         self.access_token = None
         self.base_url = "https://www.otomoto.pl/api/open/"
+        self.images_api = ImagesApi()
 
 
     def get_token(self):
@@ -156,7 +159,7 @@ class OtomotoApi:
         'visible_in_profile': '1',
     }
 
-    def _exel_info_dict_creator(self, product_id, title, description, price, new_used, manufacturer):
+    def _exel_info_dict_creator(self, product_id, title, description, price, new_used, manufacturer, photos_collection_id):
         exel_info_dict = {
             "id": product_id,
             "title": title,
@@ -164,6 +167,7 @@ class OtomotoApi:
             "price": price,
             "new_used": new_used,
             "manufacturer": manufacturer,
+            "photos_collection_id" : photos_collection_id
         }
         return exel_info_dict
 
@@ -207,24 +211,31 @@ class OtomotoApi:
                     'gross_net': 'gross'
                 },
             },
-            # "image_collection_id": 1007188815,
+            "image_collection_id": exel_info_dict["photos_collection_id"],
             'new_used': exel_info_dict["new_used"],
             'visible_in_profile': '1',
         }
         return otomoto_data
 
-    def create_otomoto_images_collection(self):
+    def create_otomoto_images_collection(self, photos_url_list: list[str]):
         url = self.base_url + "imageCollections"  # Замініть на правильний URL
 
-        # Зображення для додавання
-        image_data = {
-            "1": "https://i.imgur.com/x9c4rhA.jpeg",
-            "2": "https://i.imgur.com/pbUDT54.jpeg",
-            "3": "https://i.imgur.com/WVXzjrn.jpeg"
-        }
+
+        # image_data = {
+        #     "1": "https://i.imgur.com/x9c4rhA.jpeg",
+        #     "2": "https://i.imgur.com/pbUDT54.jpeg",
+        #     "3": "https://i.imgur.com/WVXzjrn.jpeg"
+        # }
+
+        image_data = {}
+        counter = 1
+        for photo_url in photos_url_list:
+            image_data.update({str(counter): photo_url})
+            counter += 1
+
         access_token = self.get_token()
         headers = self._get_basic_headers(access_token)
-
+        collection_id = None
         # Відправка POST-запиту
         response = requests.post(url, headers=headers, data=json.dumps(image_data))
 
@@ -234,23 +245,29 @@ class OtomotoApi:
             response_data = response.json()
             print(response_data)
             print("ID колекції:", response_data.get("id"))
-            print("Посилання на зображення:")
-            for image_id, urls in response_data.get("images").items():
-                print(f"Зображення {image_id}:")
-                for i, url in enumerate(urls):
-                    print(f"    {i}: {url}")
+            collection_id = response_data.get("id")
+            # print("Посилання на зображення:")
+            # for image_id, urls in response_data.get("images").items():
+            #     print(f"Зображення {image_id}:")
+            #     for i, url in enumerate(urls):
+            #         print(f"    {i}: {url}")
         else:
             print("Помилка при створенні колекції зображень. Код статусу:", response.status_code)
             print("Текст помилки:", response.text)
+        return collection_id
 
 
     def create_otomoto_advert(self, product_id, title, description, price, new_used, manufacturer) -> str:
+
+        photos_url_list = self.images_api.upload_image_to_imgur(storage_name=product_id)
+        photos_collection_id = self.create_otomoto_images_collection(photos_url_list=photos_url_list)
         exel_info_dict = self._exel_info_dict_creator(product_id=product_id,
                                                       title=title,
                                                       description=description,
                                                       price=price,
                                                       new_used=new_used,
-                                                      manufacturer=manufacturer)
+                                                      manufacturer=manufacturer,
+                                                      photos_collection_id=photos_collection_id)
         otomoto_data = self._data_creator(exel_info_dict=exel_info_dict)
         url = self._get_basic_url()
         access_token = self.get_token()

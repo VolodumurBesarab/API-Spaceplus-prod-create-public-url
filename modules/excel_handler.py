@@ -75,7 +75,7 @@ class ExcelHandler:
             # Перевірте, чи успішно отримано вміст файлу
             if response.status_code == 200:
                 file_content = response.content
-                print("file created secsessful")
+                print("excel file created secsessful")
         return file_content
 
     def get_file_path(self, file_name) -> str:
@@ -90,3 +90,4 @@ class ExcelHandler:
 
     def create_lines_list(self):
         pass
+

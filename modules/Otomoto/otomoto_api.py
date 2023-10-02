@@ -35,6 +35,7 @@ class OtomotoApi:
             if response.status_code == 200:
                 self.access_token = response.json().get("access_token")
                 print("New access token was acquired from OtoMoto")
+                print(self.access_token)
                 return self.access_token
             else:
                 print("Error:", response.status_code, response.text)
@@ -160,6 +161,8 @@ class OtomotoApi:
     }
 
     def _exel_info_dict_creator(self, product_id, title, description, price, new_used, manufacturer, photos_collection_id):
+        if photos_collection_id is None:
+            photos_collection_id = "0" # do not add image
         exel_info_dict = {
             "id": product_id,
             "title": title,
@@ -260,6 +263,10 @@ class OtomotoApi:
     def create_otomoto_advert(self, product_id, title, description, price, new_used, manufacturer) -> str:
 
         photos_url_list = self.images_api.upload_image_to_imgur(storage_name=product_id)
+        if photos_url_list is None:
+            print("cann't create photos url list")
+            return "Error: cann't create photos url list"
+        advert_id = None
         photos_collection_id = self.create_otomoto_images_collection(photos_url_list=photos_url_list)
         exel_info_dict = self._exel_info_dict_creator(product_id=product_id,
                                                       title=title,
@@ -277,7 +284,7 @@ class OtomotoApi:
         if response.status_code == 201:
             advert_id = response.json().get("id")
             print(f"Advert successfully posted with ID: {advert_id}")
-            return advert_id
+            return str(advert_id)
         else:
             error = ("Error:", response.status_code, response.text)
             return str(error)

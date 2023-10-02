@@ -14,19 +14,19 @@ class ImagesApi:
 
     # Функція для завантаження фото на Imgur і отримання URL
     def _create_list_of_img(self, storage_name) -> tuple[str, list[str]]:
-        # try:
-            folder_path = os.path.join('Data', 'Images', storage_name)
+        try:
+            folder_path = os.path.join('Data', 'Images', str(storage_name))
             image_files = os.listdir(folder_path)
-            print(image_files)
             return folder_path, image_files
-        # except:
-        #     print(f"{storage_name} not found")
-        #     return None
+        except:
+            print(f"Folder with photos {storage_name} not found")
+            return None
 
     def upload_image_to_imgur(self, storage_name) -> list[str]:
         if self._create_list_of_img(storage_name=storage_name) is None:
             return None
         folder_path, image_files = self._create_list_of_img(storage_name=storage_name)
+
         # base_path = os.path.join('Data', 'Images', folder_name, image_name)
         # image_files = os.listdir(base_path)
         # print("bla-bla aaaaaaaaaa", image_files)
@@ -61,8 +61,6 @@ class ImagesApi:
                 print(f"Помилка при завантаженні файлу {final_path}: {str(e)}")
         return image_urls
 
-    # Завантаження фото і отримання URL
-    # imgur_image_url = upload_image_to_imgur(image_path)
-    #
-    # # Виведення URL
-    # print("URL фото на Imgur:", imgur_image_url)
+    def get_list_photos(self):
+        client = ImgurClient(CLIENT_ID, CLIENT_SECRET)
+        client.get_account_images("Vlad")

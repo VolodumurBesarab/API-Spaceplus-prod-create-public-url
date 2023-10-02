@@ -103,7 +103,7 @@ class OneDrivePhotoManager:
         else:
             print(f"Сталася помилка при отриманні вмісту папки root/NL: {response.text}")
 
-        print(photo_id_list)
+        # print(photo_id_list)
 
         create_link_payload = {
             "type": "view",

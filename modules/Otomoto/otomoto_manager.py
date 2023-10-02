@@ -105,21 +105,22 @@ class OtomotoManager:
         list_of_errors = []
         adverts_dict = self._convert_adverts_to_dict(list_ready_to_create)
         for item in adverts_dict:
-            try:
+            # try:
                 created_advert_id = self.otomoto_api.create_otomoto_advert(product_id=item.get("номер на складі"),
                                                                            title=item.get("title"),
                                                                            description=item.get("description"),
                                                                            price=item.get("price"),
                                                                            new_used=item.get("new_used"),
                                                                            manufacturer="Sony Ericsson")
-                if "Error:" in item:
+                if "Error:" in created_advert_id:
                     list_of_errors.append((item.get("номер на складі"), created_advert_id))
                 else:
                     list_created_adverts_id.append((item.get("номер на складі"), created_advert_id))
-            except Exception as e:
-                self._create_report(list_created_adverts_id=list_created_adverts_id,
-                                    list_of_errors=list_of_errors)
-                print(f"Помилка при створенні {item}: {e}")
+
+            # except Exception as e:
+            #     self._create_report(list_created_adverts_id=list_created_adverts_id,
+            #                         list_of_errors=list_of_errors)
+            #     print(f"Помилка при створенні оголошення {item}: {e}")
 
         self._create_report(list_created_adverts_id=list_created_adverts_id,
                             list_of_errors=list_of_errors)
@@ -161,18 +162,14 @@ class OtomotoManager:
         first_100_values = df1.head(100)
 
         in_stock, out_of_stock, invalid_quantity = self.create_lists_of_produts(first_100_values)
-        print(len(in_stock), len(out_of_stock), len(invalid_quantity))
 
         # self.otomoto_api.
-
-        columns_to_display = ["номер на складі", "наявність на складі", "title", "description", "price", "new_used"]
 
         # num_rows, num_columns = first_100_values.shape
         # print(num_rows, num_columns)
 
         list_check_need_to_edit, list_ready_to_create = self.create_list_need_to_create(in_stock)
-        print("edit", len(list_check_need_to_edit))
-        print("create", len(list_ready_to_create))
+        print("adverts to create:", len(list_ready_to_create))
 
         self.post_adverts(list_ready_to_create)
 

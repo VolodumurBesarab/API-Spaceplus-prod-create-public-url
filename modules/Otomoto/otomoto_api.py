@@ -1,5 +1,6 @@
 import json
 import requests
+import math
 
 from modules.Images.images_api import ImagesApi
 from modules.auth_manager import AuthManager
@@ -162,7 +163,9 @@ class OtomotoApi:
 
     def _exel_info_dict_creator(self, product_id, title, description, price, new_used, manufacturer, photos_collection_id):
         if photos_collection_id is None:
-            photos_collection_id = "0" # do not add image
+            photos_collection_id = "12" # do not add image
+        if manufacturer is None or math.isnan(manufacturer):
+            manufacturer = "Default manufacturer"
         exel_info_dict = {
             "id": product_id,
             "title": title,
@@ -176,7 +179,7 @@ class OtomotoApi:
 
     def _data_creator(self, exel_info_dict) -> json:
         if exel_info_dict is None or exel_info_dict == {}:
-            print("Dictionaty is empty")
+            print("Dictionary is empty")
         otomoto_data = {
             "status": "unpaid",
             'title': exel_info_dict["title"],
@@ -244,10 +247,8 @@ class OtomotoApi:
 
         # Перевірка статусу відповіді
         if response.status_code == 201:
-            print("Колекцію зображень успішно створено.")
             response_data = response.json()
-            print(response_data)
-            print("ID колекції:", response_data.get("id"))
+            print("Колекцію зображень успішно створено.", "ID колекції:", response_data.get("id"))
             collection_id = response_data.get("id")
             # print("Посилання на зображення:")
             # for image_id, urls in response_data.get("images").items():
@@ -261,12 +262,15 @@ class OtomotoApi:
 
 
     def create_otomoto_advert(self, product_id, title, description, price, new_used, manufacturer) -> str:
-
+        if manufacturer is None:
+            manufacturer = "default manufacturer" # manufacture by default
+        # if description:
+        #     # description must be 30+ char
+        #     pass
         photos_url_list = self.images_api.upload_image_to_imgur(storage_name=product_id)
         if photos_url_list is None:
-            print("cann't create photos url list")
-            return "Error: cann't create photos url list"
-        advert_id = None
+            return f"Error: can't find folder {product_id}"
+        # advert_id = None
         photos_collection_id = self.create_otomoto_images_collection(photos_url_list=photos_url_list)
         exel_info_dict = self._exel_info_dict_creator(product_id=product_id,
                                                       title=title,
@@ -279,6 +283,7 @@ class OtomotoApi:
         url = self._get_basic_url()
         access_token = self.get_token()
         headers = self._get_basic_headers(access_token=access_token)
+        print("otomoto_data:", otomoto_data)
         response = requests.post(url, json=otomoto_data, headers=headers)
 
         if response.status_code == 201:

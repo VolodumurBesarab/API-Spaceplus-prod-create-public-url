@@ -2,6 +2,9 @@ import os
 
 import pandas as pd
 import requests
+from openpyxl import Workbook
+from pandas import DataFrame
+
 # from openpyxl import Workbook
 # from openpyxl.utils.dataframe import dataframe_to_rows
 
@@ -27,29 +30,29 @@ class ExcelHandler:
         df[column_name] = df[column_name].fillna(default_value)
         return df
 
-    def save_excel(self, df1, df2, output_excel_filename):
-        # Створення нового Excel файлу
-        wb = Workbook()
-
-        # Вибір або створення першої сторінки
-        sheet1 = wb.active
-        sheet1.title = 'Sheet1'
-
-        # Додавання даних з DataFrame df на першу сторінку
-        for row in dataframe_to_rows(df1, index=False, header=True):
-            sheet1.append(row)
-
-        # Створення другої сторінки
-        sheet2 = wb.create_sheet(title='Sheet2')
-
-        # Додавання даних з DataFrame df2 на другу сторінку
-        for row in dataframe_to_rows(df2, index=False, header=True):
-            sheet2.append(row)
-
-        # Збереження Excel файлу з назвою 'new table.xlsx'
-        wb.save(output_excel_filename)
-
-        print("Excel файл успішно збережено!")
+    # def save_excel(self, df1, df2, output_excel_filename):
+    #     # Створення нового Excel файлу
+    #     wb = Workbook()
+    #
+    #     # Вибір або створення першої сторінки
+    #     sheet1 = wb.active
+    #     sheet1.title = 'Sheet1'
+    #
+    #     # Додавання даних з DataFrame df на першу сторінку
+    #     for row in dataframe_to_rows(df1, index=False, header=True):
+    #         sheet1.append(row)
+    #
+    #     # Створення другої сторінки
+    #     sheet2 = wb.create_sheet(title='Sheet2')
+    #
+    #     # Додавання даних з DataFrame df2 на другу сторінку
+    #     for row in dataframe_to_rows(df2, index=False, header=True):
+    #         sheet2.append(row)
+    #
+    #     # Збереження Excel файлу з назвою 'new table.xlsx'
+    #     wb.save(output_excel_filename)
+    #
+    #     print("Excel файл успішно збережено!")
 
     def get_exel_file(self, name: str):
         root_folder_onedrive = self.onedrive_manager.get_root_folder_json(one_drive_url=self.one_drive_url,
@@ -75,7 +78,7 @@ class ExcelHandler:
             # Перевірте, чи успішно отримано вміст файлу
             if response.status_code == 200:
                 file_content = response.content
-                print("excel file created secsessful")
+                print("excel file download successful")
         return file_content
 
     def get_file_path(self, file_name) -> str:
@@ -90,4 +93,21 @@ class ExcelHandler:
 
     def create_lines_list(self):
         pass
+
+    def set_otomoto_id_by_storage_id(self, df:  DataFrame, otomoto_id, storage_id):
+        row = df[df['номер на складі'] == storage_id]
+
+        # Перевіряємо, чи такий рядок був знайдений
+        if not row.empty:
+            # Отримуємо значення otomoto_id для цього рядка
+            current_otomoto_id = row.iloc[0]['ID otomoto']
+
+            # Перевіряємо, чи otomoto_id є NaN (пустим)
+            if pd.isna(current_otomoto_id):
+                # Вставляємо нове otomoto_id у відповідне поле
+                df.loc[df['номер на складі'] == storage_id, 'ID otomoto'] = otomoto_id
+        # Зберігаємо оновлений DataFrame у файл
+        df.to_excel('New tested file.xlsx', index=False)
+        # Повертаємо оновлений DataFrame
+        return df
 

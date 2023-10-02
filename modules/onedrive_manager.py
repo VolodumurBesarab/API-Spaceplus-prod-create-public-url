@@ -1,7 +1,12 @@
 import requests
 
+from modules.auth_manager import AuthManager
+
 
 class OneDriveManager:
+    def __init__(self):
+        self.auth_manager = AuthManager()
+
     def upload_excel_to_onedrive(self, access_token, file_path, upload_url):
         headers_octet_stream = {
             'Authorization': access_token,

@@ -21,8 +21,9 @@ def read_page_line():
 
 
 class OtomotoManager:
-    def __init__(self, file_name, sheet_name):
-        self.file_name = file_name
+    def __init__(self, excel_file_name, sheet_name):
+        self.first_100_values = None
+        self.file_name = excel_file_name
         self.sheet_name = sheet_name
         self.excel_handler = ExcelHandler()
         self.otomoto_api = OtomotoApi()
@@ -111,19 +112,22 @@ class OtomotoManager:
                                                                            description=item.get("description"),
                                                                            price=item.get("price"),
                                                                            new_used=item.get("new_used"),
-                                                                           manufacturer="Sony Ericsson")
+                                                                           manufacturer=item.get("manufacturer"))
                 if "Error:" in created_advert_id:
                     list_of_errors.append((item.get("номер на складі"), created_advert_id))
                 else:
                     list_created_adverts_id.append((item.get("номер на складі"), created_advert_id))
+                    # Зберігаємо оновлений DataFrame у файл
+                    self.excel_handler.set_otomoto_id_by_storage_id(df=self.first_100_values, otomoto_id=created_advert_id, storage_id=item.get("номер на складі"))
 
-            # except Exception as e:
+        # except Exception as e:
             #     self._create_report(list_created_adverts_id=list_created_adverts_id,
             #                         list_of_errors=list_of_errors)
             #     print(f"Помилка при створенні оголошення {item}: {e}")
 
         self._create_report(list_created_adverts_id=list_created_adverts_id,
                             list_of_errors=list_of_errors)
+
         return list_created_adverts_id, list_of_errors
 
     def create_list_need_to_create(self, in_stock: list[DataFrame]) -> tuple[list[DataFrame], list[DataFrame]]:
@@ -159,9 +163,9 @@ class OtomotoManager:
         file_path = self.excel_handler.get_file_path(file_name=self.file_name)
         df1 = pd.read_excel(file_path)
 
-        first_100_values = df1.head(100)
+        self.first_100_values = df1.head(100)
 
-        in_stock, out_of_stock, invalid_quantity = self.create_lists_of_produts(first_100_values)
+        in_stock, out_of_stock, invalid_quantity = self.create_lists_of_produts(self.first_100_values)
 
         # self.otomoto_api.
 

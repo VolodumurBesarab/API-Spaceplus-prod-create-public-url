@@ -36,7 +36,6 @@ class OtomotoApi:
             if response.status_code == 200:
                 self.access_token = response.json().get("access_token")
                 print("New access token was acquired from OtoMoto")
-                print(self.access_token)
                 return self.access_token
             else:
                 print("Error:", response.status_code, response.text)
@@ -261,12 +260,11 @@ class OtomotoApi:
         return collection_id
 
 
-    def create_otomoto_advert(self, product_id, title, description, price, new_used, manufacturer) -> str:
-        if manufacturer is None:
-            manufacturer = "default manufacturer" # manufacture by default
-        # if description:
-        #     # description must be 30+ char
-        #     pass
+    def create_otomoto_advert(self, product_id, title, description: str, price, new_used, manufacturer) -> str:
+        if len(description) < 30:
+            return f"Error: {product_id}'s description must be more then 30 symbol"
+        if product_id == 0 or product_id == 2:
+            return f"Error: can't create ads with ID {product_id}"
         photos_url_list = self.images_api.upload_image_to_imgur(storage_name=product_id)
         if photos_url_list is None:
             return f"Error: can't find folder {product_id}"
@@ -283,7 +281,6 @@ class OtomotoApi:
         url = self._get_basic_url()
         access_token = self.get_token()
         headers = self._get_basic_headers(access_token=access_token)
-        print("otomoto_data:", otomoto_data)
         response = requests.post(url, json=otomoto_data, headers=headers)
 
         if response.status_code == 201:

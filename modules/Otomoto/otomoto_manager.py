@@ -1,4 +1,6 @@
+from datetime import datetime
 import os
+from datetime import date
 
 import pandas as pd
 from pandas import DataFrame
@@ -76,14 +78,17 @@ class OtomotoManager:
     #     except Exception as e:
     #         print(f"Помилка при створенні репорту: {str(e)}")
 
-    def _create_report(self, list_created_adverts_id, list_of_errors):
+    def _create_report(self, list_created_adverts_id, list_of_errors, is_unexpected: bool):
         try:
             reports_folder = os.path.join(os.getcwd(), "Reports")
 
             if not os.path.exists(reports_folder):
                 os.makedirs(reports_folder)
 
-            full_path = os.path.join(reports_folder, "report.txt")
+            if not is_unexpected:
+                full_path = os.path.join(reports_folder, f"report{date.today()}.txt")
+            else:
+                full_path = os.path.join(reports_folder, f"unexpected report{date.today()}.txt")
 
             with open(full_path, 'w') as file:
                 file.write("List of created ads:\n")
@@ -106,7 +111,7 @@ class OtomotoManager:
         list_of_errors = []
         adverts_dict = self._convert_adverts_to_dict(list_ready_to_create)
         for item in adverts_dict:
-            # try:
+            try:
                 created_advert_id = self.otomoto_api.create_otomoto_advert(product_id=item.get("номер на складі"),
                                                                            title=item.get("title"),
                                                                            description=item.get("description"),
@@ -120,13 +125,15 @@ class OtomotoManager:
                     # Зберігаємо оновлений DataFrame у файл
                     self.excel_handler.set_otomoto_id_by_storage_id(df=self.first_100_values, otomoto_id=created_advert_id, storage_id=item.get("номер на складі"))
 
-        # except Exception as e:
-            #     self._create_report(list_created_adverts_id=list_created_adverts_id,
-            #                         list_of_errors=list_of_errors)
-            #     print(f"Помилка при створенні оголошення {item}: {e}")
+            except Exception as e:
+                self._create_report(list_created_adverts_id=list_created_adverts_id,
+                                    list_of_errors=list_of_errors,
+                                    is_unexpected=True)
+                print(f"Помилка при створенні оголошення {item}: {e}")
 
         self._create_report(list_created_adverts_id=list_created_adverts_id,
-                            list_of_errors=list_of_errors)
+                            list_of_errors=list_of_errors,
+                            is_unexpected=False)
 
         return list_created_adverts_id, list_of_errors
 

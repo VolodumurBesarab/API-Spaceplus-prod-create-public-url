@@ -63,4 +63,10 @@ class ImagesApi:
 
     def get_list_photos(self):
         client = ImgurClient(CLIENT_ID, CLIENT_SECRET)
-        client.get_account_images("Vlad")
+        # client.get_account_images(username="spaceplus69", page=1)
+        authorization_url = client.get_auth_url("code")
+        print(authorization_url)
+        authorization_code = input("Введіть код авторизації: ")
+        # credentials = client.authorize(authorization_code, 'code')
+        # print("Отримано токен доступу:", credentials['access_token'])
+        client.get_account_images(username="spaceplus69")

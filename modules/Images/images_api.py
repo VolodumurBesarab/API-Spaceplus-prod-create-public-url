@@ -1,6 +1,6 @@
 import os
 
-from Data.imgurpython import ImgurClient
+from imgurpython import ImgurClient
 
 CLIENT_ID = 'f82bcb68847441a'
 CLIENT_SECRET = 'd3870caebcf64e7cc4ab0d180204d25b292dc3b6'

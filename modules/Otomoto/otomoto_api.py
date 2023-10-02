@@ -193,8 +193,8 @@ class OtomotoApi:
                 'en': 'Lublin'
             },
             'coordinates': {
-                'latitude': 51.23955,
-                'longitude': 22.55257,
+                'latitude': 51.271275,
+                'longitude': 22.569633,
                 'radius': 0,
                 'zoom_level': 13
             },

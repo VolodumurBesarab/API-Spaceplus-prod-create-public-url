@@ -165,7 +165,7 @@ class OtomotoApi:
         if photos_collection_id is None:
             photos_collection_id = "12" # do not add image
         if manufacturer is None or math.isnan(manufacturer):
-            manufacturer = "Default manufacturer"
+            manufacturer = "oryginalny"
         exel_info_dict = {
             "id": product_id,
             "title": title,

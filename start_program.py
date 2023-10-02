@@ -16,7 +16,7 @@ class StartProgram:
         self.onedrive_manager = OneDriveManager()
         # self.images_api = ImagesApi()
         # self.otomoto_manager = OtomotoManager(excel_file_name=r"Test_doc.xlsx", sheet_name="OtoMoto")
-        self.otomoto_manager = OtomotoManager(excel_file_name=r"Test_doc.xlsx", sheet_name="OtoMoto")
+        self.otomoto_manager = OtomotoManager(excel_file_name=r"OtoMoto.xlsx", sheet_name="OtoMoto")
 
     def start(self):
         endpoint = self.auth_manager.get_endpoint()

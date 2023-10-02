@@ -261,7 +261,7 @@ class OtomotoApi:
 
 
     def create_otomoto_advert(self, product_id, title, description: str, price, new_used, manufacturer) -> str:
-        if len(description) < 30:
+        if len(str(description)) < 30:
             return f"Error: {product_id}'s description must be more then 30 symbol"
         if product_id == 0 or product_id == 2:
             return f"Error: can't create ads with ID {product_id}"

@@ -9,6 +9,7 @@ from modules.excel_handler import ExcelHandler
 from modules.one_drive_photo_manager import OneDriveHelper
 from modules.onedrive_manager import OneDriveManager
 
+
 class StartProgram:
     def __init__(self):
         self.auth_manager = AuthManager()

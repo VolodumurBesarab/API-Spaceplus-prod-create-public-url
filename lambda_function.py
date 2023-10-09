@@ -1,5 +1,6 @@
 # from modules.one_drive_photo_manager import OneDrivePhotoManager
 import builtins
+import json
 import sys
 
 from modules.Images.images_api import ImagesApi
@@ -10,14 +11,22 @@ from modules.Otomoto.otomoto_manager import OtomotoManager
 
 # otomoto_manager = OtomotoManager()
 
-start_program = StartProgram()
+
 # imagesapi = ImagesApi()
 # imagesapi.get_list_photos()
 
 
 
-start_program.otomoto_test()
+# start_program.otomoto_test()
 
+def lambda_handler(event, context):
+    # TODO implement
+    start_program = StartProgram()
+    start_program.otomoto_test()
+    return {
+        'statusCode': 200,
+        'body': json.dumps('Hello from Lambda!')
+    }
 
 
 

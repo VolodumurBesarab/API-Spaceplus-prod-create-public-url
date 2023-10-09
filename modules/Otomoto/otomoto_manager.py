@@ -9,19 +9,6 @@ from modules.Otomoto.otomoto_api import OtomotoApi
 from modules.excel_handler import ExcelHandler
 
 
-def read_page_line():
-    status = "Error"
-    # read article count in storage
-    # read article id
-    # create product
-    # read other atribbutes
-    # edit atributes
-    #
-
-    status = "Complete"
-    return status
-
-
 class OtomotoManager:
     def __init__(self, excel_file_name, sheet_name):
         self.first_100_values = None
@@ -149,18 +136,13 @@ class OtomotoManager:
 
         return list_check_need_to_edit, list_ready_to_create
 
-    def read_page_line(self):
-        status = "Error"
 
         # read article count in storage
         # read article id
         # create product
         # read other atribbutes
         # edit atributes
-        #
 
-        status = "Complete"
-        return status
 
     def create_page(self):
         file_content = self.excel_handler.get_exel_file(self.file_name)
@@ -196,8 +178,3 @@ class OtomotoManager:
         #         print(value)
         print("Page created")
         return self
-
-    def read_all_items(self):
-        self.create_page()
-
-        pass

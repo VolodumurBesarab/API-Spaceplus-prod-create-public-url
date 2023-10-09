@@ -238,6 +238,11 @@ class OtomotoApi:
             image_data.update({str(counter): photo_url})
             counter += 1
 
+        image_data = {
+            "1": "https://spacelpus-my.sharepoint.com/:i:/g/personal/andrzej_besarab_spacelpus_onmicrosoft_com/EWst24PuZbZMq0U6UNcvf4gB0SyA90-U6wEfnJYHHIUFBg?e=fKrumH",
+            "2": "https://spacelpus-my.sharepoint.com/:i:/g/personal/andrzej_besarab_spacelpus_onmicrosoft_com/ERMA695lP1dGiOlGZaJ61y0BII8VBffo2OW1Gip4Z4nHqw?e=61hK6A"
+        }
+
         access_token = self.get_token()
         headers = self._get_basic_headers(access_token)
         collection_id = None
@@ -247,6 +252,7 @@ class OtomotoApi:
         # Перевірка статусу відповіді
         if response.status_code == 201:
             response_data = response.json()
+            print("response_data:", response_data)
             print("Колекцію зображень успішно створено.", "ID колекції:", response_data.get("id"))
             collection_id = response_data.get("id")
             # print("Посилання на зображення:")
@@ -261,7 +267,7 @@ class OtomotoApi:
 
 
     def create_otomoto_advert(self, product_id, title, description: str, price, new_used, manufacturer) -> str:
-        if len(description) < 30:
+        if len(str(description)) < 30:
             return f"Error: {product_id}'s description must be more then 30 symbol"
         if product_id == 0 or product_id == 2:
             return f"Error: can't create ads with ID {product_id}"

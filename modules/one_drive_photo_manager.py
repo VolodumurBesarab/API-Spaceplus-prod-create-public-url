@@ -60,7 +60,7 @@ class OneDrivePhotoManager:
         return response_data['id']
 
 
-    def get_folder_id_by_name(self, folder_name) -> str:
+    def  get_folder_id_by_name(self, folder_name) -> str:
         # Складаємо URL для пошуку папки за ім'ям
         url = f"{self.endpoint}/me/drive/root/children"
         params = {

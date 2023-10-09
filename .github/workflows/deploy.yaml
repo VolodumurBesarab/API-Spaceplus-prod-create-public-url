@@ -29,9 +29,9 @@ jobs:
 
       - name: 'Installing and zipping dependencies'
         run: |
-          mkdir dependencies
-          pip install --target=dependencies -r requirements.txt
-          zip -r dependencies.zip ./dependencies
+          mkdir python
+          pip install --target=python -r requirements.txt
+          zip -r dependencies.zip ./python
         shell: 'bash'
 
       - name: 'Publishing dependencies as a layer '
@@ -39,7 +39,7 @@ jobs:
           aws s3 cp dependencies.zip s3://${{vars.LAMBDA_LAYERS_S3_NAME}}/dependencies.zip 
           result=$(aws lambda publish-layer-version --layer-name ${{vars.LAMBDA_LAYER_ARN}} --content S3Bucket=${{vars.LAMBDA_LAYERS_S3_NAME}},S3Key=dependencies.zip)
           echo "LAYER_VERSION=$(jq '.Version' <<< "$result")" >> $GITHUB_ENV
-          rm -rf dependencies/
+          rm -rf python
           rm dependencies.zip
         shell: 'bash'
 

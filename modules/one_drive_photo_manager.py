@@ -48,8 +48,9 @@ class OneDrivePhotoManager:
         self.basic_ulr = "https://graph.microsoft.com/v1.0/me/"
 
     def get_stock_photos_id(self):
-        asd = os.path.join(self.basic_ulr ,"asdasd")
-        # response = requests.get(f"{self.basic_ulr}/items/{folder_id}/children", headers=self.headers)
+
+        url = os.path.join(self.basic_ulr ,"asdasd")
+        response = requests.get(f"{url}/items/{folder_id}/children", headers=self.headers)
         pass
 
     def _get_folder_id_by_name(self, folder_name) -> str:

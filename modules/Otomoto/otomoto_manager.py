@@ -111,7 +111,7 @@ class OtomotoManager:
                 else:
                     list_created_adverts_id.append((item.get("номер на складі"), created_advert_id))
                     # Зберігаємо оновлений DataFrame у файл
-                    self.excel_handler.set_otomoto_id_by_storage_id(df=self.df1, otomoto_id=created_advert_id, storage_id=item.get("номер на складі"))
+                    self.excel_handler.set_otomoto_id_by_storage_id(df=self.first_100_values, otomoto_id=created_advert_id, storage_id=item.get("номер на складі"))
 
             except Exception as e:
                 self._create_report(list_created_adverts_id=list_created_adverts_id,
@@ -155,13 +155,7 @@ class OtomotoManager:
 
         self.first_100_values = self.df1.head(100)
 
-        in_stock, out_of_stock, invalid_quantity = self.create_lists_of_produts(self.df1)
-
-        # self.otomoto_api.
-
-        # num_rows, num_columns = first_100_values.shape
-        # print(num_rows, num_columns)
-
+        in_stock, out_of_stock, invalid_quantity = self.create_lists_of_produts(self.first_100_values)
         list_check_need_to_edit, list_ready_to_create = self.create_list_need_to_create(in_stock)
         print("adverts to create:", len(list_ready_to_create))
 

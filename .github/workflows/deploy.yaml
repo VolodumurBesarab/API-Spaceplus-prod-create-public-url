@@ -36,8 +36,8 @@ jobs:
 
       - name: 'Publishing dependencies as a layer '
         run: |
-          aws s3 cp dependencies.zip s3://${{vars.LAMBDA_LAYERS_S3_NAME}}/dependencies-$(date +%s).zip 
-          result=$(aws lambda publish-layer-version --layer-name ${{vars.LAMBDA_FUNCTION_NAME}} --content S3Bucket=${{vars.LAMBDA_LAYERS_S3_NAME}},S3Key=dependencies-date +%s.zip)
+          aws s3 cp dependencies.zip s3://${{vars.LAMBDA_LAYERS_S3_NAME}}/dependencies.zip 
+          result=$(aws lambda publish-layer-version --layer-name ${{vars.LAMBDA_LAYER_ARN}} --content S3Bucket=${{vars.LAMBDA_LAYERS_S3_NAME}},S3Key=dependencies.zip)
           echo "LAYER_VERSION=$(jq '.Version' <<< "$result")" >> $GITHUB_ENV
           rm -rf dependencies/
           rm dependencies.zip

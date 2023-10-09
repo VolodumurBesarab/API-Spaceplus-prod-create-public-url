@@ -1,6 +1,8 @@
 import os
 import requests
 
+from modules.auth_manager import AuthManager
+
 NL_FOLDER_ID = "01GK3VGRXOWQGPB72LHVB2WIIN642U4NKK"
 STOCK_PHOTOS_ID = "01GK3VGRXIBVXNE7ZPRBFI67KLJQLR6ZFG"
 
@@ -40,20 +42,25 @@ class OneDriveHelper:
                 else:
                     print(f"Не вдалося завантажити: {file_name}")
 
+
 class OneDrivePhotoManager:
+
+
     def __init__(self, endpoint: str, headers, access_token):
         self.endpoint = endpoint
         self.headers = headers
         self.access_token = access_token
-        self.basic_ulr = "https://graph.microsoft.com/v1.0/me/"
+        # self.basic_ulr = "https://graph.microsoft.com/v1.0/me/"
+        self.auth_manager = AuthManager()
 
-    def get_stock_photos_id(self):
+    def get_stock_photos_folder_id(self):
+        url = os.path.join(self.endpoint, "drive/root:/Holland/stock-photos/")
+        response = requests.get(url=url, headers=self.headers)
+        response_data = response.json()
+        return response_data['id']
 
-        url = os.path.join(self.basic_ulr ,"asdasd")
-        response = requests.get(f"{url}/items/{folder_id}/children", headers=self.headers)
-        pass
 
-    def _get_folder_id_by_name(self, folder_name) -> str:
+    def get_folder_id_by_name(self, folder_name) -> str:
         # Складаємо URL для пошуку папки за ім'ям
         url = f"{self.endpoint}/me/drive/root/children"
         params = {

@@ -45,7 +45,7 @@ jobs:
 
       - name: 'Updating lambda function layer'
         run: |
-          aws lambda update-function-configuration --function-name ${{vars.LAMBDA_FUNCTION_NAME}} --layers "${{vars.LAMBDA_LAYER_ARN}}:${env.LAYER_VERSION}" > /dev/null
+          aws lambda update-function-configuration --function-name ${{vars.LAMBDA_FUNCTION_NAME}} --layers "${{vars.LAMBDA_LAYER_ARN}}:${{env.LAYER_VERSION}}" > /dev/null
         shell: 'bash'
 
       - name: 'Deploing function code'

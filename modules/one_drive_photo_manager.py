@@ -1,8 +1,8 @@
-import requests as requests
 import os
 import requests
 
 NL_FOLDER_ID = "01GK3VGRXOWQGPB72LHVB2WIIN642U4NKK"
+
 
 class OneDriveHelper:
     def __init__(self, endpoint, headers, access_token):
@@ -38,10 +38,6 @@ class OneDriveHelper:
                     print(f"Завантажено: {file_name}")
                 else:
                     print(f"Не вдалося завантажити: {file_name}")
-
-
-
-
 
 class OneDrivePhotoManager:
     def __init__(self, endpoint: str, headers, access_token):
@@ -121,8 +117,6 @@ class OneDrivePhotoManager:
         if create_link_response.status_code == 200:
             create_link_response_json = create_link_response.json()
             created_link = create_link_response_json["link"]["webUrl"]
-            # test = requests.get(created_link).content
-            # print(test)
 
         for item_id in photo_id_list:
             create_link_url = self.endpoint + f"drive/items/{item_id}/createLink"
@@ -133,10 +127,3 @@ class OneDrivePhotoManager:
                 create_link_response_json = create_link_response.json()
                 created_link = create_link_response_json["link"]["webUrl"]
                 print(created_link)
-                # print(create_link_response_json)
-
-                # image_data = {
-                #     "file": ("image.jpg", requests.get(created_link).content, "image/jpeg")
-                # }
-                #
-                # print(image_data)

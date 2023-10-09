@@ -1,12 +1,7 @@
-import json
 
-import requests
-
-# from modules.Images.images_api import ImagesApi
 from modules.Otomoto.otomoto_manager import OtomotoManager
 from modules.auth_manager import AuthManager
 from modules.excel_handler import ExcelHandler
-from modules.one_drive_photo_manager import OneDriveHelper
 from modules.onedrive_manager import OneDriveManager
 
 
@@ -15,8 +10,6 @@ class StartProgram:
         self.auth_manager = AuthManager()
         self.excel_handler = ExcelHandler()
         self.onedrive_manager = OneDriveManager()
-        # self.images_api = ImagesApi()
-        # self.otomoto_manager = OtomotoManager(excel_file_name=r"Test_doc.xlsx", sheet_name="OtoMoto")
         self.otomoto_manager = OtomotoManager(excel_file_name=r"OtoMoto.xlsx", sheet_name="OtoMoto")
 
     def start(self):
@@ -28,7 +21,7 @@ class StartProgram:
 
         excel_file_name = "sklad.xlsx"
 
-        #self.one_drive_photo_manager = OneDrivePhotoManager(endpoint=endpoint,headers=headers, access_token=access_token)
+        # self.one_drive_photo_manager = OneDrivePhotoManager(endpoint=endpoint,headers=headers, access_token=access_token)
 
         root_folder_onedrive = self.onedrive_manager.get_root_folder_json(one_drive_url=one_drive_url, headers=headers)
 
@@ -62,11 +55,3 @@ class StartProgram:
 
     def otomoto_test(self):
         self.otomoto_manager.create_page()
-
-
-
-
-
-
-
-

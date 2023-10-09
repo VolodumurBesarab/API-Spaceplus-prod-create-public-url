@@ -41,31 +41,6 @@ class OtomotoManager:
             advert_dict = {}
         return list_of_adverts_dict
 
-    # def _create_report(self, list_created_adverts_id, list_of_errors):
-    #     try:
-    #         reports_folder = os.path.join(os.getcwd(), "Reports")
-    #
-    #         if not os.path.exists(reports_folder):
-    #             os.makedirs(reports_folder)
-    #
-    #         full_path = os.path.join(reports_folder, "report.txt")
-    #
-    #         with open(full_path, 'w') as file:
-    #             file.write("Список створених оголошень:\n")
-    #             for advert_id in list_created_adverts_id:
-    #                 file.write(f"Номер на складі: {product_id}, ID створеного оголошення: {advert_id}\n")
-    #
-    #             file.write("\nСписок помилок:\n")
-    #             for error_message in list_of_errors:
-    #                 file.write(f"Номер на складі: {product_id}, {error_message}\n")
-    #
-    #         print(f"Репорт збережено у файлі {full_path}")
-    #         with open(full_path, 'r') as file:
-    #             report_contents = file.read()
-    #             print(report_contents)
-    #     except Exception as e:
-    #         print(f"Помилка при створенні репорту: {str(e)}")
-
     def _create_report(self, list_created_adverts_id, list_of_errors, is_unexpected: bool):
         try:
             reports_folder = os.path.join(os.getcwd(), "Reports")
@@ -161,15 +136,5 @@ class OtomotoManager:
 
         self.post_adverts(list_ready_to_create)
 
-        # first_row_values = df1.iloc[32]
-        # for line_count
-        #
-        # for column_name, value in first_row_values.items():
-        #     print(f"{column_name}: {value}")
-
-        # for column in df1.columns:
-        #     print(f"Column: {column}")
-        #     for value in df1[column]:
-        #         print(value)
         print("Page created")
         return self

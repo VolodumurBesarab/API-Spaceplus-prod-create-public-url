@@ -41,8 +41,6 @@ class OtomotoApi:
                 print("Error:", response.status_code, response.text)
         return self.access_token
 
-        # otomoto api виведення в консоль даних про оголошення
-
     def _get_basic_headers(self, access_token):
         user_email = "andrewb200590@gmail.com"
         headers = {
@@ -77,48 +75,6 @@ class OtomotoApi:
         else:
             print("Error:", response.status_code, response.text)
 
-
-
-    # створення колекції з фото (код не тестований, вже як матимемо фото варто спробувати + дописати рядок до data "image_collection_id": 821165355"
-    # def create_image_collection(user_email, access_token, image_urls):
-    #     url = "https://www.otomoto.pl/api/open/imageCollections"
-    #
-    #     headers = {
-    #         "User-Agent": user_email,
-    #         "Content-Type": "application/json",
-    #         "Authorization": f"Bearer {access_token}"
-    #     }
-    #
-    #     data = image_urls
-    #
-    #     response = requests.post(url, json=data, headers=headers)
-    #
-    #     if response.status_code == 200:
-    #         collection_id = response.json().get("id")
-    #         print(f"Image collection successfully created with ID: {collection_id}")
-    #         return collection_id
-    #     else:
-    #         print("Error:", response.status_code, response.text)
-    #         return None
-    #
-    # # Replace these with your actual values
-    # user_email = "your_user_email"
-    # access_token = "your_access_token"
-    #
-    # image_urls = {
-    #     "1": "http://lorempixel.com/800/600/transport/",
-    #     "2": "http://lorempixel.com/800/600/transport/",
-    #     "3": "http://lorempixel.com/800/600/transport/"
-    # }
-
-    # створення нового оголошення otomoto
-
-        # Зчитуєм данні з таблиці
-        # Зберігаєм данні в словнику
-        # Передаєм словник генератору дати
-        # В даті розпаковуєм і створюєм
-
-    # треба поміняти тут код на змінні які будемо отримувати з таблиці
     custom_otomoto_data = {
         "status": "unpaid",
         'title': 'Poprzeczki Belki bagaznik Thule Aerobar 3',
@@ -226,22 +182,17 @@ class OtomotoApi:
         url = self.base_url + "imageCollections"  # Замініть на правильний URL
 
 
-        # image_data = {
-        #     "1": "https://i.imgur.com/x9c4rhA.jpeg",
-        #     "2": "https://i.imgur.com/pbUDT54.jpeg",
-        #     "3": "https://i.imgur.com/WVXzjrn.jpeg"
-        # }
+        image_data = {
+            "1": "https://i.imgur.com/x9c4rhA.jpeg",
+            "2": "https://i.imgur.com/pbUDT54.jpeg",
+            "3": "https://i.imgur.com/WVXzjrn.jpeg"
+        }
 
         image_data = {}
         counter = 1
         for photo_url in photos_url_list:
             image_data.update({str(counter): photo_url})
             counter += 1
-
-        image_data = {
-            "1": "https://spacelpus-my.sharepoint.com/:i:/g/personal/andrzej_besarab_spacelpus_onmicrosoft_com/EWst24PuZbZMq0U6UNcvf4gB0SyA90-U6wEfnJYHHIUFBg?e=fKrumH",
-            "2": "https://spacelpus-my.sharepoint.com/:i:/g/personal/andrzej_besarab_spacelpus_onmicrosoft_com/ERMA695lP1dGiOlGZaJ61y0BII8VBffo2OW1Gip4Z4nHqw?e=61hK6A"
-        }
 
         access_token = self.get_token()
         headers = self._get_basic_headers(access_token)
@@ -255,16 +206,10 @@ class OtomotoApi:
             print("response_data:", response_data)
             print("Колекцію зображень успішно створено.", "ID колекції:", response_data.get("id"))
             collection_id = response_data.get("id")
-            # print("Посилання на зображення:")
-            # for image_id, urls in response_data.get("images").items():
-            #     print(f"Зображення {image_id}:")
-            #     for i, url in enumerate(urls):
-            #         print(f"    {i}: {url}")
         else:
             print("Помилка при створенні колекції зображень. Код статусу:", response.status_code)
             print("Текст помилки:", response.text)
         return collection_id
-
 
     def create_otomoto_advert(self, product_id, title, description: str, price, new_used, manufacturer) -> str:
         if len(str(description)) < 30:
@@ -297,48 +242,3 @@ class OtomotoApi:
             error = ("Error:", response.status_code, response.text)
             return str(error)
 
-
-
-    def api_test(self):
-        my_30_char_description = "qwertyuio qwertyuio qwertyuio zaoza"
-        first_item = self.exel_info_dict_creator(title="Title 1", description=my_30_char_description, price=101, new_used="used",
-                                            manufacturer="Manufacturer 1")
-        first_item_dict = self.data_creator(first_item)
-        advert_id = self.create_otomoto_advert(first_item_dict)
-
-        # collection_id = create_image_collection(user_email, access_token, image_urls)
-
-        # цей кусок має активувати оголошення але чомусь цього не робить тому оголошення додається до вкладки "активуйте оголошення"
-        # звідки його вручну можна активувати
-
-        # if advert_id is not None:
-        #     activate_advert(advert_id, user_email, access_token)
-
-        # #видалення оголошення
-        #
-        # def deactivate_advert(advert_id, user_email, access_token):
-        #     url = f"https://www.otomoto.pl/api/open/account/adverts/{advert_id}/deactivate"
-        #
-        #     headers = {
-        #         "User-Agent": user_email,
-        #         "Content-Type": "application/json",
-        #         "Authorization": f"Bearer {access_token}"
-        #     }
-        #
-        #     data = {
-        #         "reason": {
-        #             "id": "1",
-        #             "description": "Reason to deactivate the Ad"
-        #         }
-        #     }
-        #
-        #     response = requests.post(url, json=data, headers=headers)
-        #
-        #     if response.status_code == 200:
-        #         print(f"Advert with ID {advert_id} successfully deactivated.")
-        #     else:
-        #         print("Error:", response.status_code, response.text)
-        #
-        # advert_id = "6113956279"
-        #
-        # deactivate_advert(advert_id, user_email, access_token)

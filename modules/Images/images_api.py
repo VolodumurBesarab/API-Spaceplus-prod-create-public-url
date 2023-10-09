@@ -5,9 +5,6 @@ from imgurpython import ImgurClient
 CLIENT_ID = 'f82bcb68847441a'
 CLIENT_SECRET = 'd3870caebcf64e7cc4ab0d180204d25b292dc3b6'
 
-# client_id = 'f82bcb68847441a'
-# client_secret = 'd3870caebcf64e7cc4ab0d180204d25b292dc3b6'
-
 class ImagesApi:
     # Шлях до фото на вашому локальному комп'ютері
     # image_path = 'C:\\Users\\vladi\\OneDrive\\Desktop\\IMG-8277.jpg'
@@ -27,25 +24,6 @@ class ImagesApi:
             return None
         folder_path, image_files = self._create_list_of_img(storage_name=storage_name)
 
-        # base_path = os.path.join('Data', 'Images', folder_name, image_name)
-        # image_files = os.listdir(base_path)
-        # print("bla-bla aaaaaaaaaa", image_files)
-        #
-        # folder_path = os.path.join('Data', 'Images', folder_name)
-        #
-        # # Отримуємо список усіх файлів у папці folder_path
-        # image_files = os.listdir(folder_path)
-
-        # client = ImgurClient(CLIENT_ID, CLIENT_SECRET)
-
-
-        # image_urls = []
-        #
-        # # Проходимося по кожному файлу у папці та завантажуємо його на Imgur
-        # for image_name in image_files:
-        #     image_url = upload_image_to_imgur(folder_name, image_name)
-        #     image_urls.append(image_url)
-        #
         client = ImgurClient(CLIENT_ID, CLIENT_SECRET)
         image_urls = []
         # Завантаження фото
@@ -63,7 +41,6 @@ class ImagesApi:
 
     def get_list_photos(self):
         client = ImgurClient(CLIENT_ID, CLIENT_SECRET)
-        # client.get_account_images(username="spaceplus69", page=1)
         authorization_url = client.get_auth_url("code")
         print(authorization_url)
         authorization_code = input("Введіть код авторизації: ")

@@ -36,7 +36,7 @@ jobs:
 
       - name: 'Publishing dependencies as a layer '
         run: |
-          local result = $(aws lambda publish-layer-version --layer-name ${{vars.LAMBDA_LAYER_ARN}} --zip-file fileb://dependencies.zip)
+          result = $(aws lambda publish-layer-version --layer-name ${{vars.LAMBDA_LAYER_ARN}} --zip-file fileb://dependencies.zip)
           echo "LAYER_VERSION=$(jq '.Version' <<< "$result")" >> $GITHUB_ENV
           rm -rf dependencies/
           rm dependencies.zip

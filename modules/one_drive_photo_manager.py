@@ -19,8 +19,6 @@ class OneDriveHelper:
                 return item['id']
         return None
 
-    def get_stock_photos_id(self):
-        pass
 
     def download_files_from_folder(self, folder_id, destination_folder):
         response = requests.get(f"{self.endpoint}/items/{folder_id}/children", headers=self.headers)
@@ -47,6 +45,12 @@ class OneDrivePhotoManager:
         self.endpoint = endpoint
         self.headers = headers
         self.access_token = access_token
+        self.basic_ulr = "https://graph.microsoft.com/v1.0/me/"
+
+    def get_stock_photos_id(self):
+        asd = os.path.join(self.basic_ulr ,"asdasd")
+        # response = requests.get(f"{self.basic_ulr}/items/{folder_id}/children", headers=self.headers)
+        pass
 
     def _get_folder_id_by_name(self, folder_name) -> str:
         # Складаємо URL для пошуку папки за ім'ям

@@ -1,6 +1,7 @@
 import json
 from msal import ConfidentialClientApplication
 
+
 class AuthManager:
     def __init__(self):
         with open("secrets.json") as secrets:

@@ -2,7 +2,7 @@ import os
 import requests
 
 NL_FOLDER_ID = "01GK3VGRXOWQGPB72LHVB2WIIN642U4NKK"
-
+STOCK_PHOTOS_ID = "01GK3VGRXIBVXNE7ZPRBFI67KLJQLR6ZFG"
 
 class OneDriveHelper:
     def __init__(self, endpoint, headers, access_token):
@@ -18,6 +18,9 @@ class OneDriveHelper:
             if item.get('folder', {}).get('name') == folder_name:
                 return item['id']
         return None
+
+    def get_stock_photos_id(self):
+        pass
 
     def download_files_from_folder(self, folder_id, destination_folder):
         response = requests.get(f"{self.endpoint}/items/{folder_id}/children", headers=self.headers)

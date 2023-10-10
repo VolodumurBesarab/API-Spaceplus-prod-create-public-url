@@ -6,52 +6,13 @@ from modules.auth_manager import AuthManager
 NL_FOLDER_ID = "01GK3VGRXOWQGPB72LHVB2WIIN642U4NKK"
 STOCK_PHOTOS_ID = "01GK3VGRXIBVXNE7ZPRBFI67KLJQLR6ZFG"
 
-class OneDriveHelper:
-    def __init__(self, endpoint, headers, access_token):
-        self.endpoint = endpoint
-        self.headers = headers
-        self.access_token = access_token
-
-    def find_folder_by_name(self, folder_name):
-        response = requests.get(f"{self.endpoint}/root/children", headers=self.headers)
-        response.raise_for_status()
-        items = response.json().get('value', [])
-        for item in items:
-            if item.get('folder', {}).get('name') == folder_name:
-                return item['id']
-        return None
-
-
-    def download_files_from_folder(self, folder_id, destination_folder):
-        response = requests.get(f"{self.endpoint}/items/{folder_id}/children", headers=self.headers)
-        response.raise_for_status()
-        items = response.json().get('value', [])
-        for item in items:
-            if 'file' in item:
-                file_id = item['id']
-                file_name = item['name']
-                download_url = f"{self.endpoint}/items/{file_id}/content"
-                file_path = os.path.join(destination_folder, file_name)
-
-                # Завантаження файлу
-                response = requests.get(download_url, headers=self.headers)
-                if response.status_code == 200:
-                    with open(file_path, 'wb') as file:
-                        file.write(response.content)
-                    print(f"Завантажено: {file_name}")
-                else:
-                    print(f"Не вдалося завантажити: {file_name}")
-
 
 class OneDrivePhotoManager:
-
-
-    def __init__(self, endpoint: str, headers, access_token):
-        self.endpoint = endpoint
-        self.headers = headers
-        self.access_token = access_token
-        # self.basic_ulr = "https://graph.microsoft.com/v1.0/me/"
+    def __init__(self):
         self.auth_manager = AuthManager()
+        self.endpoint = self.auth_manager.get_endpoint()
+        self.access_token = self.auth_manager.get_access_token_default_scopes()
+        self.headers = self.auth_manager.get_default_header(access_token=self.access_token)
 
     def get_stock_photos_folder_id(self):
         url = os.path.join(self.endpoint, "drive/root:/Holland/stock-photos/")
@@ -59,30 +20,39 @@ class OneDrivePhotoManager:
         response_data = response.json()
         return response_data['id']
 
-
-    def  get_folder_id_by_name(self, folder_name) -> str:
-        # Складаємо URL для пошуку папки за ім'ям
-        url = f"{self.endpoint}/me/drive/root/children"
-        params = {
-            "filter": f"name eq '{folder_name}'",
-            "$select": "id"
-        }
-
-        # Виконуємо GET-запит до OneDrive API
-        response = requests.get(url, headers=self.headers, params=params)
-
-        if response.status_code == 200:
-            data = response.json()
-            # Перевіряємо, чи знайдена папка
-            if 'value' in data and len(data['value']) > 0:
-                # Повертаємо ідентифікатор першої знайденої папки (якщо є кілька з однаковим ім'ям)
-                return data['value'][0]['id']
-            else:
-                raise Exception(f"Папка з іменем '{folder_name}' не знайдена в OneDrive.")
+    def find_folder_by_name(self, parent_folder_id, folder_name):
+        url = os.path.join(self.endpoint, f"drive/items/{parent_folder_id}/children?$filter=name eq '{folder_name}'")
+        response = requests.get(url=url, headers=self.headers)
+        response_data = response.json()
+        if 'value' in response_data and len(response_data['value']) > 0:
+            return response_data['value'][0]['id']  # Повертаємо ідентифікатор знайденої папки
         else:
-            raise Exception(f"Не вдалося виконати запит до OneDrive API. Код статусу: {response.status_code}")
+            return None
 
-    def get_photos(self, folder_name: str):
+    def download_files_from_folder(self, folder_id):
+        list_to_download = []
+        project_folder = os.getcwd()
+        url = os.path.join(self.endpoint, f"drive/items/{folder_id}/children")
+        response = requests.get(url=url, headers=self.headers)
+        response_data = response.json()
+        if 'value' in response_data:
+            for item in response_data['value']:
+                file_id = item['id']
+                file_name = item['name']
+                list_to_download.append((file_id, file_name))
+
+        for photo_id, name in list_to_download:
+            url = os.path.join(self.endpoint, f"drive/items/{photo_id}/content")
+            response = requests.get(url=url, headers=self.headers)
+            if response.status_code == 200:
+                file_path = os.path.join(project_folder, "Data", "Photos", name)
+                with open(file_path, 'wb') as file:
+                    file.write(response.content)
+                print(f"Завантажено: {name}")
+            else:
+                print(f"Не вдалося завантажити: {name}")
+
+    def get_photos_public_url(self, folder_name: str):
         response = requests.get(url=self.endpoint + f"drive/items/{NL_FOLDER_ID}/children",
                                 headers=self.headers)
         photo_id_list = []

@@ -101,7 +101,7 @@ class ExcelHandler:
             # Перевіряємо, чи otomoto_id є NaN (пустим)
             if pd.isna(current_otomoto_id):
                 # Вставляємо нове otomoto_id у відповідне поле
-                df.loc[df['номер на складі'] == storage_id, 'ID otomoto'] = otomoto_id
+                df.loc[df['номер на складі'] == storage_id, 'ID otomoto'] = str(otomoto_id)
         # Зберігаємо оновлений DataFrame у файл
         df.to_excel('New tested file.xlsx', index=False)
         # Повертаємо оновлений DataFrame

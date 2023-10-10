@@ -216,7 +216,10 @@ class OtomotoApi:
             return f"Error: {product_id}'s description must be more then 30 symbol"
         if product_id == 0 or product_id == 2:
             return f"Error: can't create ads with ID {product_id}"
-        photos_url_list = self.images_api.upload_image_to_imgur(storage_name=product_id)
+        # photos_url_list = self.images_api.upload_image_to_imgur(storage_name=product_id)
+        photos_url_list = ["https://upload.wikimedia.org/wikipedia/commons/6/64/Sprechender_Brief_--_2015_--_6008.jpg",
+                           "https://vinylrecords.com.ua/image/cache/catalog/12345/roger-waters-the-lockdown-sessions-vinyl.1280x1280-1000x1000.jpeg",
+                           "https://vinylrecords.com.ua/image/cache/catalog/123metallica/0602438945153_1_536_0_75-1000x1000.jpg"]
         if photos_url_list is None:
             return f"Error: can't find folder {product_id}"
         # advert_id = None

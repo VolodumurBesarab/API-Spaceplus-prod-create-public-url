@@ -1,4 +1,3 @@
-
 from modules.Otomoto.otomoto_manager import OtomotoManager
 from modules.auth_manager import AuthManager
 from modules.excel_handler import ExcelHandler
@@ -10,7 +9,7 @@ class StartProgram:
         self.auth_manager = AuthManager()
         self.excel_handler = ExcelHandler()
         self.onedrive_manager = OneDriveManager()
-        self.otomoto_manager = OtomotoManager(excel_file_name=r"OtoMoto.xlsx", sheet_name="OtoMoto")
+        self.otomoto_manager = OtomotoManager(excel_file_name=r"Test_doc.xlsx", sheet_name="OtoMoto")
 
     def start(self):
         endpoint = self.auth_manager.get_endpoint()

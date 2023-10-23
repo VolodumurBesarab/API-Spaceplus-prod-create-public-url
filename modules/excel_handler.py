@@ -79,7 +79,7 @@ class ExcelHandler:
 
     def get_file_path(self, file_name) -> str:
         current_directory = os.getcwd()
-        save_path = os.path.join(current_directory, 'Data', file_name)
+        save_path = os.path.join(current_directory, 'tmp', file_name)
         return save_path
 
     def create_file_on_data(self, file_content, file_name):

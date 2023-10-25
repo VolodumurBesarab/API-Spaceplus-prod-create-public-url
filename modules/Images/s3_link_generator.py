@@ -12,24 +12,30 @@ class S3LinkGenerator:
         for root, dirs, files in os.walk(folder_path):
             for file in files:
                 file_list.append(os.path.join(root, file))
-        return file_list
+        file_names = [os.path.basename(file_path) for file_path in file_list]
 
-    def _get_list_and_upload_photos(self, path_to_save_photos: str):
+        return file_list, file_names
+
+    def _get_list_and_upload_photos(self, path_to_save_photos: str, file_name: str):
         # s3_object_key = None
-        file_list = self._get_files_in_folder(path_to_save_photos)
-        for file_path in file_list:
-            with open(file_path, "rb") as file:
-                s3_object_key = os.path.basename(file_path)
-                # Завантаження файлу на Amazon S3
-                s3 = boto3.client("s3")
-                s3.upload_fileobj(file, s3_bucket_name, s3_object_key)
+        file_list, file_names = self._get_files_in_folder(path_to_save_photos)
+        s3 = boto3.client("s3")
+
+        for file_path, file_name in zip(file_list, file_names):
+            s3.upload_file(file_path, s3_bucket_name, file_name)
+            try:
+                s3.head_object(Bucket=s3_bucket_name, Key=file_name)
+                print(f"Файл {file_name} успішно завантажено на S3.")
+            except Exception as e:
+                print(f"Помилка: {e}. Файл {file_name} не був знайдений на S3.")
+
         return file_list
 
     def _del_photos(self):
         pass
 
-    def generate_public_urls(self, path_to_save_photos: str):
-        file_list = self._get_list_and_upload_photos(path_to_save_photos=path_to_save_photos)
+    def generate_public_urls(self, path_to_save_photos: str, file_name):
+        file_list = self._get_list_and_upload_photos(path_to_save_photos=path_to_save_photos, file_name=file_name)
         s3 = boto3.client("s3")
 
         public_urls = []

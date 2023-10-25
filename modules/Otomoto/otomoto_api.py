@@ -233,7 +233,7 @@ class OtomotoApi:
         # photos_url_list = ["https://upload.wikimedia.org/wikipedia/commons/6/64/Sprechender_Brief_--_2015_--_6008.jpg",
         #                    "https://vinylrecords.com.ua/image/cache/catalog/12345/roger-waters-the-lockdown-sessions-vinyl.1280x1280-1000x1000.jpeg",
         #                    "https://vinylrecords.com.ua/image/cache/catalog/123metallica/0602438945153_1_536_0_75-1000x1000.jpg"]
-        if photos_url_list is None:
+        if photos_url_list is None or photos_url_list == []:
             return f"Error: can't find folder {product_id}"
         # advert_id = None
         photos_collection_id = self.create_otomoto_images_collection(photos_url_list=photos_url_list)

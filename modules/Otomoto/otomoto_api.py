@@ -221,7 +221,8 @@ class OtomotoApi:
 
         parent_folder_id = self.one_drive_photo_manager.get_stock_photos_folder_id()
         folder_id = self.one_drive_photo_manager.find_folder_by_name(parent_folder_id=parent_folder_id, folder_name=product_id)
-        self.one_drive_photo_manager.download_files_from_folder(folder_id=folder_id, folder_name=product_id)
+        path_to_save_photos = self.one_drive_photo_manager.download_files_from_folder(folder_id=folder_id, folder_name=product_id)
+        print(path_to_save_photos)
 
 
 

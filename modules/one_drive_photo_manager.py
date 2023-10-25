@@ -58,6 +58,7 @@ class OneDrivePhotoManager:
                 print(f"Завантажено: {name}")
             else:
                 print(f"Не вдалося завантажити: {name}. Status code = {response.status_code}")
+        return path_to_save_photos
 
     def get_photos_public_url(self, folder_name: str):
         response = requests.get(url=self.endpoint + f"drive/items/{NL_FOLDER_ID}/children",

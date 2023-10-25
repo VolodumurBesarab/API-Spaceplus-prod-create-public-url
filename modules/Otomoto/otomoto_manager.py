@@ -69,6 +69,20 @@ class OtomotoManager:
         except Exception as e:
             print(f"Сталася помилка при створенні звіту: {e}")
 
+    def _create_basic_report(self, message: str):
+        # Шлях до папки та файлу
+        folder_path = "/tmp/Reports"
+        file_path = "/tmp/Reports/my_test_report.txt"
+
+        # Перевірка і створення папки, якщо її немає
+        if not os.path.exists(folder_path):
+            os.makedirs(folder_path)
+
+        # Відкриття файлу та запис повідомлення у новий рядок
+        with open(file_path, "a") as file:
+            file.write(message + "\n")
+
+
     def _post_adverts(self, list_ready_to_create: list[DataFrame]) -> tuple[list, list]:
         list_created_adverts_id = []
         list_of_errors = []
@@ -82,21 +96,28 @@ class OtomotoManager:
                                                                            new_used=item.get("new_used"),
                                                                            manufacturer=item.get("manufacturer"))
                 if "Error:" in created_advert_id:
-                    list_of_errors.append((item.get("номер на складі"), created_advert_id))
+                    nubmer_in_stock = item.get("номер на складі")
+                    message = f"{nubmer_in_stock}, {created_advert_id}"
+                    self._create_basic_report(message=message)
+                    # list_of_errors.append((item.get("номер на складі"), created_advert_id))
                 else:
-                    list_created_adverts_id.append((item.get("номер на складі"), created_advert_id))
-                    # Зберігаємо оновлений DataFrame у файл
-                    self.excel_handler.set_otomoto_id_by_storage_id(df=self.first_100_values, otomoto_id=created_advert_id, storage_id=item.get("номер на складі"))
+                    nubmer_in_stock = item.get("номер на складі")
+                    message = f"{nubmer_in_stock}, {created_advert_id}"
+                    self._create_basic_report(message=message)
+                    # list_created_adverts_id.append((item.get("номер на складі"), created_advert_id))
+                    # # Зберігаємо оновлений DataFrame у файл
+                    # self.excel_handler.set_otomoto_id_by_storage_id(df=self.first_100_values, otomoto_id=created_advert_id, storage_id=item.get("номер на складі"))
+                    pass
 
             except Exception as e:
-                self._create_report(list_created_adverts_id=list_created_adverts_id,
-                                    list_of_errors=list_of_errors,
-                                    is_unexpected=True)
+                # self._create_report(list_created_adverts_id=list_created_adverts_id,
+                #                     list_of_errors=list_of_errors,
+                #                     is_unexpected=True)
                 print(f"Помилка при створенні оголошення {item}: {e}")
 
-        self._create_report(list_created_adverts_id=list_created_adverts_id,
-                            list_of_errors=list_of_errors,
-                            is_unexpected=False)
+        # self._create_report(list_created_adverts_id=list_created_adverts_id,
+        #                     list_of_errors=list_of_errors,
+        #                     is_unexpected=False)
 
         return list_created_adverts_id, list_of_errors
 

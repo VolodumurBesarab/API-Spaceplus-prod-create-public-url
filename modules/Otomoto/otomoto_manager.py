@@ -69,7 +69,7 @@ class OtomotoManager:
         except Exception as e:
             print(f"Сталася помилка при створенні звіту: {e}")
 
-    def post_adverts(self, list_ready_to_create: list[DataFrame]) -> tuple[list, list]:
+    def _post_adverts(self, list_ready_to_create: list[DataFrame]) -> tuple[list, list]:
         list_created_adverts_id = []
         list_of_errors = []
         adverts_dict = self._convert_adverts_to_dict(list_ready_to_create)
@@ -134,7 +134,7 @@ class OtomotoManager:
         list_check_need_to_edit, list_ready_to_create = self.create_list_need_to_create(in_stock)
         print("adverts to create:", len(list_ready_to_create))
 
-        self.post_adverts(list_ready_to_create)
+        self._post_adverts(list_ready_to_create)
 
         print("Page created")
         return self

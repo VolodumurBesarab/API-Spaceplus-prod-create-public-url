@@ -29,9 +29,15 @@ class OneDrivePhotoManager:
         else:
             return None
 
-    def download_files_from_folder(self, folder_id):
+    def download_files_from_folder(self, folder_id, folder_name):
         list_to_download = []
-        project_folder = os.getcwd()
+        # project_folder = os.getcwd()
+        tmp = "/tmp/"
+        if not os.path.exists(tmp + "Photos"):
+            os.mkdir(tmp + "Photos")
+        photos_path = tmp + "Photos"
+        path_to_save_photos = os.path.join(photos_path, folder_name)
+        os.mkdir(path_to_save_photos)
         url = os.path.join(self.endpoint, f"drive/items/{folder_id}/children")
         response = requests.get(url=url, headers=self.headers)
         response_data = response.json()
@@ -45,12 +51,13 @@ class OneDrivePhotoManager:
             url = os.path.join(self.endpoint, f"drive/items/{photo_id}/content")
             response = requests.get(url=url, headers=self.headers)
             if response.status_code == 200:
-                file_path = os.path.join(project_folder, "Data", "Photos", name)
+                # file_path = os.path.join(project_folder, "Data", "Photos", name)
+                file_path = os.path.join(path_to_save_photos, name)
                 with open(file_path, 'wb') as file:
                     file.write(response.content)
                 print(f"Завантажено: {name}")
             else:
-                print(f"Не вдалося завантажити: {name}")
+                print(f"Не вдалося завантажити: {name}. Status code = {response.status_code}")
 
     def get_photos_public_url(self, folder_name: str):
         response = requests.get(url=self.endpoint + f"drive/items/{NL_FOLDER_ID}/children",

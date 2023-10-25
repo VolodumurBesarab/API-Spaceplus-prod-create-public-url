@@ -4,6 +4,7 @@ import math
 
 from modules.Images.images_api import ImagesApi
 from modules.auth_manager import AuthManager
+from modules.one_drive_photo_manager import OneDrivePhotoManager
 
 
 class OtomotoApi:
@@ -12,6 +13,7 @@ class OtomotoApi:
         self.access_token = None
         self.base_url = "https://www.otomoto.pl/api/open/"
         self.images_api = ImagesApi()
+        self.one_drive_photo_manager = OneDrivePhotoManager()
 
 
     def get_token(self):
@@ -216,10 +218,17 @@ class OtomotoApi:
             return f"Error: {product_id}'s description must be more then 30 symbol"
         if product_id == 0 or product_id == 2:
             return f"Error: can't create ads with ID {product_id}"
-        # photos_url_list = self.images_api.upload_image_to_imgur(storage_name=product_id)
-        photos_url_list = ["https://upload.wikimedia.org/wikipedia/commons/6/64/Sprechender_Brief_--_2015_--_6008.jpg",
-                           "https://vinylrecords.com.ua/image/cache/catalog/12345/roger-waters-the-lockdown-sessions-vinyl.1280x1280-1000x1000.jpeg",
-                           "https://vinylrecords.com.ua/image/cache/catalog/123metallica/0602438945153_1_536_0_75-1000x1000.jpg"]
+
+        parent_folder_id = self.one_drive_photo_manager.get_stock_photos_folder_id()
+        folder_id = self.one_drive_photo_manager.find_folder_by_name(parent_folder_id=parent_folder_id, folder_name=product_id)
+        self.one_drive_photo_manager.download_files_from_folder(folder_id=folder_id, folder_name=product_id)
+
+
+
+        photos_url_list = self.images_api.upload_image_to_imgur(storage_name=product_id)
+        # photos_url_list = ["https://upload.wikimedia.org/wikipedia/commons/6/64/Sprechender_Brief_--_2015_--_6008.jpg",
+        #                    "https://vinylrecords.com.ua/image/cache/catalog/12345/roger-waters-the-lockdown-sessions-vinyl.1280x1280-1000x1000.jpeg",
+        #                    "https://vinylrecords.com.ua/image/cache/catalog/123metallica/0602438945153_1_536_0_75-1000x1000.jpg"]
         if photos_url_list is None:
             return f"Error: can't find folder {product_id}"
         # advert_id = None

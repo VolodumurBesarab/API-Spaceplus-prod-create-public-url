@@ -3,7 +3,7 @@ import os
 import boto3
 
 
-s3_bucket_name = "Photos"
+s3_bucket_name = "prod-spaceplus-automation"
 
 
 class S3LinkGenerator:
@@ -14,7 +14,7 @@ class S3LinkGenerator:
                 file_list.append(os.path.join(root, file))
         return file_list
 
-    def _upload_photos(self, path_to_save_photos: str):
+    def _get_list_and_upload_photos(self, path_to_save_photos: str):
         # s3_object_key = None
         file_list = self._get_files_in_folder(path_to_save_photos)
         for file_path in file_list:
@@ -23,10 +23,26 @@ class S3LinkGenerator:
                 # Завантаження файлу на Amazon S3
                 s3 = boto3.client("s3")
                 s3.upload_fileobj(file, s3_bucket_name, s3_object_key)
-        return f"Завантажено {len(file_list)} файлів на S3."
+        return file_list
 
     def _del_photos(self):
         pass
 
-    def generate_link(self, folder_name: str):
-        pass
+    def generate_public_urls(self, path_to_save_photos: str):
+        file_list = self._get_list_and_upload_photos(path_to_save_photos=path_to_save_photos)
+        s3 = boto3.client("s3")
+
+        public_urls = []
+
+        for file_path in file_list:
+            s3_object_key = os.path.basename(file_path)
+            url = s3.generate_presigned_url(
+                ClientMethod="get_object",
+                Params={"Bucket": s3_bucket_name, "Key": s3_object_key},
+                ExpiresIn=3600  # Тут ви можете вказати термін дії посилання в секундах (наприклад, 1 година)
+            )
+            public_urls.append(url)
+        if public_urls:
+            return public_urls
+        else:
+            return None

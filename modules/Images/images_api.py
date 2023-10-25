@@ -13,6 +13,7 @@ class ImagesApi:
     def _create_list_of_img(self, storage_name) -> tuple[str, list[str]]:
         try:
             folder_path = os.path.join('Data', 'Images', str(storage_name))
+
             image_files = os.listdir(folder_path)
             return folder_path, image_files
         except:

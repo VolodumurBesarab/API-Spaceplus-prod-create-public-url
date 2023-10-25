@@ -35,6 +35,7 @@ class OneDrivePhotoManager:
         tmp = "/tmp/"
         if not os.path.exists(tmp + "Photos"):
             os.mkdir(tmp + "Photos")
+            print("Photos in tmp created")
         photos_path = tmp + "Photos"
         path_to_save_photos = os.path.join(photos_path, folder_name)
         os.mkdir(path_to_save_photos)

@@ -16,7 +16,7 @@ class S3LinkGenerator:
 
         return file_list, file_names
 
-    def _get_list_and_upload_photos(self, path_to_save_photos: str, file_name: str):
+    def _get_list_and_upload_photos(self, path_to_save_photos: str):
         # s3_object_key = None
         file_list, file_names = self._get_files_in_folder(path_to_save_photos)
         s3 = boto3.client("s3")
@@ -34,8 +34,8 @@ class S3LinkGenerator:
     def _del_photos(self):
         pass
 
-    def generate_public_urls(self, path_to_save_photos: str, file_name):
-        file_list = self._get_list_and_upload_photos(path_to_save_photos=path_to_save_photos, file_name=file_name)
+    def generate_public_urls(self, path_to_save_photos: str):
+        file_list = self._get_list_and_upload_photos(path_to_save_photos=path_to_save_photos)
         s3 = boto3.client("s3")
 
         public_urls = []
@@ -52,3 +52,9 @@ class S3LinkGenerator:
             return public_urls
         else:
             return None
+
+
+    """
+    SSL validation failed for https://prod-spaceplus-automation.s3.eu-central-1.amazonaws.com/PXL_20230816_062109406.jpg EOF occurred in violation of protocol (_ssl.c:2427)
+/tmp/Photos/30493
+    """

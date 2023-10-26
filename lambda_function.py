@@ -5,7 +5,7 @@ import boto3
 
 s3_bucket_name = "prod-spaceplus-automation"
 key = "1.jpg"
-filename = "/Resources/1.jpg"
+filename = "/Resources/2.jpg"
 
 from start_program import StartProgram
 

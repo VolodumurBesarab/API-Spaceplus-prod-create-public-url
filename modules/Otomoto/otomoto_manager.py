@@ -75,7 +75,7 @@ class OtomotoManager:
     def _create_basic_report(self, message: str):
         # Шлях до папки та файлу
         folder_path = "/tmp/Reports"
-        file_path = "/tmp/Reports/report.txt"
+        file_path = f"/tmp/Reports/report{datetime.today()}.txt"
 
         # Перевірка і створення папки, якщо її немає
         if not os.path.exists(folder_path):
@@ -149,7 +149,7 @@ class OtomotoManager:
         # edit atributes
     def read_selected_rows_from_excel(self, file_path, rows_to_skip: int, rows_to_read):
         if rows_to_skip > 0:
-            working_data_table = pd.read_excel(file_path, skiprows=(1, rows_to_skip), nrows=rows_to_read)
+            working_data_table = pd.read_excel(file_path, skiprows=range(1, rows_to_skip), nrows=rows_to_read)
         else:
             working_data_table = pd.read_excel(file_path, nrows=rows_to_read)
         return working_data_table

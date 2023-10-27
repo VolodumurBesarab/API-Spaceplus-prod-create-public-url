@@ -108,7 +108,7 @@ class OtomotoManager:
                     # list_of_errors.append((item.get("номер на складі"), created_advert_id))
                 else:
                     nubmer_in_stock = item.get("номер на складі")
-                    message = f"{nubmer_in_stock}, {created_advert_id}"
+                    message = f"{nubmer_in_stock}, Advert successfully posted with ID: {created_advert_id}"
                     self._create_basic_report(message=message)
                     # list_created_adverts_id.append((item.get("номер на складі"), created_advert_id))
                     # # Зберігаємо оновлений DataFrame у файл

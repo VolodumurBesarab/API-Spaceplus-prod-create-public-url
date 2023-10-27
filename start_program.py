@@ -9,7 +9,7 @@ class StartProgram:
         self.auth_manager = AuthManager()
         self.excel_handler = ExcelHandler()
         self.onedrive_manager = OneDriveManager()
-        self.otomoto_manager = OtomotoManager(excel_file_name=r"sklad.xlsx", sheet_name="OtoMoto")
+        self.otomoto_manager = OtomotoManager(excel_file_name=r"Otomoto.xlsx", sheet_name="OtoMoto")
 
     def start(self):
         endpoint = self.auth_manager.get_endpoint()

@@ -251,7 +251,7 @@ class OtomotoApi:
 
         if response.status_code == 201:
             advert_id = response.json().get("id")
-            return str(f"Advert successfully posted with ID: {advert_id}")
+            return str(advert_id)
         else:
             error = ("Error:", response.status_code, response.text)
             return str(error)

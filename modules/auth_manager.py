@@ -1,47 +1,55 @@
 import json
 import os
+import threading
 
 from msal import ConfidentialClientApplication
 
 
 class AuthManager:
+    _instance = None
+    _lock = threading.Lock()
+
+    def __new__(cls):
+        if cls._instance is None:
+            with cls._lock:
+                if cls._instance is None:
+                    cls._instance = super(AuthManager, cls).__new__(cls)
+                    cls._instance.__initialized = False
+        return cls._instance
+
     def __init__(self):
-        if os.path.exists("secrets.json"):
-            with open("secrets.json") as secrets:
-                secrets = json.load(secrets)
+        if not self.__initialized:
+            if os.path.exists("secrets.json"):
+                with open("secrets.json") as secrets:
+                    secrets = json.load(secrets)
 
-            self.otomoto_url = secrets.get("otomoto_url")
-            self.otomoto_client_id = secrets.get("otomoto_client_id")
-            self.otomoto_client_secret = secrets.get("otomoto_client_secret")
-            self.otomoto_username = secrets.get("otomoto_username")
-            self.otomoto_password = secrets.get("otomoto_password")
+                self.otomoto_url = secrets.get("otomoto_url")
+                self.otomoto_client_id = secrets.get("otomoto_client_id")
+                self.otomoto_client_secret = secrets.get("otomoto_client_secret")
+                self.otomoto_username = secrets.get("otomoto_username")
+                self.otomoto_password = secrets.get("otomoto_password")
 
-            self.application_id = secrets.get("VLAD_APPLICATION_ID")
-            self.client_secret = secrets.get("VLAD_CLIENT_SECRET")
-            self.authority_url = secrets.get("authority_url")
+                self.application_id = secrets.get("VLAD_APPLICATION_ID")
+                self.client_secret = secrets.get("VLAD_CLIENT_SECRET")
+                self.authority_url = secrets.get("authority_url")
 
-        else:
-            self.otomoto_url = os.environ["otomoto_url"]
-            self.otomoto_client_id = os.environ["otomoto_client_id"]
-            self.otomoto_client_secret = os.environ["otomoto_client_secret"]
-            self.otomoto_username = os.environ["otomoto_username"]
-            self.otomoto_password = os.environ["otomoto_password"]
+            else:
+                self.otomoto_url = os.environ["otomoto_url"]
+                self.otomoto_client_id = os.environ["otomoto_client_id"]
+                self.otomoto_client_secret = os.environ["otomoto_client_secret"]
+                self.otomoto_username = os.environ["otomoto_username"]
+                self.otomoto_password = os.environ["otomoto_password"]
 
-            self.application_id = os.environ["VLAD_APPLICATION_ID"]
-            self.client_secret = os.environ["VLAD_CLIENT_SECRET"]
-            self.authority_url = os.environ["authority_url"]
+                self.application_id = os.environ["VLAD_APPLICATION_ID"]
+                self.client_secret = os.environ["VLAD_CLIENT_SECRET"]
+                self.authority_url = os.environ["authority_url"]
 
-        self.default_scope = ['https://graph.microsoft.com/.default']
-        self.base_url = "https://graph.microsoft.com/v1.0/"
-        self.endpoint = self.base_url + "users/andrzej.besarab@spacelpus.onmicrosoft.com/"
+            self.default_scope = ['https://graph.microsoft.com/.default']
+            self.base_url = "https://graph.microsoft.com/v1.0/"
+            self.endpoint = self.base_url + "users/andrzej.besarab@spacelpus.onmicrosoft.com/"
 
-        self.client = ConfidentialClientApplication(
-            client_id=self.application_id,
-            client_credential=self.client_secret,
-            authority=self.authority_url
-        )
-
-        self.access_token = None
+            self.client = None
+            self.access_token = None
 
     def get_otomoto_url(self) -> str:
         return self.otomoto_url
@@ -66,6 +74,11 @@ class AuthManager:
 
     def get_access_token_default_scopes(self) -> str:
         if not self.access_token:
+            self.client = ConfidentialClientApplication(
+                client_id=self.application_id,
+                client_credential=self.client_secret,
+                authority=self.authority_url
+            )
             token_result = self.client.acquire_token_silent(self.default_scope, account=None)
             # If the token is available in cache, save it to a variable
             if token_result:

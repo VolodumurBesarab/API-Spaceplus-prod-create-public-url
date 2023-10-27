@@ -12,8 +12,9 @@ from modules.onedrive_manager import OneDriveManager
 
 class OtomotoManager:
     def __init__(self, excel_file_name, sheet_name):
+        self.working_data_table = None
         self.df1 = None
-        self.first_126_values = None
+        # self.first_126_values = None
         self.file_name = excel_file_name
         self.sheet_name = sheet_name
         self.excel_handler = ExcelHandler()
@@ -111,7 +112,7 @@ class OtomotoManager:
                     self._create_basic_report(message=message)
                     # list_created_adverts_id.append((item.get("номер на складі"), created_advert_id))
                     # # Зберігаємо оновлений DataFrame у файл
-                    self.excel_handler.set_otomoto_id_by_storage_id(df=self.first_100_values,
+                    self.excel_handler.set_otomoto_id_by_storage_id(df=self.working_data_table,
                                                                     otomoto_id=created_advert_id,
                                                                     storage_id=item.get("номер на складі"))
                     pass
@@ -146,6 +147,12 @@ class OtomotoManager:
         # create product
         # read other atribbutes
         # edit atributes
+    def read_selected_rows_from_excel(self, file_path, rows_to_skip: int, rows_to_read):
+        if rows_to_skip > 0:
+            working_data_table = pd.read_excel(file_path, skiprows=(1, rows_to_skip), nrows=rows_to_read)
+        else:
+            working_data_table = pd.read_excel(file_path, nrows=rows_to_read)
+        return working_data_table
 
     def create_page(self):
         file_content = self.excel_handler.get_exel_file(self.file_name)
@@ -155,9 +162,12 @@ class OtomotoManager:
         file_path = self.excel_handler.get_file_path(file_name=self.file_name)
         self.df1 = pd.read_excel(file_path)
 
-        self.first_126_values = self.df1.head(126)
+        # self.first_126_values = self.df1.head(126)
+        self.working_data_table = self.read_selected_rows_from_excel(file_path=file_path,
+                                                                     rows_to_skip=0,
+                                                                     rows_to_read=125)
 
-        in_stock, out_of_stock, invalid_quantity = self.create_lists_of_produts(self.first_126_values)
+        in_stock, out_of_stock, invalid_quantity = self.create_lists_of_produts(self.working_data_table)
         list_check_need_to_edit, list_ready_to_create = self.create_list_need_to_create(in_stock)
         print("adverts to create:", len(list_ready_to_create))
 

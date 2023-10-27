@@ -6,8 +6,12 @@ from modules.auth_manager import AuthManager
 class OneDriveManager:
     def __init__(self):
         self.auth_manager = AuthManager()
+        self.access_token = self.auth_manager.get_access_token_default_scopes()
 
-    def upload_excel_to_onedrive(self, access_token, file_path, upload_url):
+    def upload_file_to_onedrive(self, file_path, upload_url):
+        if upload_url is None:
+            upload_url = self.auth_manager.get_endpoint() + "drive/items/root:/Holland/sklad.xlsx:/content"
+        access_token = self.access_token
         headers_octet_stream = {
             'Authorization': access_token,
             'Content-Type': 'application/octet-stream',

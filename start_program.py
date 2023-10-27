@@ -9,7 +9,7 @@ class StartProgram:
         self.auth_manager = AuthManager()
         self.excel_handler = ExcelHandler()
         self.onedrive_manager = OneDriveManager()
-        self.otomoto_manager = OtomotoManager(excel_file_name=r"Test_doc.xlsx", sheet_name="OtoMoto")
+        self.otomoto_manager = OtomotoManager(excel_file_name=r"sklad.xlsx", sheet_name="OtoMoto")
 
     def start(self):
         endpoint = self.auth_manager.get_endpoint()
@@ -37,9 +37,8 @@ class StartProgram:
 
         upload_url = endpoint + "drive/items/root:/sklad.xlsx:/content"
         excel_file_path = 'sklad.xlsx'
-        self.onedrive_manager.upload_excel_to_onedrive(access_token=access_token,
-                                                       file_path=excel_file_path,
-                                                       upload_url=upload_url)
+        self.onedrive_manager.upload_file_to_onedrive(file_path=excel_file_path,
+                                                      upload_url=upload_url)
 
 
         """

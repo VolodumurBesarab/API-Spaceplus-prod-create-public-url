@@ -15,7 +15,7 @@ class ExcelHandler:
 
         self.endpoint = self.auth_manager.get_endpoint()
         self.access_token = self.auth_manager.get_access_token_default_scopes()
-        self.one_drive_url = self.auth_manager.get_endpoint() + "drive/root/children"
+        self.one_drive_url = self.endpoint + "drive/root/children"
         self.headers = self.auth_manager.get_default_header(access_token=self.access_token)
 
     def read_excel(self, file_content, sheet_name):
@@ -51,6 +51,7 @@ class ExcelHandler:
     #     print("Excel файл успішно збережено!")
 
     def get_exel_file(self, name: str):
+        one_drive_url = self.endpoint + "drive/root:/Holland/"
         root_folder_onedrive = self.onedrive_manager.get_root_folder_json(one_drive_url=self.one_drive_url,
                                                                           headers=self.headers)
         exel_file = None

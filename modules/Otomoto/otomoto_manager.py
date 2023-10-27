@@ -7,6 +7,7 @@ from pandas import DataFrame
 
 from modules.Otomoto.otomoto_api import OtomotoApi
 from modules.excel_handler import ExcelHandler
+from modules.onedrive_manager import OneDriveManager
 
 
 class OtomotoManager:
@@ -17,6 +18,7 @@ class OtomotoManager:
         self.sheet_name = sheet_name
         self.excel_handler = ExcelHandler()
         self.otomoto_api = OtomotoApi()
+        self.one_drive_manager = OneDriveManager()
 
     def create_lists_of_produts(self, df1) -> tuple[list[DataFrame], list[DataFrame], list[DataFrame]]:
         in_stock = []
@@ -72,7 +74,7 @@ class OtomotoManager:
     def _create_basic_report(self, message: str):
         # Шлях до папки та файлу
         folder_path = "/tmp/Reports"
-        file_path = "/tmp/Reports/my_test_report.txt"
+        file_path = "/tmp/Reports/report.txt"
 
         # Перевірка і створення папки, якщо її немає
         if not os.path.exists(folder_path):
@@ -118,7 +120,9 @@ class OtomotoManager:
         # self._create_report(list_created_adverts_id=list_created_adverts_id,
         #                     list_of_errors=list_of_errors,
         #                     is_unexpected=False)
+        file_path = "/tmp/Reports/report.txt"
 
+        self.one_drive_manager.upload_file_to_onedrive(file_path=file_path)
         return list_created_adverts_id, list_of_errors
 
     def create_list_need_to_create(self, in_stock: list[DataFrame]) -> tuple[list[DataFrame], list[DataFrame]]:

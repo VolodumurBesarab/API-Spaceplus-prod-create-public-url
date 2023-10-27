@@ -84,12 +84,15 @@ class OtomotoManager:
         with open(file_path, "a") as file:
             file.write(message + "\n")
 
-
     def _post_adverts(self, list_ready_to_create: list[DataFrame]) -> tuple[list, list]:
         list_created_adverts_id = []
         list_of_errors = []
         adverts_dict = self._convert_adverts_to_dict(list_ready_to_create)
         for item in adverts_dict:
+            if (item.get("номер на складі") == 0 and item.get("title") == 0 and item.get(
+                    "description") == 0 and item.get("price") == 0 and item.get("new_used") == 0 and item.get(
+                    "manufacturer")):
+                return list_created_adverts_id, list_of_errors
             try:
                 created_advert_id = self.otomoto_api.create_otomoto_advert(product_id=item.get("номер на складі"),
                                                                            title=item.get("title"),
@@ -137,13 +140,11 @@ class OtomotoManager:
 
         return list_check_need_to_edit, list_ready_to_create
 
-
         # read article count in storage
         # read article id
         # create product
         # read other atribbutes
         # edit atributes
-
 
     def create_page(self):
         file_content = self.excel_handler.get_exel_file(self.file_name)

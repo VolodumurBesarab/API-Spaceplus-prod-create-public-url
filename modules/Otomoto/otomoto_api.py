@@ -185,12 +185,12 @@ class OtomotoApi:
     def create_otomoto_images_collection(self, photos_url_list: list[str]):
         url = self.base_url + "imageCollections"  # Замініть на правильний URL
 
-
-        image_data = {
-            "1": "https://i.imgur.com/x9c4rhA.jpeg",
-            "2": "https://i.imgur.com/pbUDT54.jpeg",
-            "3": "https://i.imgur.com/WVXzjrn.jpeg"
-        }
+        # example creation image data
+        # image_data = {
+        #     "1": "https://i.imgur.com/x9c4rhA.jpeg",
+        #     "2": "https://i.imgur.com/pbUDT54.jpeg",
+        #     "3": "https://i.imgur.com/WVXzjrn.jpeg"
+        # }
 
         image_data = {}
         counter = 1
@@ -218,9 +218,8 @@ class OtomotoApi:
     def create_otomoto_advert(self, product_id, title, description: str, price, new_used, manufacturer) -> str:
         if len(str(description)) < 30:
             return f"Error: {product_id}'s description must be more then 30 symbol"
-        if product_id == 0 or product_id == 2:
+        if product_id == 0 or product_id == 2 or product_id is None:
             return f"Error: can't create ads with ID {product_id}"
-
         parent_folder_id = self.one_drive_photo_manager.get_stock_photos_folder_id()
         folder_id = self.one_drive_photo_manager.find_folder_by_name(parent_folder_id=parent_folder_id, folder_name=str(product_id))
         path_to_save_photos = self.one_drive_photo_manager.download_files_from_folder(folder_id=folder_id, folder_name=str(product_id))

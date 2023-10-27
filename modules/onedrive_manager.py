@@ -8,9 +8,8 @@ class OneDriveManager:
         self.auth_manager = AuthManager()
         self.access_token = self.auth_manager.get_access_token_default_scopes()
 
-    def upload_file_to_onedrive(self, file_path, upload_url):
-        if upload_url is None:
-            upload_url = self.auth_manager.get_endpoint() + "drive/items/root:/Holland/sklad.xlsx:/content"
+    def upload_file_to_onedrive(self, file_path):
+        upload_url = self.auth_manager.get_endpoint() + "drive/items/root:/Holland/sklad.xlsx:/content"
         access_token = self.access_token
         headers_octet_stream = {
             'Authorization': access_token,

@@ -52,9 +52,3 @@ class S3LinkGenerator:
             return public_urls
         else:
             return None
-
-
-    """
-    SSL validation failed for https://prod-spaceplus-automation.s3.eu-central-1.amazonaws.com/PXL_20230816_062109406.jpg EOF occurred in violation of protocol (_ssl.c:2427)
-/tmp/Photos/30493
-    """

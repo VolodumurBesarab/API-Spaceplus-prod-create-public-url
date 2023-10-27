@@ -51,15 +51,15 @@ class ExcelHandler:
     #     print("Excel файл успішно збережено!")
 
     def get_exel_file(self, name: str):
-        one_drive_url = self.endpoint + "drive/root:/Holland/"
-        root_folder_onedrive = self.onedrive_manager.get_root_folder_json(one_drive_url=self.one_drive_url,
+        one_drive_url = self.endpoint + "drive/root:/Holland/" + name
+        exel_file = self.onedrive_manager.get_root_folder_json(one_drive_url=one_drive_url,
                                                                           headers=self.headers)
-        exel_file = None
+        # exel_file = None
         file_content = None
-        for file in root_folder_onedrive['value']:
-            if file['name'] == name:
-                exel_file = file
-                break
+        # for file in root_folder_onedrive['value']:
+        #     if file['name'] == name:
+        #         exel_file = file
+        #         break
             # rework this
             # else:
             #     print("Name of exel file not found")

@@ -16,8 +16,6 @@ class OtomotoApi:
         self.images_api = ImagesApi()
         self.one_drive_photo_manager = OneDrivePhotoManager()
 
-
-
     def get_token(self):
         if not self.access_token:
             otomoto_url = self.auth_manager.get_otomoto_url()
@@ -36,7 +34,8 @@ class OtomotoApi:
                 "password": otomoto_password
             }
 
-            response = requests.post(otomoto_url, data=start_data, headers=headers, auth=(otomoto_client_id, otomoto_client_secret))
+            response = requests.post(otomoto_url, data=start_data, headers=headers,
+                                     auth=(otomoto_client_id, otomoto_client_secret))
             if response.status_code == 200:
                 self.access_token = response.json().get("access_token")
                 print("New access token was acquired from OtoMoto")
@@ -120,9 +119,10 @@ class OtomotoApi:
         'visible_in_profile': '1',
     }
 
-    def _exel_info_dict_creator(self, product_id, title, description, price, new_used, manufacturer, photos_collection_id):
+    def _exel_info_dict_creator(self, product_id, title, description, price, new_used, manufacturer,
+                                photos_collection_id):
         if photos_collection_id is None:
-            photos_collection_id = "12" # do not add image
+            photos_collection_id = "12"  # do not add image
         if manufacturer is None or math.isnan(manufacturer):
             manufacturer = "oryginalny"
         exel_info_dict = {
@@ -132,7 +132,7 @@ class OtomotoApi:
             "price": price,
             "new_used": new_used,
             "manufacturer": manufacturer,
-            "photos_collection_id" : photos_collection_id
+            "photos_collection_id": photos_collection_id
         }
         return exel_info_dict
 
@@ -221,20 +221,19 @@ class OtomotoApi:
         if product_id == 0 or product_id == 2 or product_id is None:
             return f"Error: can't create ads with ID {product_id}"
         parent_folder_id = self.one_drive_photo_manager.get_stock_photos_folder_id()
-        folder_id = self.one_drive_photo_manager.find_folder_by_name(parent_folder_id=parent_folder_id, folder_name=str(product_id))
-        path_to_save_photos = self.one_drive_photo_manager.download_files_from_folder(folder_id=folder_id, folder_name=str(product_id))
+        folder_id = self.one_drive_photo_manager.find_folder_by_name(parent_folder_id=parent_folder_id,
+                                                                     folder_name=str(product_id))
+
+        path_to_save_photos = self.one_drive_photo_manager.download_files_from_folder(folder_id=folder_id,
+                                                                                      folder_name=str(product_id))
+
         print(path_to_save_photos)
         s3_link_generator = S3LinkGenerator()
         photos_url_list = s3_link_generator.generate_public_urls(path_to_save_photos=path_to_save_photos)
 
-
-        # photos_url_list = self.images_api.upload_image_to_imgur(storage_name=product_id)
-        # photos_url_list = ["https://upload.wikimedia.org/wikipedia/commons/6/64/Sprechender_Brief_--_2015_--_6008.jpg",
-        #                    "https://vinylrecords.com.ua/image/cache/catalog/12345/roger-waters-the-lockdown-sessions-vinyl.1280x1280-1000x1000.jpeg",
-        #                    "https://vinylrecords.com.ua/image/cache/catalog/123metallica/0602438945153_1_536_0_75-1000x1000.jpg"]
         if photos_url_list is None or photos_url_list == []:
-            return f"Error: can't find folder {product_id}"
-        # advert_id = None
+            return f"Error: can't find folder {product_id}, or folder is empty"
+
         photos_collection_id = self.create_otomoto_images_collection(photos_url_list=photos_url_list)
         exel_info_dict = self._exel_info_dict_creator(product_id=product_id,
                                                       title=title,
@@ -243,6 +242,7 @@ class OtomotoApi:
                                                       new_used=new_used,
                                                       manufacturer=manufacturer,
                                                       photos_collection_id=photos_collection_id)
+
         otomoto_data = self._data_creator(exel_info_dict=exel_info_dict)
         url = self._get_basic_url()
         access_token = self.get_token()
@@ -251,9 +251,7 @@ class OtomotoApi:
 
         if response.status_code == 201:
             advert_id = response.json().get("id")
-            print(f"Advert successfully posted with ID: {advert_id}")
-            return str(advert_id)
+            return str(f"Advert successfully posted with ID: {advert_id}")
         else:
             error = ("Error:", response.status_code, response.text)
             return str(error)
-

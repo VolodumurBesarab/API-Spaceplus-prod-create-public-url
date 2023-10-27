@@ -13,7 +13,7 @@ from modules.onedrive_manager import OneDriveManager
 class OtomotoManager:
     def __init__(self, excel_file_name, sheet_name):
         self.df1 = None
-        self.first_100_values = None
+        self.first_126_values = None
         self.file_name = excel_file_name
         self.sheet_name = sheet_name
         self.excel_handler = ExcelHandler()
@@ -111,7 +111,9 @@ class OtomotoManager:
                     self._create_basic_report(message=message)
                     # list_created_adverts_id.append((item.get("номер на складі"), created_advert_id))
                     # # Зберігаємо оновлений DataFrame у файл
-                    # self.excel_handler.set_otomoto_id_by_storage_id(df=self.first_100_values, otomoto_id=created_advert_id, storage_id=item.get("номер на складі"))
+                    self.excel_handler.set_otomoto_id_by_storage_id(df=self.first_100_values,
+                                                                    otomoto_id=created_advert_id,
+                                                                    storage_id=item.get("номер на складі"))
                     pass
 
             except Exception as e:
@@ -153,9 +155,9 @@ class OtomotoManager:
         file_path = self.excel_handler.get_file_path(file_name=self.file_name)
         self.df1 = pd.read_excel(file_path)
 
-        self.first_100_values = self.df1.head(100)
+        self.first_126_values = self.df1.head(126)
 
-        in_stock, out_of_stock, invalid_quantity = self.create_lists_of_produts(self.first_100_values)
+        in_stock, out_of_stock, invalid_quantity = self.create_lists_of_produts(self.first_126_values)
         list_check_need_to_edit, list_ready_to_create = self.create_list_need_to_create(in_stock)
         print("adverts to create:", len(list_ready_to_create))
 

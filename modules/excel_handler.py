@@ -53,7 +53,7 @@ class ExcelHandler:
     def get_exel_file(self, name: str):
         one_drive_url = self.endpoint + "drive/root:/Holland/" + name
         exel_file = self.onedrive_manager.get_root_folder_json(one_drive_url=one_drive_url,
-                                                                          headers=self.headers)
+                                                               headers=self.headers)
         # exel_file = None
         file_content = None
         # for file in root_folder_onedrive['value']:
@@ -103,7 +103,10 @@ class ExcelHandler:
                 # Вставляємо нове otomoto_id у відповідне поле
                 df.loc[df['номер на складі'] == storage_id, 'ID otomoto'] = str(otomoto_id)
         # Зберігаємо оновлений DataFrame у файл
-        df.to_excel('New tested file.xlsx', index=False)
+        # df.to_excel('New tested file.xlsx', index=False)
+        file_path = "/tmp/New tested file.xlsx"
+        df.to_excel(file_path, index=False, sheet_name="Otomoto")
+        self.onedrive_manager.upload_file_to_onedrive(file_path=file_path)
         # Повертаємо оновлений DataFrame
         return df
 

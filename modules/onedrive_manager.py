@@ -23,11 +23,10 @@ class OneDriveManager:
             media_content = upload.read()
 
         response = requests.put(url=upload_url, headers=headers_octet_stream, data=media_content)
-        print(response.status_code)
-        if response.status_code == 201:
+        if response.status_code == 201 or response.status_code == 200:
             print("Файл успішно завантажено на OneDrive!")
         else:
-            print(f"Сталася помилка при завантаженні файлу. {response.text}")
+            print(f"Сталася помилка при завантаженні файлу на OneDrive!. {response.text}")
         return response
 
     def get_root_folder_json(self, one_drive_url, headers):

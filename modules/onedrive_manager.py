@@ -1,3 +1,5 @@
+import os
+
 import requests
 
 from modules.auth_manager import AuthManager
@@ -9,7 +11,8 @@ class OneDriveManager:
         self.access_token = self.auth_manager.get_access_token_default_scopes()
 
     def upload_file_to_onedrive(self, file_path):
-        upload_url = self.auth_manager.get_endpoint() + "drive/items/root:/Holland/sklad.xlsx:/content"
+        file_name = os.path.basename(file_path)
+        upload_url = self.auth_manager.get_endpoint() + f"drive/items/root:/Holland/{file_name}:/content"
         access_token = self.access_token
         headers_octet_stream = {
             'Authorization': access_token,

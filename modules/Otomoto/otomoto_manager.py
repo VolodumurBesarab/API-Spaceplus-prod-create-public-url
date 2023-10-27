@@ -124,7 +124,6 @@ class OtomotoManager:
         #                     list_of_errors=list_of_errors,
         #                     is_unexpected=False)
         file_path = "/tmp/Reports/report.txt"
-
         self.one_drive_manager.upload_file_to_onedrive(file_path=file_path)
         return list_created_adverts_id, list_of_errors
 

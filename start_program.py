@@ -35,10 +35,9 @@ class StartProgram:
         print(df2)
         self.excel_handler.save_excel(df1, df2, output_excel_filename=excel_file_name)
 
-        upload_url = endpoint + "drive/items/root:/sklad.xlsx:/content"
+        # upload_url = endpoint + "drive/items/root:/sklad.xlsx:/content"
         excel_file_path = 'sklad.xlsx'
-        self.onedrive_manager.upload_file_to_onedrive(file_path=excel_file_path,
-                                                      upload_url=upload_url)
+        self.onedrive_manager.upload_file_to_onedrive(file_path=excel_file_path)
 
 
         """

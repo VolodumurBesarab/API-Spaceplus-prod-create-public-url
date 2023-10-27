@@ -50,6 +50,7 @@ class AuthManager:
 
             self.client = None
             self.access_token = None
+            self.__initialized = True
 
     def get_otomoto_url(self) -> str:
         return self.otomoto_url

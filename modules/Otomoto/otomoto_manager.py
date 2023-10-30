@@ -75,7 +75,7 @@ class OtomotoManager:
     def _create_basic_report(self, message: str):
         # Шлях до папки та файлу
         folder_path = "/tmp/Reports"
-        file_path = f"/tmp/Reports/report{datetime.today()}.txt"
+        file_path = f"/tmp/Reports/report {datetime.today()}.txt"
 
         # Перевірка і створення папки, якщо її немає
         if not os.path.exists(folder_path):
@@ -120,7 +120,7 @@ class OtomotoManager:
                 #                     is_unexpected=True)
                 print(f"Помилка при створенні оголошення {item}: {e}")
 
-        file_path = "/tmp/Reports/report.txt"
+        file_path = f"/tmp/Reports/report {datetime.today()}.txt"
         self.one_drive_manager.upload_file_to_onedrive(file_path=file_path)
         file_path = "/tmp/New tested file.xlsx"
         self.one_drive_manager.upload_file_to_onedrive(file_path=file_path)
@@ -155,6 +155,7 @@ class OtomotoManager:
         file_content = self.excel_handler.get_exel_file(self.file_name)
         # create file
         self.excel_handler.create_file_on_data(file_content=file_content, file_name=self.file_name)
+        self.excel_handler.create_file_on_data(file_content=file_content, file_name="New tested file.xlsx")
 
         file_path = self.excel_handler.get_file_path(file_name=self.file_name)
         self.df1 = pd.read_excel(file_path)
@@ -162,12 +163,12 @@ class OtomotoManager:
         # self.first_126_values = self.df1.head(126)
         self.working_data_table = self.read_selected_rows_from_excel(file_path=file_path,
                                                                      rows_to_skip=0,
-                                                                     rows_to_read=125)
+                                                                     rows_to_read=600)
 
         in_stock, out_of_stock, invalid_quantity = self.create_lists_of_produts(self.working_data_table)
         list_check_need_to_edit, list_ready_to_create = self.create_list_need_to_create(in_stock)
-        print("adverts to create:", len(list_ready_to_create))
-
+        print(f"adverts to create:", len(list_ready_to_create))
+        self._create_basic_report(message=f"adverts to create: {len(list_ready_to_create)}")
         self._post_adverts(list_ready_to_create)
 
         print("Page created")

@@ -110,12 +110,9 @@ class OtomotoManager:
                     nubmer_in_stock = item.get("номер на складі")
                     message = f"{nubmer_in_stock}, Advert successfully posted with ID: {created_advert_id}"
                     self._create_basic_report(message=message)
-                    # list_created_adverts_id.append((item.get("номер на складі"), created_advert_id))
-                    # # Зберігаємо оновлений DataFrame у файл
                     self.excel_handler.set_otomoto_id_by_storage_id(df=self.working_data_table,
                                                                     otomoto_id=created_advert_id,
                                                                     storage_id=item.get("номер на складі"))
-                    pass
 
             except Exception as e:
                 # self._create_report(list_created_adverts_id=list_created_adverts_id,
@@ -123,11 +120,11 @@ class OtomotoManager:
                 #                     is_unexpected=True)
                 print(f"Помилка при створенні оголошення {item}: {e}")
 
-        # self._create_report(list_created_adverts_id=list_created_adverts_id,
-        #                     list_of_errors=list_of_errors,
-        #                     is_unexpected=False)
         file_path = "/tmp/Reports/report.txt"
         self.one_drive_manager.upload_file_to_onedrive(file_path=file_path)
+        file_path = "/tmp/New tested file.xlsx"
+        self.one_drive_manager.upload_file_to_onedrive(file_path=file_path)
+
         return list_created_adverts_id, list_of_errors
 
     def create_list_need_to_create(self, in_stock: list[DataFrame]) -> tuple[list[DataFrame], list[DataFrame]]:

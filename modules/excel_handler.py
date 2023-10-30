@@ -106,7 +106,6 @@ class ExcelHandler:
         # df.to_excel('New tested file.xlsx', index=False)
         file_path = "/tmp/New tested file.xlsx"
         df.to_excel(file_path, index=False, sheet_name="Otomoto")
-        self.onedrive_manager.upload_file_to_onedrive(file_path=file_path)
         # Повертаємо оновлений DataFrame
         return df
 

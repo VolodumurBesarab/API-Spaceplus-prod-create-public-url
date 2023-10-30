@@ -72,10 +72,10 @@ class OtomotoManager:
         except Exception as e:
             print(f"Сталася помилка при створенні звіту: {e}")
 
-    def _create_basic_report(self, message: str):
+    def _create_basic_report(self, message: str) -> str:
         # Шлях до папки та файлу
         folder_path = "/tmp/Reports"
-        file_path = f"/tmp/Reports/report {datetime.today()}.txt"
+        file_path = f"/tmp/Reports/report {datetime.now().day}.txt"
 
         # Перевірка і створення папки, якщо її немає
         if not os.path.exists(folder_path):
@@ -84,6 +84,7 @@ class OtomotoManager:
         # Відкриття файлу та запис повідомлення у новий рядок
         with open(file_path, "a") as file:
             file.write(message + "\n")
+        return file_path
 
     def _post_adverts(self, list_ready_to_create: list[DataFrame]) -> tuple[list, list]:
         list_created_adverts_id = []
@@ -120,8 +121,13 @@ class OtomotoManager:
                 #                     is_unexpected=True)
                 print(f"Помилка при створенні оголошення {item}: {e}")
 
-        file_path = f"/tmp/Reports/report {datetime.today()}.txt"
-        self.one_drive_manager.upload_file_to_onedrive(file_path=file_path)
+        # file_path = f"/tmp/Reports/report {datetime.today()}.txt"
+        reports_file_name = self._create_basic_report(f"Program processed success")
+        file_path = f"/tmp/Reports/{reports_file_name}"
+        try:
+            self.one_drive_manager.upload_file_to_onedrive(file_path=file_path)
+        except Exception as e:
+            print(e)
         file_path = "/tmp/New tested file.xlsx"
         self.one_drive_manager.upload_file_to_onedrive(file_path=file_path)
 
@@ -162,7 +168,7 @@ class OtomotoManager:
 
         # self.first_126_values = self.df1.head(126)
         self.working_data_table = self.read_selected_rows_from_excel(file_path=file_path,
-                                                                     rows_to_skip=0,
+                                                                     rows_to_skip=100,
                                                                      rows_to_read=600)
 
         in_stock, out_of_stock, invalid_quantity = self.create_lists_of_produts(self.working_data_table)

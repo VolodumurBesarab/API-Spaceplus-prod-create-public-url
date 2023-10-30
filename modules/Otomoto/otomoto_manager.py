@@ -123,9 +123,8 @@ class OtomotoManager:
 
         # file_path = f"/tmp/Reports/report {datetime.today()}.txt"
         reports_file_name = self._create_basic_report(f"Program processed success")
-        file_path = f"/tmp/Reports/{reports_file_name}"
         try:
-            self.one_drive_manager.upload_file_to_onedrive(file_path=file_path)
+            self.one_drive_manager.upload_file_to_onedrive(file_path=reports_file_name)
         except Exception as e:
             print(e)
         file_path = "/tmp/New tested file.xlsx"
@@ -163,13 +162,13 @@ class OtomotoManager:
         self.excel_handler.create_file_on_data(file_content=file_content, file_name=self.file_name)
         self.excel_handler.create_file_on_data(file_content=file_content, file_name="New tested file.xlsx")
 
-        file_path = self.excel_handler.get_file_path(file_name=self.file_name)
-        self.df1 = pd.read_excel(file_path)
+        main_excel_file_path = self.excel_handler.get_file_path(file_name=self.file_name)
+        self.df1 = pd.read_excel(main_excel_file_path)
 
         # self.first_126_values = self.df1.head(126)
-        self.working_data_table = self.read_selected_rows_from_excel(file_path=file_path,
+        self.working_data_table = self.read_selected_rows_from_excel(file_path=main_excel_file_path,
                                                                      rows_to_skip=100,
-                                                                     rows_to_read=600)
+                                                                     rows_to_read=300)
 
         in_stock, out_of_stock, invalid_quantity = self.create_lists_of_produts(self.working_data_table)
         list_check_need_to_edit, list_ready_to_create = self.create_list_need_to_create(in_stock)

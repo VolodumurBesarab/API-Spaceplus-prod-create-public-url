@@ -120,6 +120,7 @@ class OtomotoManager:
                 #                     list_of_errors=list_of_errors,
                 #                     is_unexpected=True)
                 print(f"Помилка при створенні оголошення {item}: {e}")
+                self._create_basic_report(f"Unexpected error {item} : {e}")
 
         # file_path = f"/tmp/Reports/report {datetime.today()}.txt"
         reports_file_name = self._create_basic_report(f"Program processed success")
@@ -167,8 +168,8 @@ class OtomotoManager:
 
         # self.first_126_values = self.df1.head(126)
         self.working_data_table = self.read_selected_rows_from_excel(file_path=main_excel_file_path,
-                                                                     rows_to_skip=300,
-                                                                     rows_to_read=1000)
+                                                                     rows_to_skip=1003,
+                                                                     rows_to_read=497)
 
         in_stock, out_of_stock, invalid_quantity = self.create_lists_of_produts(self.working_data_table)
         list_check_need_to_edit, list_ready_to_create = self.create_list_need_to_create(in_stock)

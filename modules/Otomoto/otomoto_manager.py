@@ -167,13 +167,14 @@ class OtomotoManager:
 
         # self.first_126_values = self.df1.head(126)
         self.working_data_table = self.read_selected_rows_from_excel(file_path=main_excel_file_path,
-                                                                     rows_to_skip=100,
-                                                                     rows_to_read=300)
+                                                                     rows_to_skip=300,
+                                                                     rows_to_read=1000)
 
         in_stock, out_of_stock, invalid_quantity = self.create_lists_of_produts(self.working_data_table)
         list_check_need_to_edit, list_ready_to_create = self.create_list_need_to_create(in_stock)
         print(f"adverts to create:", len(list_ready_to_create))
         self._create_basic_report(message=f"adverts to create: {len(list_ready_to_create)}")
+        self._create_basic_report(message=str(list_ready_to_create))
         self._post_adverts(list_ready_to_create)
 
         print("Page created")

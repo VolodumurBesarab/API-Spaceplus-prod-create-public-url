@@ -90,7 +90,7 @@ class ExcelHandler:
     def create_lines_list(self):
         pass
 
-    def set_otomoto_id_by_storage_id(self, df:  DataFrame, otomoto_id, storage_id):
+    def set_otomoto_id_by_storage_id(self, df:  DataFrame, otomoto_id, storage_id, excel_file_path):
         row = df[df['номер на складі'] == storage_id]
 
         # Перевіряємо, чи такий рядок був знайдений
@@ -104,7 +104,6 @@ class ExcelHandler:
                 df.loc[df['номер на складі'] == storage_id, 'ID otomoto'] = str(otomoto_id)
         # Зберігаємо оновлений DataFrame у файл
         # df.to_excel('New tested file.xlsx', index=False)
-        file_path = "/tmp/New tested file.xlsx"
         df.to_excel(file_path, index=False, sheet_name="Otomoto")
         # Повертаємо оновлений DataFrame
         return df

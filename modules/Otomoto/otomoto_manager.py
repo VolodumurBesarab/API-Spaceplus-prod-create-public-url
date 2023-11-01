@@ -118,14 +118,34 @@ class OtomotoManager:
                     nubmer_in_stock = item.get("номер на складі")
                     message = f"{nubmer_in_stock}, Advert successfully posted with ID: {created_advert_id}"
                     self._create_basic_report(message=message)
+                    test_excel_file_path = "/tmp/New tested file.xlsx"
                     self.excel_handler.set_otomoto_id_by_storage_id(df=self.working_data_table,
                                                                     otomoto_id=created_advert_id,
-                                                                    storage_id=item.get("номер на складі"))
+                                                                    storage_id=item.get("номер на складі"),
+                                                                    excel_file_path=test_excel_file_path)
+
+                    main_excel_file_path = "/tmp/Main excel file.xlsx"
+                    self.excel_handler.set_otomoto_id_by_storage_id(df=self.df1,
+                                                                    otomoto_id=created_advert_id,
+                                                                    storage_id=item.get("номер на складі"),
+                                                                    excel_file_path=main_excel_file_path)
+
 
             except Exception as e:
                 print(f"Помилка при створенні оголошення {item}: {e}")
                 self._create_basic_report(f"Unexpected error {item} : {e}")
 
+        try:
+            main_excel_file_path = "/tmp/Main excel file.xlsx"
+
+            self.one_drive_manager.upload_file_to_onedrive(file_path=main_excel_file_path,
+                                                           rows_to_read=ROWS_TO_READ,
+                                                           rows_to_skip=ROWS_TO_SKIP)
+            self.s3_link_generator.upload_file_to_s3(file_path=main_excel_file_path,
+                                                     rows_to_read=ROWS_TO_READ,
+                                                     rows_to_skip=ROWS_TO_SKIP)
+        except Exception as e:
+            print(e)
         try:
             reports_file_name = REPORT_FILE_PATH
             self.one_drive_manager.upload_file_to_onedrive(file_path=reports_file_name,
@@ -136,6 +156,7 @@ class OtomotoManager:
                                                      rows_to_skip=ROWS_TO_SKIP)
         except Exception as e:
             print(e)
+
         try:
             file_path = "/tmp/New tested file.xlsx"
             self.one_drive_manager.upload_file_to_onedrive(file_path=file_path,
@@ -217,25 +238,3 @@ class OtomotoManager:
         self.s3_link_generator.upload_file_to_s3(file_path=test_file_path,
                                                  rows_to_read=None,
                                                  rows_to_skip=None)
-
-
-        # # Об'єднати всі DataFrames зі списку list_ready_to_create
-        # combined_df = pd.concat(list_ready_to_create)
-        #
-        # # Зберегти комбінований DataFrame в новий ексель файл
-        # excel_file_path_test = '/tmp/new_excel_file.xlsx'
-        # combined_df.to_excel(excel_file_path_test, index=False)
-        #
-        # file_path = "/tmp/my_test_file.txt"
-        # with open(file_path, 'w') as text_file:
-        #     for index, row in combined_df.iterrows():
-        #         text_file.write(row['номер на складі'] + '\n')
-        #
-        # self.s3_link_generator.upload_file_to_s3(file_path=file_path,
-        #                                          rows_to_read=1,
-        #                                          rows_to_skip=1)
-        # self.s3_link_generator.upload_file_to_s3(file_path=excel_file_path_test,
-        #                                          rows_to_read=1,
-        #                                          rows_to_skip=1)
-
-        pass

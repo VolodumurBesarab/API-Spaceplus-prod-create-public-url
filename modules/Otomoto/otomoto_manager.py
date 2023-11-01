@@ -5,13 +5,14 @@ from datetime import date
 import pandas as pd
 from pandas import DataFrame
 
+from modules.Images.s3_link_generator import S3LinkGenerator
 from modules.Otomoto.otomoto_api import OtomotoApi
 from modules.excel_handler import ExcelHandler
 from modules.onedrive_manager import OneDriveManager
 
 ROWS_TO_SKIP = 2600
 ROWS_TO_READ = 300
-DATETIME = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+DATETIME = datetime.now().strftime("%d-%m-%Y %H-%M-%S")
 REPORT_FILE_PATH = f"/tmp/Reports/report {DATETIME}.txt"
 
 
@@ -25,6 +26,7 @@ class OtomotoManager:
         self.excel_handler = ExcelHandler()
         self.otomoto_api = OtomotoApi()
         self.one_drive_manager = OneDriveManager()
+        self.s3_link_generator = S3LinkGenerator()
 
     def create_lists_of_produts(self, df1) -> tuple[list[DataFrame], list[DataFrame], list[DataFrame]]:
         in_stock = []
@@ -121,9 +123,6 @@ class OtomotoManager:
                                                                     storage_id=item.get("номер на складі"))
 
             except Exception as e:
-                # self._create_report(list_created_adverts_id=list_created_adverts_id,
-                #                     list_of_errors=list_of_errors,
-                #                     is_unexpected=True)
                 print(f"Помилка при створенні оголошення {item}: {e}")
                 self._create_basic_report(f"Unexpected error {item} : {e}")
 
@@ -132,6 +131,9 @@ class OtomotoManager:
             self.one_drive_manager.upload_file_to_onedrive(file_path=reports_file_name,
                                                            rows_to_read=ROWS_TO_READ,
                                                            rows_to_skip=ROWS_TO_SKIP)
+            self.s3_link_generator.upload_file_to_s3(file_path=reports_file_name,
+                                                     rows_to_read=ROWS_TO_READ,
+                                                     rows_to_skip=ROWS_TO_SKIP)
         except Exception as e:
             print(e)
         try:
@@ -139,6 +141,9 @@ class OtomotoManager:
             self.one_drive_manager.upload_file_to_onedrive(file_path=file_path,
                                                            rows_to_read=ROWS_TO_READ,
                                                            rows_to_skip=ROWS_TO_SKIP)
+            self.s3_link_generator.upload_file_to_s3(file_path=file_path,
+                                                     rows_to_read=ROWS_TO_READ,
+                                                     rows_to_skip=ROWS_TO_SKIP)
         except Exception as e:
             print(e)
 

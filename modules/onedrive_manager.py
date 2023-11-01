@@ -14,18 +14,23 @@ class OneDriveManager:
         if rows_to_skip is None and rows_to_read is None:
             file_name = os.path.basename(file_path)
         else:
-            file_name = f"{os.path.basename(file_path)} {rows_to_skip}-{rows_to_read} "
+            file_name = f"{os.path.basename(file_path)} {rows_to_skip}-{rows_to_skip+rows_to_read}"
+            print(file_name)
         upload_url = self.auth_manager.get_endpoint() + f"drive/items/root:/Holland/{file_name}:/content"
         access_token = self.access_token
         headers_octet_stream = {
             'Authorization': access_token,
             'Content-Type': 'application/octet-stream',
         }
+        # headers_json = {
+        #     'Authorization': access_token,
+        #     'Content-Type': 'application/json',  # Змінено Content-Type
+        # }
 
-        with open(file_path, 'rb') as upload:
-            media_content = upload.read()
+        # with open(file_path, 'rb') as upload:
+        #     media_content = upload.read()
 
-        response = requests.put(url=upload_url, headers=headers_octet_stream, data=media_content)
+        response = requests.put(url=upload_url, headers=headers_octet_stream, data=headers_octet_stream)
         if response.status_code == 201 or response.status_code == 200:
             print("Файл успішно завантажено на OneDrive!")
         else:

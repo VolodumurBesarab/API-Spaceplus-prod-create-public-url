@@ -3,8 +3,8 @@ import os
 import boto3
 
 
-s3_bucket_name = "prod-spaceplus-automation"
-
+S3_BUCKET_NAME = "prod-spaceplus-automation"
+S3 = boto3.client("s3")
 
 class S3LinkGenerator:
     def _get_files_in_folder(self, folder_path):
@@ -16,6 +16,11 @@ class S3LinkGenerator:
         sorted_file_list = sorted(file_list, key=lambda x: os.path.basename(x))
         return sorted_file_list #, file_names
 
+    def upload_file_to_s3(self, file_path, rows_to_skip, rows_to_read):
+        file_name = f"{os.path.basename(file_path)} {rows_to_skip}-{rows_to_skip + rows_to_read}"
+        S3.upload_file(file_path, S3_BUCKET_NAME, file_name)
+        pass
+
     def _get_list_and_upload_photos(self, path_to_save_photos: str):
         # s3_object_key = None
         file_list = self._get_files_in_folder(path_to_save_photos)
@@ -23,9 +28,9 @@ class S3LinkGenerator:
 
         for file_path in file_list:
             file_name = os.path.basename(file_path)
-            s3.upload_file(file_path, s3_bucket_name, file_name)
+            s3.upload_file(file_path, S3_BUCKET_NAME, file_name)
             try:
-                s3.head_object(Bucket=s3_bucket_name, Key=file_name)
+                s3.head_object(Bucket=S3_BUCKET_NAME, Key=file_name)
                 print(f"Файл {file_name} успішно завантажено на S3.")
             except Exception as e:
                 print(f"Помилка: {e}. Файл {file_name} не був знайдений на S3.")
@@ -37,15 +42,15 @@ class S3LinkGenerator:
 
     def generate_public_urls(self, path_to_save_photos: str):
         file_list = self._get_list_and_upload_photos(path_to_save_photos=path_to_save_photos)
-        s3 = boto3.client("s3")
+
 
         public_urls = []
 
         for file_path in file_list:
             s3_object_key = os.path.basename(file_path)
-            url = s3.generate_presigned_url(
+            url = S3.generate_presigned_url(
                 ClientMethod="get_object",
-                Params={"Bucket": s3_bucket_name, "Key": s3_object_key},
+                Params={"Bucket": S3_BUCKET_NAME, "Key": s3_object_key},
                 ExpiresIn=3600  # Тут ви можете вказати термін дії посилання в секундах (наприклад, 1 година)
             )
             public_urls.append(url)

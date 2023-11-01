@@ -18,6 +18,7 @@ REPORT_FILE_PATH = f"/tmp/Reports/report {DATETIME}.txt"
 
 class OtomotoManager:
     def __init__(self, excel_file_name, sheet_name):
+        self.df2 = None
         self.working_data_table = None
         self.df1 = None
         # self.first_126_values = None
@@ -124,28 +125,28 @@ class OtomotoManager:
                                                                     storage_id=item.get("номер на складі"),
                                                                     excel_file_path=test_excel_file_path)
 
-                    # main_excel_file_path = "/tmp/Main excel file.xlsx"
-                    # self.excel_handler.set_otomoto_id_by_storage_id(df=self.df1,
-                    #                                                 otomoto_id=created_advert_id,
-                    #                                                 storage_id=item.get("номер на складі"),
-                    #                                                 excel_file_path=main_excel_file_path)
+                    main_excel_file_path = "/tmp/Main excel file.xlsx"
+                    self.excel_handler.set_otomoto_id_by_storage_id(df=self.df2,
+                                                                    otomoto_id=created_advert_id,
+                                                                    storage_id=item.get("номер на складі"),
+                                                                    excel_file_path=main_excel_file_path)
 
 
             except Exception as e:
                 print(f"Помилка при створенні оголошення {item}: {e}")
                 self._create_basic_report(f"Unexpected error {item} : {e}")
 
-        # try:
-        #     main_excel_file_path = "/tmp/Main excel file.xlsx"
-        #
-        #     self.one_drive_manager.upload_file_to_onedrive(file_path=main_excel_file_path,
-        #                                                    rows_to_read=ROWS_TO_READ,
-        #                                                    rows_to_skip=ROWS_TO_SKIP)
-        #     self.s3_link_generator.upload_file_to_s3(file_path=main_excel_file_path,
-        #                                              rows_to_read=ROWS_TO_READ,
-        #                                              rows_to_skip=ROWS_TO_SKIP)
-        # except Exception as e:
-        #     print(e)
+        try:
+            main_excel_file_path = "/tmp/Main excel file.xlsx"
+
+            self.one_drive_manager.upload_file_to_onedrive(file_path=main_excel_file_path,
+                                                           rows_to_read=ROWS_TO_READ,
+                                                           rows_to_skip=ROWS_TO_SKIP)
+            self.s3_link_generator.upload_file_to_s3(file_path=main_excel_file_path,
+                                                     rows_to_read=ROWS_TO_READ,
+                                                     rows_to_skip=ROWS_TO_SKIP)
+        except Exception as e:
+            print(e)
 
         try:
             reports_file_name = REPORT_FILE_PATH
@@ -197,9 +198,8 @@ class OtomotoManager:
         self.excel_handler.create_file_on_data(file_content=file_content, file_name="New tested file.xlsx")
 
         main_excel_file_path = self.excel_handler.get_file_path(file_name=self.file_name)
-        self.df1 = pd.read_excel(main_excel_file_path)
-
-        # self.first_126_values = self.df1.head(126)
+        self.df1 = pd.read_excel(main_excel_file_path) # file to read
+        self.df2 = pd.read_excel(main_excel_file_path) # file to write
         self.working_data_table = self.read_selected_rows_from_excel(file_path=main_excel_file_path,
                                                                      rows_to_skip=ROWS_TO_SKIP,
                                                                      rows_to_read=ROWS_TO_READ)

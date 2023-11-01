@@ -207,7 +207,6 @@ class OtomotoApi:
         # Перевірка статусу відповіді
         if response.status_code == 201:
             response_data = response.json()
-            print("response_data:", response_data)
             print("Колекцію зображень успішно створено.", "ID колекції:", response_data.get("id"))
             collection_id = response_data.get("id")
         else:

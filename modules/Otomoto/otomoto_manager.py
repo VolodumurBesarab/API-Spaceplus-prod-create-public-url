@@ -9,6 +9,11 @@ from modules.Otomoto.otomoto_api import OtomotoApi
 from modules.excel_handler import ExcelHandler
 from modules.onedrive_manager import OneDriveManager
 
+ROWS_TO_SKIP = 2600
+ROWS_TO_READ = 300
+DATETIME = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+REPORT_FILE_PATH = f"/tmp/Reports/report {DATETIME}.txt"
+
 
 class OtomotoManager:
     def __init__(self, excel_file_name, sheet_name):
@@ -75,7 +80,7 @@ class OtomotoManager:
     def _create_basic_report(self, message: str) -> str:
         # Шлях до папки та файлу
         folder_path = "/tmp/Reports"
-        file_path = f"/tmp/Reports/report {datetime.now().day}.txt"
+        file_path = REPORT_FILE_PATH
 
         # Перевірка і створення папки, якщо її немає
         if not os.path.exists(folder_path):
@@ -122,16 +127,20 @@ class OtomotoManager:
                 print(f"Помилка при створенні оголошення {item}: {e}")
                 self._create_basic_report(f"Unexpected error {item} : {e}")
 
-        # try:
-        #     reports_file_name = self._create_basic_report(f"Program processed success")
-        #     self.one_drive_manager.upload_file_to_onedrive(file_path=reports_file_name)
-        # except Exception as e:
-        #     print(e)
-        # try:
-        #     file_path = "/tmp/New tested file.xlsx"
-        #     self.one_drive_manager.upload_file_to_onedrive(file_path=file_path)
-        # except Exception as e:
-        #     print(e)
+        try:
+            reports_file_name = REPORT_FILE_PATH
+            self.one_drive_manager.upload_file_to_onedrive(file_path=reports_file_name,
+                                                           rows_to_read=ROWS_TO_READ,
+                                                           rows_to_skip=ROWS_TO_SKIP)
+        except Exception as e:
+            print(e)
+        try:
+            file_path = "/tmp/New tested file.xlsx"
+            self.one_drive_manager.upload_file_to_onedrive(file_path=file_path,
+                                                           rows_to_read=ROWS_TO_READ,
+                                                           rows_to_skip=ROWS_TO_SKIP)
+        except Exception as e:
+            print(e)
 
         return list_created_adverts_id, list_of_errors
 
@@ -170,8 +179,8 @@ class OtomotoManager:
 
         # self.first_126_values = self.df1.head(126)
         self.working_data_table = self.read_selected_rows_from_excel(file_path=main_excel_file_path,
-                                                                     rows_to_skip=2236,
-                                                                     rows_to_read=1)
+                                                                     rows_to_skip=ROWS_TO_SKIP,
+                                                                     rows_to_read=ROWS_TO_READ)
 
         in_stock, out_of_stock, invalid_quantity = self.create_lists_of_produts(self.working_data_table)
         list_check_need_to_edit, list_ready_to_create = self.create_list_need_to_create(in_stock)

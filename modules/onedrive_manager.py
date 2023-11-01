@@ -10,8 +10,11 @@ class OneDriveManager:
         self.auth_manager = AuthManager()
         self.access_token = self.auth_manager.get_access_token_default_scopes()
 
-    def upload_file_to_onedrive(self, file_path):
-        file_name = os.path.basename(file_path)
+    def upload_file_to_onedrive(self, file_path, rows_to_skip, rows_to_read):
+        if rows_to_skip is None and rows_to_read is None:
+            file_name = os.path.basename(file_path)
+        else:
+            file_name = f"{os.path.basename(file_path)} {rows_to_skip}-{rows_to_read} "
         upload_url = self.auth_manager.get_endpoint() + f"drive/items/root:/Holland/{file_name}:/content"
         access_token = self.access_token
         headers_octet_stream = {

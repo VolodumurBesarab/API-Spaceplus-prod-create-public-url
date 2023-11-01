@@ -10,8 +10,8 @@ from modules.Otomoto.otomoto_api import OtomotoApi
 from modules.excel_handler import ExcelHandler
 from modules.onedrive_manager import OneDriveManager
 
-ROWS_TO_SKIP = 2600
-ROWS_TO_READ = 300
+ROWS_TO_SKIP = 2236
+ROWS_TO_READ = 1
 DATETIME = datetime.now().strftime("%d-%m-%Y %H-%M-%S")
 REPORT_FILE_PATH = f"/tmp/Reports/report {DATETIME}.txt"
 
@@ -161,11 +161,6 @@ class OtomotoManager:
 
         return list_check_need_to_edit, list_ready_to_create
 
-        # read article count in storage
-        # read article id
-        # create product
-        # read other atribbutes
-        # edit atributes
     def read_selected_rows_from_excel(self, file_path, rows_to_skip: int, rows_to_read):
         if rows_to_skip > 0:
             working_data_table = pd.read_excel(file_path, skiprows=range(1, rows_to_skip), nrows=rows_to_read)
@@ -196,3 +191,26 @@ class OtomotoManager:
 
         print("Page created")
         return self
+
+    def rename_me(self):
+        file_content = self.excel_handler.get_exel_file(self.file_name)
+        # create file
+        self.excel_handler.create_file_on_data(file_content=file_content, file_name=self.file_name)
+        main_excel_file_path = self.excel_handler.get_file_path(file_name=self.file_name)
+        self.working_data_table = self.read_selected_rows_from_excel(file_path=main_excel_file_path,
+                                                                     rows_to_skip=3050,
+                                                                     rows_to_read=3300)
+        in_stock, out_of_stock, invalid_quantity = self.create_lists_of_produts(self.working_data_table)
+        list_check_need_to_edit, list_ready_to_create = self.create_list_need_to_create(in_stock)
+
+        combined_data = pd.concat([df["номер на складі"] for df in in_stock])
+        chunks = [combined_data[i:i + 25] for i in range(0, len(combined_data), 25)]
+
+        delimiter = "*------------------------------------------------------------------*\n"
+
+        # Записати вміст у текстовий файл
+        with open("/tmp/my_file.txt", "w") as file:
+            for chunk in chunks:
+                file.write(chunk.to_string(header=False, index=False) + "\n" + delimiter)
+        self.s3_link_generator.upload_file_to_s3(file_path="/tmp/my_file.txt", rows_to_skip=None, rows_to_read=None)
+        pass

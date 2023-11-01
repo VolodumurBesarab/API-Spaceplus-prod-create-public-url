@@ -104,7 +104,7 @@ class ExcelHandler:
                 df.loc[df['номер на складі'] == storage_id, 'ID otomoto'] = str(otomoto_id)
         # Зберігаємо оновлений DataFrame у файл
         # df.to_excel('New tested file.xlsx', index=False)
-        df.to_excel(file_path, index=False, sheet_name="Otomoto")
+        df.to_excel(excel_file_path, index=False, sheet_name="Otomoto")
         # Повертаємо оновлений DataFrame
         return df
 

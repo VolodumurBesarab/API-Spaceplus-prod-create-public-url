@@ -124,28 +124,29 @@ class OtomotoManager:
                                                                     storage_id=item.get("номер на складі"),
                                                                     excel_file_path=test_excel_file_path)
 
-                    main_excel_file_path = "/tmp/Main excel file.xlsx"
-                    self.excel_handler.set_otomoto_id_by_storage_id(df=self.df1,
-                                                                    otomoto_id=created_advert_id,
-                                                                    storage_id=item.get("номер на складі"),
-                                                                    excel_file_path=main_excel_file_path)
+                    # main_excel_file_path = "/tmp/Main excel file.xlsx"
+                    # self.excel_handler.set_otomoto_id_by_storage_id(df=self.df1,
+                    #                                                 otomoto_id=created_advert_id,
+                    #                                                 storage_id=item.get("номер на складі"),
+                    #                                                 excel_file_path=main_excel_file_path)
 
 
             except Exception as e:
                 print(f"Помилка при створенні оголошення {item}: {e}")
                 self._create_basic_report(f"Unexpected error {item} : {e}")
 
-        try:
-            main_excel_file_path = "/tmp/Main excel file.xlsx"
+        # try:
+        #     main_excel_file_path = "/tmp/Main excel file.xlsx"
+        #
+        #     self.one_drive_manager.upload_file_to_onedrive(file_path=main_excel_file_path,
+        #                                                    rows_to_read=ROWS_TO_READ,
+        #                                                    rows_to_skip=ROWS_TO_SKIP)
+        #     self.s3_link_generator.upload_file_to_s3(file_path=main_excel_file_path,
+        #                                              rows_to_read=ROWS_TO_READ,
+        #                                              rows_to_skip=ROWS_TO_SKIP)
+        # except Exception as e:
+        #     print(e)
 
-            self.one_drive_manager.upload_file_to_onedrive(file_path=main_excel_file_path,
-                                                           rows_to_read=ROWS_TO_READ,
-                                                           rows_to_skip=ROWS_TO_SKIP)
-            self.s3_link_generator.upload_file_to_s3(file_path=main_excel_file_path,
-                                                     rows_to_read=ROWS_TO_READ,
-                                                     rows_to_skip=ROWS_TO_SKIP)
-        except Exception as e:
-            print(e)
         try:
             reports_file_name = REPORT_FILE_PATH
             self.one_drive_manager.upload_file_to_onedrive(file_path=reports_file_name,

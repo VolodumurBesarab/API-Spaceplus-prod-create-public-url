@@ -17,7 +17,14 @@ class S3LinkGenerator:
         return sorted_file_list #, file_names
 
     def upload_file_to_s3(self, file_path, rows_to_skip, rows_to_read):
-        file_name = f"{os.path.basename(file_path)} {rows_to_skip}-{rows_to_skip + rows_to_read}"
+        # file_name = f"{os.path.basename(file_path)} {rows_to_skip}-{rows_to_skip + rows_to_read}"
+        # S3.upload_file(file_path, S3_BUCKET_NAME, file_name)
+        if rows_to_skip is None and rows_to_read is None:
+            file_name = os.path.basename(file_path)
+        else:
+            base_name, extension = os.path.splitext(file_path)
+            new_file_path = f"{base_name} {rows_to_skip}-{rows_to_skip + rows_to_read}{extension}"
+            file_name = os.path.basename(new_file_path)
         S3.upload_file(file_path, S3_BUCKET_NAME, file_name)
         pass
 

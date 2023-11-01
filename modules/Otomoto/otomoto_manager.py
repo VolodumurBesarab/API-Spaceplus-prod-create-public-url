@@ -192,25 +192,50 @@ class OtomotoManager:
         print("Page created")
         return self
 
-    def rename_me(self):
+    def create_list_to_create_in_s3(self):
         file_content = self.excel_handler.get_exel_file(self.file_name)
         # create file
         self.excel_handler.create_file_on_data(file_content=file_content, file_name=self.file_name)
         main_excel_file_path = self.excel_handler.get_file_path(file_name=self.file_name)
         self.working_data_table = self.read_selected_rows_from_excel(file_path=main_excel_file_path,
-                                                                     rows_to_skip=3050,
-                                                                     rows_to_read=3300)
+                                                                     rows_to_skip=0,
+                                                                     rows_to_read=6400)
         in_stock, out_of_stock, invalid_quantity = self.create_lists_of_produts(self.working_data_table)
         list_check_need_to_edit, list_ready_to_create = self.create_list_need_to_create(in_stock)
 
-        combined_data = pd.concat([df["номер на складі"] for df in in_stock])
-        chunks = [combined_data[i:i + 25] for i in range(0, len(combined_data), 25)]
+        dict_ready_to_create = self._convert_adverts_to_dict(list_ready_to_create=list_ready_to_create)
+        test_file_path = "/tmp/my_test_file.txt"
+        count = 0
+        for item in dict_ready_to_create:
+            print(item.get('номер на складі'))
+            with open(test_file_path, "a") as file:
+                file.write(str(item.get('номер на складі')) + "\n")
+            count += 1
+            if count % 25 == 0:
+                with open(test_file_path, "a") as file:
+                    file.write("-" * 50 + "\n")
+        self.s3_link_generator.upload_file_to_s3(file_path=test_file_path,
+                                                 rows_to_read=None,
+                                                 rows_to_skip=None)
 
-        delimiter = "*------------------------------------------------------------------*\n"
 
-        # Записати вміст у текстовий файл
-        with open("/tmp/my_file.txt", "w") as file:
-            for chunk in chunks:
-                file.write(chunk.to_string(header=False, index=False) + "\n" + delimiter)
-        self.s3_link_generator.upload_file_to_s3(file_path="/tmp/my_file.txt", rows_to_skip=None, rows_to_read=None)
+        # # Об'єднати всі DataFrames зі списку list_ready_to_create
+        # combined_df = pd.concat(list_ready_to_create)
+        #
+        # # Зберегти комбінований DataFrame в новий ексель файл
+        # excel_file_path_test = '/tmp/new_excel_file.xlsx'
+        # combined_df.to_excel(excel_file_path_test, index=False)
+        #
+        # file_path = "/tmp/my_test_file.txt"
+        # with open(file_path, 'w') as text_file:
+        #     for index, row in combined_df.iterrows():
+        #         text_file.write(row['номер на складі'] + '\n')
+        #
+        # self.s3_link_generator.upload_file_to_s3(file_path=file_path,
+        #                                          rows_to_read=1,
+        #                                          rows_to_skip=1)
+        # self.s3_link_generator.upload_file_to_s3(file_path=excel_file_path_test,
+        #                                          rows_to_read=1,
+        #                                          rows_to_skip=1)
+
         pass

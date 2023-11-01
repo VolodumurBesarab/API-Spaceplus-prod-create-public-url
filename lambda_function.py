@@ -8,7 +8,7 @@ def lambda_handler(event, context):
     otomoto_manager = OtomotoManager(excel_file_name=r"Otomoto.xlsx", sheet_name="OtoMoto")
     otomoto_manager.create_page()
     try:
-        otomoto_manager.rename_me()
+        otomoto_manager.create_list_to_create_in_s3()
     except Exception as e:
         print(e)
     return {

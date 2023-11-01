@@ -12,16 +12,17 @@ class S3LinkGenerator:
         for root, dirs, files in os.walk(folder_path):
             for file in files:
                 file_list.append(os.path.join(root, file))
-        file_names = [os.path.basename(file_path) for file_path in file_list]
-
-        return file_list, file_names
+        # file_names = [os.path.basename(file_path) for file_path in file_list]
+        sorted_file_list = sorted(file_list, key=lambda x: os.path.basename(x))
+        return sorted_file_list #, file_names
 
     def _get_list_and_upload_photos(self, path_to_save_photos: str):
         # s3_object_key = None
-        file_list, file_names = self._get_files_in_folder(path_to_save_photos)
+        file_list = self._get_files_in_folder(path_to_save_photos)
         s3 = boto3.client("s3")
 
-        for file_path, file_name in zip(file_list, file_names):
+        for file_path in file_list:
+            file_name = os.path.basename(file_path)
             s3.upload_file(file_path, s3_bucket_name, file_name)
             try:
                 s3.head_object(Bucket=s3_bucket_name, Key=file_name)

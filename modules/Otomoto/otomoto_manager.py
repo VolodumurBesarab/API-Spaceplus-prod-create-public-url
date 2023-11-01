@@ -122,14 +122,16 @@ class OtomotoManager:
                 print(f"Помилка при створенні оголошення {item}: {e}")
                 self._create_basic_report(f"Unexpected error {item} : {e}")
 
-        # file_path = f"/tmp/Reports/report {datetime.today()}.txt"
-        reports_file_name = self._create_basic_report(f"Program processed success")
-        try:
-            self.one_drive_manager.upload_file_to_onedrive(file_path=reports_file_name)
-        except Exception as e:
-            print(e)
-        file_path = "/tmp/New tested file.xlsx"
-        self.one_drive_manager.upload_file_to_onedrive(file_path=file_path)
+        # try:
+        #     reports_file_name = self._create_basic_report(f"Program processed success")
+        #     self.one_drive_manager.upload_file_to_onedrive(file_path=reports_file_name)
+        # except Exception as e:
+        #     print(e)
+        # try:
+        #     file_path = "/tmp/New tested file.xlsx"
+        #     self.one_drive_manager.upload_file_to_onedrive(file_path=file_path)
+        # except Exception as e:
+        #     print(e)
 
         return list_created_adverts_id, list_of_errors
 
@@ -168,8 +170,8 @@ class OtomotoManager:
 
         # self.first_126_values = self.df1.head(126)
         self.working_data_table = self.read_selected_rows_from_excel(file_path=main_excel_file_path,
-                                                                     rows_to_skip=1003,
-                                                                     rows_to_read=497)
+                                                                     rows_to_skip=2236,
+                                                                     rows_to_read=1)
 
         in_stock, out_of_stock, invalid_quantity = self.create_lists_of_produts(self.working_data_table)
         list_check_need_to_edit, list_ready_to_create = self.create_list_need_to_create(in_stock)

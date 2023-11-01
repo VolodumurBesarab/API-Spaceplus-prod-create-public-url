@@ -28,6 +28,9 @@ class OneDriveManager:
             'Content-Type': 'application/octet-stream',
         }
 
+        with open(file_path, 'rb') as upload:
+            media_content = upload.read()
+
         response = requests.put(url=upload_url, headers=headers_octet_stream, data=headers_octet_stream)
         if response.status_code == 201 or response.status_code == 200:
             print("Файл успішно завантажено на OneDrive!")

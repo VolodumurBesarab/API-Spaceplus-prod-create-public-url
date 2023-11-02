@@ -119,34 +119,34 @@ class OtomotoManager:
                     nubmer_in_stock = item.get("номер на складі")
                     message = f"{nubmer_in_stock}, Advert successfully posted with ID: {created_advert_id}"
                     self._create_basic_report(message=message)
-                    test_excel_file_path = "/tmp/New tested file.xlsx"
+                    excel_file_name = 'New tested file.xlsx'
                     self.excel_handler.set_otomoto_id_by_storage_id(df=self.working_data_table,
                                                                     otomoto_id=created_advert_id,
                                                                     storage_id=item.get("номер на складі"),
-                                                                    excel_file_path=test_excel_file_path)
+                                                                    excel_file_name=excel_file_name)
 
-                    main_excel_file_path = "/tmp/Main excel file.xlsx"
-                    self.excel_handler.set_otomoto_id_by_storage_id(df=self.df2,
-                                                                    otomoto_id=created_advert_id,
-                                                                    storage_id=item.get("номер на складі"),
-                                                                    excel_file_path=main_excel_file_path)
+                    # main_excel_file_path = "/tmp/Main excel file.xlsx"
+                    # self.excel_handler.set_otomoto_id_by_storage_id(df=self.df2,
+                    #                                                 otomoto_id=created_advert_id,
+                    #                                                 storage_id=item.get("номер на складі"),
+                    #                                                 excel_file_path=main_excel_file_path)
 
 
             except Exception as e:
                 print(f"Помилка при створенні оголошення {item}: {e}")
                 self._create_basic_report(f"Unexpected error {item} : {e}")
 
-        try:
-            main_excel_file_path = "/tmp/Main excel file.xlsx"
-
-            self.one_drive_manager.upload_file_to_onedrive(file_path=main_excel_file_path,
-                                                           rows_to_read=ROWS_TO_READ,
-                                                           rows_to_skip=ROWS_TO_SKIP)
-            self.s3_link_generator.upload_file_to_s3(file_path=main_excel_file_path,
-                                                     rows_to_read=ROWS_TO_READ,
-                                                     rows_to_skip=ROWS_TO_SKIP)
-        except Exception as e:
-            print(e)
+        # try:
+        #     main_excel_file_path = "/tmp/Main excel file.xlsx"
+        #
+        #     self.one_drive_manager.upload_file_to_onedrive(file_path=main_excel_file_path,
+        #                                                    rows_to_read=ROWS_TO_READ,
+        #                                                    rows_to_skip=ROWS_TO_SKIP)
+        #     self.s3_link_generator.upload_file_to_s3(file_path=main_excel_file_path,
+        #                                              rows_to_read=ROWS_TO_READ,
+        #                                              rows_to_skip=ROWS_TO_SKIP)
+        # except Exception as e:
+        #     print(e)
 
         try:
             reports_file_name = REPORT_FILE_PATH

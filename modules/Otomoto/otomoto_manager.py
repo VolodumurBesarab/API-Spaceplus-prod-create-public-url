@@ -14,7 +14,7 @@ ROWS_TO_SKIP = 2236
 ROWS_TO_READ = 1
 DATETIME = datetime.now().strftime("%d-%m-%Y %H-%M-%S")
 REPORT_FILE_PATH = f"/tmp/Reports/report {DATETIME}.txt"
-EXCEL_FILE_PATH = f"/tmp/New tested file {ROWS_TO_READ+1}-{ROWS_TO_READ+ROWS_TO_SKIP}.xlsx"
+EXCEL_FILE_PATH = f"/tmp/New tested file {ROWS_TO_SKIP+1}-{ROWS_TO_READ+ROWS_TO_SKIP}.xlsx"
 
 
 class OtomotoManager:
@@ -120,11 +120,11 @@ class OtomotoManager:
                     nubmer_in_stock = item.get("номер на складі")
                     message = f"{nubmer_in_stock}, Advert successfully posted with ID: {created_advert_id}"
                     self._create_basic_report(message=message)
-                    excel_file_name = os.path.basename(EXCEL_FILE_PATH) #'New tested file.xlsx'
+                    excel_file_path = EXCEL_FILE_PATH #'New tested file.xlsx'
                     self.excel_handler.set_otomoto_id_by_storage_id(df=self.working_data_table,
                                                                     otomoto_id=created_advert_id,
                                                                     storage_id=item.get("номер на складі"),
-                                                                    excel_file_name=excel_file_name)
+                                                                    excel_file_path=excel_file_path)
 
                     # main_excel_file_path = "/tmp/Main excel file.xlsx"
                     # self.excel_handler.set_otomoto_id_by_storage_id(df=self.df2,

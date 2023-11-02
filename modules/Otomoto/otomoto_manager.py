@@ -14,6 +14,7 @@ ROWS_TO_SKIP = 2236
 ROWS_TO_READ = 1
 DATETIME = datetime.now().strftime("%d-%m-%Y %H-%M-%S")
 REPORT_FILE_PATH = f"/tmp/Reports/report {DATETIME}.txt"
+EXCEL_FILE_PATH = f"/tmp/New tested file {ROWS_TO_READ+1}-{ROWS_TO_READ+ROWS_TO_SKIP}.xlsx"
 
 
 class OtomotoManager:
@@ -119,7 +120,7 @@ class OtomotoManager:
                     nubmer_in_stock = item.get("номер на складі")
                     message = f"{nubmer_in_stock}, Advert successfully posted with ID: {created_advert_id}"
                     self._create_basic_report(message=message)
-                    excel_file_name = 'New tested file.xlsx'
+                    excel_file_name = os.path.basename(EXCEL_FILE_PATH) #'New tested file.xlsx'
                     self.excel_handler.set_otomoto_id_by_storage_id(df=self.working_data_table,
                                                                     otomoto_id=created_advert_id,
                                                                     storage_id=item.get("номер на складі"),
@@ -160,7 +161,7 @@ class OtomotoManager:
             print(e)
 
         try:
-            file_path = "/tmp/New tested file.xlsx"
+            file_path = EXCEL_FILE_PATH
             self.one_drive_manager.upload_file_to_onedrive(file_path=file_path,
                                                            rows_to_read=ROWS_TO_READ,
                                                            rows_to_skip=ROWS_TO_SKIP)
@@ -195,11 +196,11 @@ class OtomotoManager:
         file_content = self.excel_handler.get_exel_file(self.file_name)
         # create file
         self.excel_handler.create_file_on_data(file_content=file_content, file_name=self.file_name)
-        self.excel_handler.create_file_on_data(file_content=file_content, file_name="New tested file.xlsx")
+        # self.excel_handler.create_file_on_data(file_content=file_content, file_name="New tested file.xlsx")
 
         main_excel_file_path = self.excel_handler.get_file_path(file_name=self.file_name)
-        self.df1 = pd.read_excel(main_excel_file_path) # file to read
-        self.df2 = pd.read_excel(main_excel_file_path) # file to write
+        # self.df1 = pd.read_excel(main_excel_file_path) # file to read
+        # self.df2 = pd.read_excel(main_excel_file_path) # file to write
         self.working_data_table = self.read_selected_rows_from_excel(file_path=main_excel_file_path,
                                                                      rows_to_skip=ROWS_TO_SKIP,
                                                                      rows_to_read=ROWS_TO_READ)

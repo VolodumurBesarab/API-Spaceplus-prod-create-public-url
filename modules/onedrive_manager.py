@@ -15,7 +15,7 @@ class OneDriveManager:
             file_name = os.path.basename(file_path)
         else:
             base_name, extension = os.path.splitext(file_path)
-            new_file_path = f"{base_name} {rows_to_skip}-{rows_to_skip + rows_to_read}{extension}"
+            new_file_path = f"{base_name} {rows_to_skip + 1}-{rows_to_skip + rows_to_read}{extension}"
             file_name = os.path.basename(new_file_path)
 
         upload_url = self.auth_manager.get_endpoint() + f"drive/items/root:/Holland/Reports/{file_name}:/content"

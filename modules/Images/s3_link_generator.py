@@ -23,7 +23,7 @@ class S3LinkGenerator:
             file_name = os.path.basename(file_path)
         else:
             base_name, extension = os.path.splitext(file_path)
-            new_file_path = f"{base_name} {rows_to_skip}-{rows_to_skip + rows_to_read}{extension}"
+            new_file_path = f"{base_name} {rows_to_skip + 1}-{rows_to_skip + rows_to_read}{extension}"
             file_name = os.path.basename(new_file_path)
         S3.upload_file(file_path, S3_BUCKET_NAME, file_name)
         pass

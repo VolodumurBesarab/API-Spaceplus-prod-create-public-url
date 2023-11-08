@@ -102,10 +102,14 @@ class ExcelHandler:
         df.to_excel(excel_file_path, index=False, sheet_name="Otomoto")
         return df
 
-    def update_excel_from_text(self, file_path, excel_path):
-        df = pd.read_excel(excel_path)
+    def update_excel_from_success_report(self, current_day=None):
+        download_successfully_url = self.endpoint + f"drive/items/root:/Holland/Reports/{current_day}/successfully.txt:/children"
+        self.onedrive_manager.download_file_to_tmp(download_url=download_successfully_url, file_name="successfully.txt")
+        download_excel_url = self.endpoint + f"drive/items/root:/Holland/Volodumurs_tested_file.xlsx:/children"
+        self.onedrive_manager.download_file_to_tmp(download_url=download_excel_url, file_name="Data otomoto.xlsx")
+        df = pd.read_excel("/tmp/Data otomoto.xlsx")
 
-        with open(file_path, "r") as success_file:
+        with open("/tmp/successfully.txt", "r") as success_file:
             lines = success_file.readlines()
 
         otomoto_ids = {}
@@ -136,5 +140,6 @@ class ExcelHandler:
             else:
                 print(f"Count of same id is {len(matching_rows)} ")
                 print(matching_rows)
-
-        df.to_excel("Final_exel_file.xlsx", index=False, sheet_name="Otomoto")
+        new_excel_file = "/tmp/Final_exel_file.xlsx"
+        df.to_excel(new_excel_file, index=False, sheet_name="OtoMoto")
+        self.onedrive_manager.upload_file_to_onedrive(file_path=new_excel_file)

@@ -15,7 +15,7 @@ ROWS_TO_READ = 1
 DATETIME = datetime.now().strftime("%d-%m-%Y %H-%M-%S")
 REPORT_FILE_PATH = f"/tmp/Reports/report {DATETIME}.txt"
 # EXCEL_FILE_PATH = f"/tmp/New tested file {ROWS_TO_SKIP+1}-{ROWS_TO_READ+ROWS_TO_SKIP}.xlsx"
-EXCEL_FILE_PATH = f"/tmp/Excel report.xlsx"
+EXCEL_FILE_PATH = f"/tmp/Excel working data table.xlsx"
 
 
 class OtomotoManager:
@@ -174,7 +174,7 @@ class OtomotoManager:
         file_content = self.excel_handler.get_exel_file(self.file_name)
         # create file
         self.excel_handler.create_file_on_data(file_content=file_content, file_name=self.file_name)
-        self.excel_handler.create_file_on_data(file_content=file_content, file_name="Excel report.xlsx")
+        self.excel_handler.create_file_on_data(file_content=file_content, file_name="Excel working data table.xlsx")
 
         main_excel_file_path = self.excel_handler.get_file_path(file_name=self.file_name)
         self.df1 = pd.read_excel(main_excel_file_path) # file to read
@@ -221,14 +221,11 @@ class OtomotoManager:
                                                  rows_to_skip=None)
 
     def create_reports_from_base(self):
-        # Шлях до папки з текстовими документами
         folder_path = "/tmp/text_reports"
 
-        # Ініціалізуємо два пусті списки для рядків із "successfully" і "Error"
         successfully_lines = []
         error_lines = []
 
-        # Переглядаємо файли в папці
         for filename in os.listdir(folder_path):
             if filename.endswith(".txt"):
                 file_path = os.path.join(folder_path, filename)
@@ -243,8 +240,13 @@ class OtomotoManager:
                             error_lines.append(line)
 
         # Записуємо результати у відповідні файли
-        with open("/tmp/successfully.txt", 'w') as success_file:
+        successfully_file_path = "/tmp/successfully.txt"
+        with open(successfully_file_path, 'w') as success_file:
             success_file.writelines(successfully_lines)
 
-        with open("/tmp/errors.txt", 'w') as error_file:
+        errors_file_path = "/tmp/errors.txt"
+        with open(errors_file_path, 'w') as error_file:
             error_file.writelines(error_lines)
+
+        self.one_drive_manager.upload_file_to_onedrive(file_path=successfully_file_path)
+        self.one_drive_manager.upload_file_to_onedrive(file_path=errors_file_path)

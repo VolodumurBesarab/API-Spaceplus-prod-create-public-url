@@ -14,7 +14,7 @@ class OneDriveManager:
         self.access_token = self.auth_manager.get_access_token_default_scopes()
         self.endpoint = self.auth_manager.get_endpoint()
 
-    def upload_file_to_onedrive(self, file_path, rows_to_skip, rows_to_read, current_day=DATETIME):
+    def upload_file_to_onedrive(self, file_path, rows_to_skip=None, rows_to_read = None, current_day=DATETIME):
         if rows_to_skip is None and rows_to_read is None:
             uploading_file_name = os.path.basename(file_path)
         else:

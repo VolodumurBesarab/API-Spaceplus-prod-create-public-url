@@ -56,7 +56,7 @@ class OneDrivePhotoManager:
                 file_path = os.path.join(path_to_save_photos, name)
                 with open(file_path, 'wb') as file:
                     file.write(response.content)
-                print(f"Завантажено: {name}")
+                # print(f"Завантажено: {name}")
             else:
                 print(f"Не вдалося завантажити: {name}. Status code = {response.status_code}")
         return path_to_save_photos

@@ -14,7 +14,8 @@ ROWS_TO_SKIP = 2236
 ROWS_TO_READ = 1
 DATETIME = datetime.now().strftime("%d-%m-%Y %H-%M-%S")
 REPORT_FILE_PATH = f"/tmp/Reports/report {DATETIME}.txt"
-EXCEL_FILE_PATH = f"/tmp/New tested file {ROWS_TO_SKIP+1}-{ROWS_TO_READ+ROWS_TO_SKIP}.xlsx"
+# EXCEL_FILE_PATH = f"/tmp/New tested file {ROWS_TO_SKIP+1}-{ROWS_TO_READ+ROWS_TO_SKIP}.xlsx"
+EXCEL_FILE_PATH = f"/tmp/Excel report.xlsx"
 
 
 class OtomotoManager:
@@ -35,12 +36,12 @@ class OtomotoManager:
         out_of_stock = []
         invalid_quantity = []
         for index, row in df1.iterrows():
-            if row['наявність на складі'] < 0:
-                invalid_quantity.append(row)
-            elif row['наявність на складі'] == 0:
+            if row['наявність на складі'] == 0:
                 out_of_stock.append(row)
-            elif row['наявність на складі'] > 0:
+            elif row['наявність на складі'] == 1:
                 in_stock.append(row)
+            else:
+                invalid_quantity.append(row)
         return in_stock, out_of_stock, invalid_quantity
 
     def _convert_adverts_to_dict(self, list_ready_to_create: list[DataFrame]) -> list[dict]:
@@ -95,15 +96,13 @@ class OtomotoManager:
             file.write(message + "\n")
         return file_path
 
-    def _post_adverts(self, list_ready_to_create: list[DataFrame]) -> tuple[list, list]:
-        list_created_adverts_id = []
-        list_of_errors = []
+    def _post_adverts(self, list_ready_to_create: list[DataFrame]):
         adverts_dict = self._convert_adverts_to_dict(list_ready_to_create)
         for item in adverts_dict:
             if (item.get("номер на складі") == 0 and item.get("title") == 0 and item.get(
                     "description") == 0 and item.get("price") == 0 and item.get("new_used") == 0 and item.get(
                     "manufacturer")):
-                return list_created_adverts_id, list_of_errors
+                return
             try:
                 created_advert_id = self.otomoto_api.create_otomoto_advert(product_id=item.get("номер на складі"),
                                                                            title=item.get("title"),
@@ -126,28 +125,9 @@ class OtomotoManager:
                                                                     storage_id=item.get("номер на складі"),
                                                                     excel_file_path=excel_file_path)
 
-                    # main_excel_file_path = "/tmp/Main excel file.xlsx"
-                    # self.excel_handler.set_otomoto_id_by_storage_id(df=self.df2,
-                    #                                                 otomoto_id=created_advert_id,
-                    #                                                 storage_id=item.get("номер на складі"),
-                    #                                                 excel_file_path=main_excel_file_path)
-
-
             except Exception as e:
-                print(f"Помилка при створенні оголошення {item}: {e}")
+                print(f"Error with create advert {item}: {e}")
                 self._create_basic_report(f"Unexpected error {item} : {e}")
-
-        # try:
-        #     main_excel_file_path = "/tmp/Main excel file.xlsx"
-        #
-        #     self.one_drive_manager.upload_file_to_onedrive(file_path=main_excel_file_path,
-        #                                                    rows_to_read=ROWS_TO_READ,
-        #                                                    rows_to_skip=ROWS_TO_SKIP)
-        #     self.s3_link_generator.upload_file_to_s3(file_path=main_excel_file_path,
-        #                                              rows_to_read=ROWS_TO_READ,
-        #                                              rows_to_skip=ROWS_TO_SKIP)
-        # except Exception as e:
-        #     print(e)
 
         try:
             reports_file_name = REPORT_FILE_PATH
@@ -171,17 +151,15 @@ class OtomotoManager:
         except Exception as e:
             print(e)
 
-        return list_created_adverts_id, list_of_errors
-
     def create_list_need_to_create(self, in_stock: list[DataFrame]) -> tuple[list[DataFrame], list[DataFrame]]:
         list_check_need_to_edit = []  # Ліст для товарів з непорожнім полем "ID otomoto"
         list_ready_to_create = []  # Ліст для товарів з порожнім полем "ID otomoto"
 
         for item in in_stock:
-            if not pd.isna(item['ID otomoto']):  # Перевірка, чи поле "ID otomoto" не порожнє
-                list_check_need_to_edit.append(item)
-            else:
+            if pd.isna(item['ID otomoto']) or item['ID otomoto'] == 0:
                 list_ready_to_create.append(item)
+            else:
+                list_check_need_to_edit.append(item)
 
         return list_check_need_to_edit, list_ready_to_create
 
@@ -196,7 +174,7 @@ class OtomotoManager:
         file_content = self.excel_handler.get_exel_file(self.file_name)
         # create file
         self.excel_handler.create_file_on_data(file_content=file_content, file_name=self.file_name)
-        self.excel_handler.create_file_on_data(file_content=file_content, file_name="New tested file.xlsx")
+        self.excel_handler.create_file_on_data(file_content=file_content, file_name="Excel report.xlsx")
 
         main_excel_file_path = self.excel_handler.get_file_path(file_name=self.file_name)
         self.df1 = pd.read_excel(main_excel_file_path) # file to read
@@ -220,6 +198,7 @@ class OtomotoManager:
         # create file
         self.excel_handler.create_file_on_data(file_content=file_content, file_name=self.file_name)
         main_excel_file_path = self.excel_handler.get_file_path(file_name=self.file_name)
+        # need rework without lines as df = pd.read_excel
         self.working_data_table = self.read_selected_rows_from_excel(file_path=main_excel_file_path,
                                                                      rows_to_skip=0,
                                                                      rows_to_read=6400)
@@ -240,3 +219,34 @@ class OtomotoManager:
         self.s3_link_generator.upload_file_to_s3(file_path=test_file_path,
                                                  rows_to_read=None,
                                                  rows_to_skip=None)
+
+    def create_reports_from_base(self):
+        # Шлях до папки з текстовими документами
+        folder_path = os.path.join(os.getcwd(), "tmp/text_reports")
+
+        # Ініціалізуємо два пусті списки для рядків із "successfully" і "Error"
+        successfully_lines = []
+        error_lines = []
+
+        # Переглядаємо файли в папці
+        for filename in os.listdir(folder_path):
+            if filename.endswith(".txt"):
+                file_path = os.path.join(folder_path, filename)
+                with open(file_path, 'r') as file:
+                    lines = file.readlines()
+                    for line in lines:
+                        if "successfully" in line:
+                            successfully_lines.append(line)
+                        elif "Error:" in line:
+                            error_lines.append(line)
+                        elif "Unexpected" in line:
+                            error_lines.append(line)
+
+        # Записуємо результати у відповідні файли
+        with open("successfully.txt", 'w') as success_file:
+            success_file.writelines(successfully_lines)
+
+        with open("errors.txt", 'w') as error_file:
+            error_file.writelines(error_lines)
+
+        print("Програма завершила роботу. Рядки знайдені та збережені в файлах.")

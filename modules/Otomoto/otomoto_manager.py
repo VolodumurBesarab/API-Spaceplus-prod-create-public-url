@@ -222,7 +222,7 @@ class OtomotoManager:
 
     def create_reports_from_base(self):
         # Шлях до папки з текстовими документами
-        folder_path = os.path.join(os.getcwd(), "tmp/text_reports")
+        folder_path = "/tmp/text_reports"
 
         # Ініціалізуємо два пусті списки для рядків із "successfully" і "Error"
         successfully_lines = []
@@ -243,10 +243,8 @@ class OtomotoManager:
                             error_lines.append(line)
 
         # Записуємо результати у відповідні файли
-        with open("successfully.txt", 'w') as success_file:
+        with open("/tmp/successfully.txt", 'w') as success_file:
             success_file.writelines(successfully_lines)
 
-        with open("errors.txt", 'w') as error_file:
+        with open("/tmp/errors.txt", 'w') as error_file:
             error_file.writelines(error_lines)
-
-        print("Програма завершила роботу. Рядки знайдені та збережені в файлах.")

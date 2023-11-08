@@ -48,7 +48,7 @@ class OneDriveManager:
                                 headers=self.auth_manager.get_default_header(access_token=self.access_token))
 
         if response.status_code == 200:
-            with open(f"/tmp/{file_name}", "wb") as f:
+            with open(f"/tmp/text_reports/{file_name}", "wb") as f:
                 f.write(response.content)
         else:
             print(f"Помилка при завантаженні файлу {file_name}: {response.status_code} - {response.text}")
@@ -65,7 +65,7 @@ class OneDriveManager:
                     file_name = file.get("name")
                     file_id = file.get("id")
                     download_url = self.endpoint + f"drive/items/{file_id}/content"
-                    self.download_file(download_url, file_name)
+                    self.download_file_to_tmp(download_url, file_name)
         else:
             print(f"Error in download_reports_to_tmp {response.status_code} - {response.text}")
 

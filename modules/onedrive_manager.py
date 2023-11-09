@@ -13,8 +13,9 @@ class OneDriveManager:
         self.auth_manager = AuthManager()
         self.access_token = self.auth_manager.get_access_token_default_scopes()
         self.endpoint = self.auth_manager.get_endpoint()
+        self.default_header = self.auth_manager.get_default_header(access_token=self.access_token)
 
-    def upload_file_to_onedrive(self, file_path, rows_to_skip=None, rows_to_read = None, current_day=DATETIME):
+    def upload_file_to_onedrive(self, file_path, rows_to_skip=None, rows_to_read=None, current_day=DATETIME):
         if rows_to_skip is None and rows_to_read is None:
             uploading_file_name = os.path.basename(file_path)
         else:
@@ -57,7 +58,7 @@ class OneDriveManager:
         upload_url = self.endpoint + f"drive/items/root:/Holland/Reports/{current_day}:/children"
         print(upload_url)
         response = requests.get(url=upload_url,
-                                headers=self.auth_manager.get_default_header(access_token=self.access_token))
+                                headers=self.default_header)
         if response.status_code == 200:
             files = response.json().get("value", [])
             for file in files:
@@ -69,17 +70,39 @@ class OneDriveManager:
         else:
             print(f"Error in download_reports_to_tmp {response.status_code} - {response.text}")
 
-onedrivemanager = OneDriveManager()
+    def is_list_folder_created(self, current_day=DATETIME):
+        upload_url = self.endpoint + f"drive/items/root:/Holland/Reports/{current_day}:/children"
+        print(upload_url)
+        response = requests.get(url=upload_url,
+                                headers=self.auth_manager.get_default_header(access_token=self.access_token))
+        if response.status_code == 200:
+            items = response.json().get('value', [])
+            return any(item['name'] == 'Lists' and item['folder'] is not None for item in items)
+        else:
+            return response.json()
 
-onedrivemanager.download_reports_to_tmp()
+    def create_current_day_folder_name(self, current_day=DATETIME):
+        create_url = self.endpoint + f"drive/items/root:/Holland/Reports:children"
+        payload = {
+            "name": current_day,
+            "folder": {},
+            "@microsoft.graph.conflictBehavior": "rename"
+        }
+        response = requests.post(url=create_url, headers=self.default_header, json=payload)
+        return response.json()
 
-
+    def create_lists_folder_name(self, current_day=DATETIME):
+        create_url = self.endpoint + f"drive/items/root:/Holland/Reports/{current_day}:children"
+        payload = {
+            "name": "Lists",
+            "folder": {},
+            "@microsoft.graph.conflictBehavior": "rename"
+        }
+        response = requests.post(url=create_url, headers=self.default_header, json=payload)
+        return response.json()
 
 # folder_path = os.path.join(os.path.dirname(os.getcwd()), "tmp/text_reports")
 # file_list = (os.listdir(folder_path))
 # for file_name in file_list:
 #     file_path = os.path.join(folder_path, file_name)
 #     onedrivemanager.upload_file_to_onedrive(file_path=file_path, rows_to_read=1, rows_to_skip=0)
-
-
-

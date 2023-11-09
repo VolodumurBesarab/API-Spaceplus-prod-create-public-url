@@ -2,10 +2,15 @@ import json
 
 from modules.Otomoto.otomoto_manager import OtomotoManager
 from modules.excel_handler import ExcelHandler
+from modules.onedrive_manager import OneDriveManager
+
 
 def lambda_handler(event, context):
     otomoto_manager = OtomotoManager(excel_file_name=r"Volodumurs_tested_file.xlsx", sheet_name="OtoMoto")
+    one_drive_manager = OneDriveManager()
     otomoto_manager.create_lists()
+    one_drive_manager.download_reports_to_tmp(current_day="First start progmam reports")
+    otomoto_manager.create_reports_from_base()
     # otomoto_manager = OtomotoManager(excel_file_name=r"Otomoto.xlsx", sheet_name="OtoMoto")
     # otomoto_manager.create_page()
     # try:

@@ -93,18 +93,53 @@ class ExcelHandler:
     def set_otomoto_id_by_storage_id(self, df:  DataFrame, otomoto_id, storage_id, excel_file_path):
         row = df[df['номер на складі'] == storage_id]
 
-        # Перевіряємо, чи такий рядок був знайдений
         if not row.empty:
-            # Отримуємо значення otomoto_id для цього рядка
             current_otomoto_id = row.iloc[0]['ID otomoto']
 
-            # Перевіряємо, чи otomoto_id є NaN (пустим)
             if pd.isna(current_otomoto_id):
-                # Вставляємо нове otomoto_id у відповідне поле
                 df.loc[df['номер на складі'] == storage_id, 'ID otomoto'] = str(otomoto_id)
-        # Зберігаємо оновлений DataFrame у файл
         # df.to_excel('New tested file.xlsx', index=False)
         df.to_excel(excel_file_path, index=False, sheet_name="Otomoto")
-        # Повертаємо оновлений DataFrame
         return df
 
+    def update_excel_from_success_report(self, current_day=None):
+        download_successfully_url = self.endpoint + f"drive/items/root:/Holland/Reports/{current_day}/successfully.txt:/children"
+        self.onedrive_manager.download_file_to_tmp(download_url=download_successfully_url, file_name="successfully.txt")
+        download_excel_url = self.endpoint + f"drive/items/root:/Holland/Volodumurs_tested_file.xlsx:/children"
+        self.onedrive_manager.download_file_to_tmp(download_url=download_excel_url, file_name="Data otomoto.xlsx")
+        df = pd.read_excel("/tmp/Data otomoto.xlsx")
+
+        with open("/tmp/successfully.txt", "r") as success_file:
+            lines = success_file.readlines()
+
+        otomoto_ids = {}
+
+        for line in lines:
+            if "del" in line:
+                continue
+            parts = line.split(", ")
+            storage_id = parts[0].strip()
+
+            parts = line.split("ID: ")
+            otomoto_id = parts[1].strip()
+
+            if storage_id not in otomoto_ids:
+                otomoto_ids[storage_id] = otomoto_id
+
+            if "_" not in storage_id:
+                try:
+                    storage_id = int(storage_id)
+                except Exception as e:
+                    pass
+
+            matching_rows = df.loc[(df['номер на складі'] == storage_id) & (df['наявність на складі'] == 1)]
+            if len(matching_rows) == 0:
+                print(f"storage_id {storage_id}")
+            elif len(matching_rows) == 1:
+                df.loc[(df['номер на складі'] == storage_id) & (df['наявність на складі'] == 1), 'ID otomoto'] = otomoto_id
+            else:
+                print(f"Count of same id is {len(matching_rows)} ")
+                print(matching_rows)
+        new_excel_file = "/tmp/Final_exel_file.xlsx"
+        df.to_excel(new_excel_file, index=False, sheet_name="OtoMoto")
+        self.onedrive_manager.upload_file_to_onedrive(file_path=new_excel_file)

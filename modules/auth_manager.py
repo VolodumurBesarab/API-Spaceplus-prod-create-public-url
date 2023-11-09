@@ -19,19 +19,20 @@ class AuthManager:
 
     def __init__(self):
         if not self.__initialized:
-            if os.path.exists("secrets.json"):
-                with open("secrets.json") as secrets:
-                    secrets = json.load(secrets)
+            secrets_file_path = r'D:\API-Spaceplus\secrets.json'
+            if os.path.exists(secrets_file_path):
+                with open(secrets_file_path) as secrets:
+                    self.secrets = json.load(secrets)
 
-                self.otomoto_url = secrets.get("otomoto_url")
-                self.otomoto_client_id = secrets.get("otomoto_client_id")
-                self.otomoto_client_secret = secrets.get("otomoto_client_secret")
-                self.otomoto_username = secrets.get("otomoto_username")
-                self.otomoto_password = secrets.get("otomoto_password")
+                self.otomoto_url = self.secrets.get("otomoto_url")
+                self.otomoto_client_id = self.secrets.get("otomoto_client_id")
+                self.otomoto_client_secret = self.secrets.get("otomoto_client_secret")
+                self.otomoto_username = self.secrets.get("otomoto_username")
+                self.otomoto_password = self.secrets.get("otomoto_password")
 
-                self.application_id = secrets.get("VLAD_APPLICATION_ID")
-                self.client_secret = secrets.get("VLAD_CLIENT_SECRET")
-                self.authority_url = secrets.get("authority_url")
+                self.application_id = self.secrets.get("VLAD_APPLICATION_ID")
+                self.client_secret = self.secrets.get("VLAD_CLIENT_SECRET")
+                self.authority_url = self.secrets.get("authority_url")
 
             else:
                 self.otomoto_url = os.environ["otomoto_url"]

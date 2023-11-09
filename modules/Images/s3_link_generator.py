@@ -38,7 +38,7 @@ class S3LinkGenerator:
             s3.upload_file(file_path, S3_BUCKET_NAME, file_name)
             try:
                 s3.head_object(Bucket=S3_BUCKET_NAME, Key=file_name)
-                print(f"Файл {file_name} успішно завантажено на S3.")
+                # print(f"Файл {file_name} успішно завантажено на S3.")
             except Exception as e:
                 print(f"Помилка: {e}. Файл {file_name} не був знайдений на S3.")
 

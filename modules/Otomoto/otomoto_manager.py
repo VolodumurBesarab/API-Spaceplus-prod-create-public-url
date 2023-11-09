@@ -193,6 +193,57 @@ class OtomotoManager:
         print("Page created")
         return self
 
+    def create_lists(self):
+        file_content = self.excel_handler.get_exel_file(self.file_name)
+        # create file
+        self.excel_handler.create_file_on_data(file_content=file_content, file_name=self.file_name)
+        self.excel_handler.create_file_on_data(file_content=file_content, file_name="Excel working data table.xlsx")
+
+        main_excel_file_path = self.excel_handler.get_file_path(file_name=self.file_name)
+        self.df1 = pd.read_excel(main_excel_file_path)  # file to read
+
+        if not self.one_drive_manager.is_current_day_folder_created():
+            self.one_drive_manager.create_current_day_folder()
+
+        if not self.one_drive_manager.is_list_folder_created():
+            self.one_drive_manager.create_lists_folder()
+            in_stock, out_of_stock, invalid_quantity = self.create_lists_of_produts(self.df1)
+            list_check_need_to_edit, list_ready_to_create = self.create_list_need_to_create(in_stock)
+
+            # Rework create funk to do it
+            column_name = "номер на складі"
+            list_check_need_to_edit_values = []
+            list_ready_to_create_values = []
+            list_invalid_quantity_values = []
+
+            for df_check in list_check_need_to_edit:
+                list_check_need_to_edit_values.extend(df_check[column_name].tolist())
+
+            for df_invalid_quantity in invalid_quantity:
+                list_invalid_quantity_values.extend(df_invalid_quantity[column_name].tolist())
+
+            for df_ready in list_ready_to_create:
+                list_ready_to_create_values.extend(df_ready[column_name].tolist())
+
+            df_check_need_to_edit = pd.DataFrame({"номер на складі": list_check_need_to_edit_values})
+            df_ready_to_create = pd.DataFrame({"номер на складі": list_ready_to_create_values})
+            df_invalid_quantity = pd.DataFrame({"номер на складі": list_invalid_quantity_values})
+
+            list_check_need_to_edit_values_path = "/tmp/check_need_to_edit.txt"
+            list_ready_to_create_values_path = "/tmp/ready_to_create.txt"
+            list_invalid_quantity_values_path = "/tmp/invalid_quantity.txt"
+
+            df_check_need_to_edit.to_csv(list_check_need_to_edit_values_path, index=False)
+            df_ready_to_create.to_csv(list_ready_to_create_values_path, index=False)
+            df_invalid_quantity.to_csv(list_invalid_quantity_values_path, index=False)
+
+            self.one_drive_manager.upload_file_to_onedrive(file_path=list_check_need_to_edit_values_path,
+                                                           path_after_current_day="Lists")
+            self.one_drive_manager.upload_file_to_onedrive(file_path=list_ready_to_create_values_path,
+                                                           path_after_current_day="Lists")
+            self.one_drive_manager.upload_file_to_onedrive(file_path=list_invalid_quantity_values_path,
+                                                           path_after_current_day="Lists")
+
     def create_list_to_create_in_s3(self):
         file_content = self.excel_handler.get_exel_file(self.file_name)
         # create file

@@ -48,7 +48,5 @@ class StartProgram:
 
         #self.images_api.upload_image_to_imgur()
 
-        self.find_folder_by_name(folder_name="CP07A")
+        # self.find_folder_by_name(folder_name="CP07A")
 
-    def otomoto_test(self):
-        self.otomoto_manager.create_page()

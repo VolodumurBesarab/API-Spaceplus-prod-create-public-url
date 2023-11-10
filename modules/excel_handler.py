@@ -106,9 +106,19 @@ class ExcelHandler:
         download_successfully_url = self.endpoint + f"drive/items/root:/Holland/Reports/{current_day}/successfully.txt:/children"
         self.onedrive_manager.download_file_to_tmp(download_url=download_successfully_url, file_name="successfully.txt")
         download_excel_url = self.endpoint + f"drive/items/root:/Holland/Volodumurs_tested_file.xlsx:/children"
-        self.onedrive_manager.download_file_to_tmp(download_url=download_excel_url, file_name="Data otomoto.xlsx")
-        df = pd.read_excel("/tmp/Data otomoto.xlsx")
+        self.onedrive_manager.download_file_to_tmp(download_url=download_excel_url, file_name="Data_otomoto.xlsx")
 
+        if os.path.isfile("/tmp/successfully.txt"):
+            print("Файл 'successfully.txt' успішно завантажено.")
+        else:
+            print("Помилка: Файл 'successfully.txt' не було знайдено або не вдалося завантажити.")
+
+        if os.path.isfile("/tmp/Data_otomoto.xlsx"):
+            print("Файл 'Data_otomoto.xlsx' успішно завантажено.")
+        else:
+            print("Помилка: Файл 'Data_otomoto.xlsx' не було знайдено або не вдалося завантажити.")
+
+        df = pd.read_excel("/tmp/Data_otomoto.xlsx", sheet_name="OtoMoto")
         with open("/tmp/successfully.txt", "r") as success_file:
             lines = success_file.readlines()
 

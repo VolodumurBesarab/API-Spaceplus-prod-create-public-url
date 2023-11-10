@@ -48,19 +48,25 @@ class OneDriveManager:
         result = requests.get(url=one_drive_url, headers=headers)
         return result.json()
 
-    def download_file_to_tmp(self, download_url, file_name):
+    def download_file_to_tmp(self, download_url, file_name, is_report=False):
         response = requests.get(download_url,
                                 headers=self.auth_manager.get_default_header(access_token=self.access_token))
 
         if response.status_code == 200:
-            with open(f"/tmp/text_reports/{file_name}", "wb") as f:
-                f.write(response.content)
+            if is_report:
+                folder_path = "/tmp/text_reports"
+                if not os.path.exists(folder_path):
+                    os.makedirs(folder_path)
+                with open(f"{folder_path}/{file_name}", "wb") as f:
+                    f.write(response.content)
+            else:
+                with open(f"/tmp/{file_name}", "wb") as f:
+                    f.write(response.content)
         else:
             print(f"Помилка при завантаженні файлу {file_name}: {response.status_code} - {response.text}")
 
     def download_reports_to_tmp(self, current_day=DATETIME):
         upload_url = self.endpoint + f"drive/items/root:/Holland/Reports/{current_day}:/children"
-        print(upload_url)
         response = requests.get(url=upload_url,
                                 headers=self.default_header)
         if response.status_code == 200:
@@ -70,7 +76,7 @@ class OneDriveManager:
                     file_name = file.get("name")
                     file_id = file.get("id")
                     download_url = self.endpoint + f"drive/items/{file_id}/content"
-                    self.download_file_to_tmp(download_url, file_name)
+                    self.download_file_to_tmp(download_url, file_name, is_report=True)
         else:
             print(f"Error in download_reports_to_tmp {response.status_code} - {response.text}")
 

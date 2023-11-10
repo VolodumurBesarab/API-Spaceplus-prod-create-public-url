@@ -115,7 +115,7 @@ class ExcelHandler:
         otomoto_ids = {}
 
         for line in lines:
-            if "del" in line:
+            if "del" in line or not line.strip():
                 continue
             parts = line.split(", ")
             storage_id = parts[0].strip()

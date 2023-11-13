@@ -48,11 +48,21 @@ class OneDriveManager:
         result = requests.get(url=one_drive_url, headers=headers)
         return result.json()
 
+    def get_item_id(self, name, path_in_onedrive="/Holland/Reports"):
+        url = self.endpoint + f"drive/root:{path_in_onedrive}:/children"
+        response = requests.get(url, headers=self.default_header(access_token=self.access_token))
+
+        data = response.json()
+        for item in data["value"]:
+            if item["name"] == name:
+                return item["id"]
+
     def download_file_to_tmp(self, download_url, file_name, is_report=False):
         response = requests.get(download_url,
                                 headers=self.auth_manager.get_default_header(access_token=self.access_token))
 
         if response.status_code == 200:
+            print(response.content)
             if is_report:
                 folder_path = "/tmp/text_reports"
                 if not os.path.exists(folder_path):

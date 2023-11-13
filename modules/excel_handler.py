@@ -103,10 +103,17 @@ class ExcelHandler:
         return df
 
     def update_excel_from_success_report(self, current_day=None):
-        download_successfully_url = self.endpoint + f"drive/items/root:/Holland/Reports/{current_day}/successfully.txt:/children"
-        self.onedrive_manager.download_file_to_tmp(download_url=download_successfully_url, file_name="successfully.txt")
-        download_excel_url = self.endpoint + f"drive/items/root:/Holland/Volodumurs_tested_file.xlsx:/children"
+        successfully_item_id = self.onedrive_manager.get_item_id(name="successfully.txt",
+                                                                 path_in_onedrive=f"/Holland/Reports/{current_day}/")
+        download_successfully_url = self.endpoint + f"drive/items/root:{successfully_item_id}:/children"
+        self.onedrive_manager.download_file_to_tmp(download_url=download_successfully_url,
+                                                   file_name="successfully.txt")
+
+        data_otomoto_item_id = self.onedrive_manager.get_item_id(name="Data_otomoto.xlsx",
+                                                                 path_in_onedrive=f"/Holland/Reports/{current_day}/")
+        download_excel_url = self.endpoint + f"drive/items/root/Holland/Volodumurs_tested_file.xlsx/children"
         self.onedrive_manager.download_file_to_tmp(download_url=download_excel_url, file_name="Data_otomoto.xlsx")
+        self.onedrive_manager.upload_file_to_onedrive(file_path="/tmp/Data_otomoto.xlsx")
 
         if os.path.isfile("/tmp/successfully.txt"):
             print("Файл 'successfully.txt' успішно завантажено.")
@@ -118,7 +125,7 @@ class ExcelHandler:
         else:
             print("Помилка: Файл 'Data_otomoto.xlsx' не було знайдено або не вдалося завантажити.")
 
-        df = pd.read_excel("/tmp/Data_otomoto.xlsx", sheet_name="OtoMoto")
+        df = pd.read_excel("/tmp/Data_otomoto.xlsx", sheet_name="OtoMoto", engine="openpyxl")
         with open("/tmp/successfully.txt", "r") as success_file:
             lines = success_file.readlines()
 

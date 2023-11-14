@@ -50,7 +50,7 @@ class OneDriveManager:
 
     def get_item_id(self, name, path_in_onedrive="/Holland/Reports"):
         url = self.endpoint + f"drive/root:{path_in_onedrive}:/children"
-        response = requests.get(url=url, headers=self.default_header())
+        response = requests.get(url=url, headers=self.default_header)
 
         data = response.json()
         for item in data["value"]:
@@ -62,7 +62,6 @@ class OneDriveManager:
                                 headers=self.auth_manager.get_default_header(access_token=self.access_token))
 
         if response.status_code == 200:
-            print(response.content)
             if is_report:
                 folder_path = "/tmp/text_reports"
                 if not os.path.exists(folder_path):
@@ -131,8 +130,7 @@ class OneDriveManager:
         response = requests.post(url=create_url, headers=self.default_header, json=payload)
         return response.json()
 
-# folder_path = os.path.join(os.path.dirname(os.getcwd()), "tmp/text_reports")
-# file_list = (os.listdir(folder_path))
-# for file_name in file_list:
-#     file_path = os.path.join(folder_path, file_name)
-#     onedrivemanager.upload_file_to_onedrive(file_path=file_path, rows_to_read=1, rows_to_skip=0)
+# onedrivemanager = OneDriveManager()
+# onedrivemanager.get_item_id(name="09-11-2023")
+# download_excel_url = onedrivemanager.endpoint + f"drive/items/root:/Holland/Volodumurs_tested_file.xlsx:/content"
+# onedrivemanager.download_file_to_tmp(download_url=download_excel_url, file_name="Volodumurs_tested_file.xlsx")

@@ -107,7 +107,7 @@ class ExcelHandler:
         self.onedrive_manager.download_file_to_tmp(download_url=download_successfully_url,
                                                    file_name="successfully.txt")
 
-        download_excel_url = self.endpoint + f"drive/items/root:/Holland/Volodumurs_tested_file.xlsx:/content"
+        download_excel_url = self.endpoint + "drive/items/root:/Holland/Volodumurs_tested_file.xlsx:/content"
         self.onedrive_manager.download_file_to_tmp(download_url=download_excel_url, file_name="Data_otomoto.xlsx")
 
         if os.path.isfile("/tmp/successfully.txt"):

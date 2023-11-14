@@ -120,15 +120,17 @@ class ExcelHandler:
         else:
             print("Помилка: Файл 'Data_otomoto.xlsx' не було знайдено або не вдалося завантажити.")
 
-        df = pd.read_excel("/tmp/Data_otomoto.xlsx", sheet_name="OtoMoto", engine="openpyxl")
+        df = pd.read_excel("/tmp/Data_otomoto.xlsx", sheet_name="OtoMoto")
         with open("/tmp/successfully.txt", "r") as success_file:
             lines = success_file.readlines()
 
         otomoto_ids = {}
 
         for line in lines:
-            if "del" in line or not line.strip():
+            if "del" in line:
                 continue
+            elif not line.strip():
+                break
             parts = line.split(", ")
             storage_id = parts[0].strip()
 
@@ -155,3 +157,8 @@ class ExcelHandler:
         new_excel_file = "/tmp/Final_exel_file.xlsx"
         df.to_excel(new_excel_file, index=False, sheet_name="OtoMoto")
         self.onedrive_manager.upload_file_to_onedrive(file_path=new_excel_file)
+
+
+
+# excelhandler = ExcelHandler()
+# excelhandler.update_excel_from_success_report(current_day="Second start program reports")

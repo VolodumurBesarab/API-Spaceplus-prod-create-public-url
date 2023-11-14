@@ -50,7 +50,7 @@ class OneDriveManager:
 
     def get_item_id(self, name, path_in_onedrive="/Holland/Reports"):
         url = self.endpoint + f"drive/root:{path_in_onedrive}:/children"
-        response = requests.get(url, headers=self.default_header(access_token=self.access_token))
+        response = requests.get(url=url, headers=self.default_header())
 
         data = response.json()
         for item in data["value"]:

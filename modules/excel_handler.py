@@ -155,7 +155,10 @@ class ExcelHandler:
                 print(f"Count of same id is {len(matching_rows)} ")
                 print(matching_rows)
         new_excel_file = "/tmp/Final_exel_file.xlsx"
-        df.to_excel(new_excel_file, index=False, sheet_name="OtoMoto")
+        try:
+            df.to_excel(new_excel_file, index=False, sheet_name="OtoMoto")
+        except Exception as e:
+            print(e)
         self.onedrive_manager.upload_file_to_onedrive(file_path=new_excel_file)
 
 

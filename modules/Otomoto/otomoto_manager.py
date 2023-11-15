@@ -121,6 +121,7 @@ class OtomotoManager:
             #         "description") == 0 and item.get("price") == 0 and item.get("new_used") == 0 and item.get(
             #     "manufacturer")):
             #     return
+            nubmer_in_stock = row.get("номер на складі")
             try:
                 created_advert_id = self.otomoto_api.create_otomoto_advert(product_id=row.get("номер на складі"),
                                                                            title=row.get("title"),
@@ -128,7 +129,6 @@ class OtomotoManager:
                                                                            price=row.get("price"),
                                                                            new_used=row.get("new_used"),
                                                                            manufacturer=row.get("manufacturer"))
-                nubmer_in_stock = row.get("номер на складі")
                 if "Error:" in created_advert_id:
                     message = f"{nubmer_in_stock}, {created_advert_id}"
                     self._create_basic_report(message=message)
@@ -138,15 +138,15 @@ class OtomotoManager:
                     message = f"{nubmer_in_stock}, Advert successfully posted with ID: {created_advert_id}"
                     self._create_basic_report(message=message)
                     self.set_char_by_number_in_stock(number_in_stock=nubmer_in_stock, char="+")
-                    excel_file_path = EXCEL_FILE_PATH
-                    self.excel_handler.set_otomoto_id_by_storage_id(df=self.working_data_table,
-                                                                    otomoto_id=created_advert_id,
-                                                                    storage_id=nubmer_in_stock,
-                                                                    excel_file_path=excel_file_path)
+                    # excel_file_path = EXCEL_FILE_PATH
+                    # self.excel_handler.set_otomoto_id_by_storage_id(df=self.working_data_table,
+                    #                                                 otomoto_id=created_advert_id,
+                    #                                                 storage_id=nubmer_in_stock,
+                    #                                                 excel_file_path=excel_file_path)
 
             except Exception as e:
-                print(f"Error with create advert {row}: {e}")
-                self._create_basic_report(f"Unexpected error {row} : {e}")
+                print(f"Error with create advert {nubmer_in_stock}: {e}")
+                self._create_basic_report(f"Unexpected error {nubmer_in_stock} : {e}")
 
         try:
             reports_file_name = REPORT_FILE_PATH
@@ -276,10 +276,11 @@ class OtomotoManager:
         for line in lines:
             if counter >= adverts_create_in_one_time:
                 break
+
+            if "+" or "-" in line:
+                continue
             else:
                 counter += 1
-            if "+" in line:
-                continue
             in_stock_numbers.append(line.strip())
 
         df1 = df[(df['номер на складі'].astype(str).isin(in_stock_numbers)) & (df['наявність на складі'] == 1)].reset_index(drop=True)

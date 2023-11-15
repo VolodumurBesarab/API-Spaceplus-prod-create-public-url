@@ -11,8 +11,8 @@ def lambda_handler(event, context):
     # one_drive_manager = OneDriveManager()
     # one_drive_manager.download_reports_to_tmp(current_day="First start progmam reports")
     # otomoto_manager.create_reports_from_base()
-    # excel_handler = ExcelHandler()
-    # excel_handler.update_excel_from_success_report(current_day="Second start program reports")
+    excel_handler = ExcelHandler()
+    excel_handler.update_excel_from_success_report(current_day="Second start program reports")
     # otomoto_manager = OtomotoManager(excel_file_name=r"Otomoto.xlsx", sheet_name="OtoMoto")
     # otomoto_manager.create_page()
     # try:

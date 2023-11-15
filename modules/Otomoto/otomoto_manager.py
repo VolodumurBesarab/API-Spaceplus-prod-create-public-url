@@ -103,7 +103,7 @@ class OtomotoManager:
         for item in adverts_dict:
             if (item.get("номер на складі") == 0 and item.get("title") == 0 and item.get(
                     "description") == 0 and item.get("price") == 0 and item.get("new_used") == 0 and item.get(
-                    "manufacturer")):
+                "manufacturer")):
                 return
             try:
                 created_advert_id = self.otomoto_api.create_otomoto_advert(product_id=item.get("номер на складі"),
@@ -121,7 +121,7 @@ class OtomotoManager:
                     nubmer_in_stock = item.get("номер на складі")
                     message = f"{nubmer_in_stock}, Advert successfully posted with ID: {created_advert_id}"
                     self._create_basic_report(message=message)
-                    excel_file_path = EXCEL_FILE_PATH #'New tested file.xlsx'
+                    excel_file_path = EXCEL_FILE_PATH  # 'New tested file.xlsx'
                     self.excel_handler.set_otomoto_id_by_storage_id(df=self.working_data_table,
                                                                     otomoto_id=created_advert_id,
                                                                     storage_id=item.get("номер на складі"),
@@ -169,8 +169,10 @@ class OtomotoManager:
         list_need_to_delete = []
 
         for item in out_of_stock:
-            if pd.isna(item['ID otomoto']) and item['ID otomoto'] != 0 and item['на складі'] == 0:
-               list_need_to_delete.append(item)
+            id_otomoto = item['ID otomoto']
+            if pd.notna(id_otomoto) and id_otomoto != '0' and id_otomoto != '' and id_otomoto != 0:
+                list_need_to_delete.append(item)
+        print(list_need_to_delete)
         return list_need_to_delete
 
     def read_selected_rows_from_excel(self, file_path, rows_to_skip: int, rows_to_read: int):
@@ -200,7 +202,7 @@ class OtomotoManager:
         self.excel_handler.create_file_on_data(file_content=file_content, file_name="Excel working data table.xlsx")
 
         main_excel_file_path = self.excel_handler.get_file_path(file_name=self.file_name)
-        self.df1 = pd.read_excel(main_excel_file_path) # file to read
+        self.df1 = pd.read_excel(main_excel_file_path)  # file to read
         # self.df2 = pd.read_excel(main_excel_file_path) # file to write
         self.working_data_table = self.read_selected_rows_from_excel(file_path=main_excel_file_path,
                                                                      rows_to_skip=ROWS_TO_SKIP,
@@ -220,20 +222,17 @@ class OtomotoManager:
         self.excel_handler.create_file_on_data(file_content=file_content, file_name="Excel working data table.xlsx")
 
         main_excel_file_path = self.excel_handler.get_file_path(file_name=self.file_name)
-        self.one_drive_manager.download_file_to_tmp(download_url=self.auth_manager.get_endpoint() + "drive/items/root:/Holland/Final_exel_file.xlsx:/content",
+        self.one_drive_manager.download_file_to_tmp(path="/Holland/Final_exel_file.xlsx",
                                                     file_name="Final_exel_file")
         self.df1 = pd.read_excel(main_excel_file_path)  # file to read
         # self.df2 = pd.read_excel(main_excel_file_path) # file to write
-        self.working_data_table = self.read_selected_rows_from_excel(file_path=main_excel_file_path,
-                                                                     rows_to_skip=ROWS_TO_SKIP,
-                                                                     rows_to_read=ROWS_TO_READ)
         # print(self.working_data_table.values)
-        in_stock, out_of_stock, invalid_quantity = self.create_lists_of_produts(self.working_data_table)
-        list_check_need_to_edit, list_ready_to_create = self.create_list_need_to_create(in_stock)
-        print(f"adverts to create:", len(list_ready_to_create))
-        self._create_basic_report(message=f"adverts to create: {len(list_ready_to_create)}")
-        self._create_basic_report(message=str(list_ready_to_create))
-        self._post_adverts(list_ready_to_create)
+        self.create_lists()
+
+        # print(f"adverts to create:", len(list_ready_to_create))
+        # self._create_basic_report(message=f"adverts to create: {len(list_ready_to_create)}")
+        # self._create_basic_report(message=str(list_ready_to_create))
+        # self._post_adverts(list_ready_to_create)
 
         print("Page created")
         return self
@@ -263,6 +262,11 @@ class OtomotoManager:
             self.upload_list_to_onedrive(uploaded_list=list_ready_to_create, uploaded_list_path=ready_to_create_path)
             self.upload_list_to_onedrive(uploaded_list=invalid_quantity, uploaded_list_path=invalid_quantity_path)
             self.upload_list_to_onedrive(uploaded_list=list_need_to_delete, uploaded_list_path=list_need_to_delete_path)
+        else:
+            self.one_drive_manager.download_file_to_tmp(path=f"/Holland/Reports/{self.one_drive_manager.current_day}/Lists/ready_to_create.txt",
+                                                        file_name="ready_to_create.txt")
+            self.one_drive_manager.download_file_to_tmp(path=f"/Holland/Reports/{self.one_drive_manager.current_day}/Lists/list_need_to_delete.txt",
+                                                        file_name="list_need_to_delete.txt")
 
     def create_list_to_create_in_s3(self):
         file_content = self.excel_handler.get_exel_file(self.file_name)

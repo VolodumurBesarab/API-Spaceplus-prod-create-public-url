@@ -14,6 +14,7 @@ class OneDriveManager:
         self.access_token = self.auth_manager.get_access_token_default_scopes()
         self.endpoint = self.auth_manager.get_endpoint()
         self.default_header = self.auth_manager.get_default_header(access_token=self.access_token)
+        self.current_day = DATETIME
 
     def upload_file_to_onedrive(self, file_path, rows_to_skip=None, rows_to_read=None, current_day=DATETIME, path_after_current_day = None):
         if rows_to_skip is None and rows_to_read is None:
@@ -57,7 +58,11 @@ class OneDriveManager:
             if item["name"] == name:
                 return item["id"]
 
-    def download_file_to_tmp(self, download_url, file_name, is_report=False):
+    def download_file_to_tmp(self, path, file_name, is_report=False):
+        if is_report:
+            download_url = self.endpoint + f"drive/items/{path}/content"
+        else:
+            download_url = self.endpoint + f"drive/items/root:{path}:/content"
         response = requests.get(download_url,
                                 headers=self.auth_manager.get_default_header(access_token=self.access_token))
 
@@ -84,8 +89,8 @@ class OneDriveManager:
                 if "report" in file.get("name", "").lower():
                     file_name = file.get("name")
                     file_id = file.get("id")
-                    download_url = self.endpoint + f"drive/items/{file_id}/content"
-                    self.download_file_to_tmp(download_url, file_name, is_report=True)
+                    # download_url = self.endpoint + f"drive/items/{file_id}/content"
+                    self.download_file_to_tmp(path=file_id, file_name=file_name, is_report=True)
         else:
             print(f"Error in download_reports_to_tmp {response.status_code} - {response.text}")
 

@@ -56,7 +56,7 @@ class OtomotoManager:
             advert_dict = {}
         return list_of_adverts_dict
 
-    def set_plus_by_number_in_stock(self, number_in_stock):
+    def set_char_by_number_in_stock(self, number_in_stock, char):
         file_path = "/tmp/ready_to_create.txt"
         if not os.path.isfile(file_path):
             self.one_drive_manager.download_file_to_tmp(
@@ -69,7 +69,7 @@ class OtomotoManager:
         with open(file_path, "w") as file:
             for line in lines:
                 if number_in_stock in line:
-                    line = line.rstrip('\n') + ' +\n'
+                    line = line.rstrip('\n ') + char + '\n'
                 file.write(line)
 
     def _create_report(self, list_created_adverts_id, list_of_errors, is_unexpected: bool):
@@ -128,20 +128,20 @@ class OtomotoManager:
                                                                            price=row.get("price"),
                                                                            new_used=row.get("new_used"),
                                                                            manufacturer=row.get("manufacturer"))
+                nubmer_in_stock = row.get("номер на складі")
                 if "Error:" in created_advert_id:
-                    nubmer_in_stock = row.get("номер на складі")
                     message = f"{nubmer_in_stock}, {created_advert_id}"
                     self._create_basic_report(message=message)
+                    self.set_char_by_number_in_stock(number_in_stock=nubmer_in_stock, char="-")
                     # list_of_errors.append((item.get("номер на складі"), created_advert_id))
                 else:
-                    nubmer_in_stock = row.get("номер на складі")
                     message = f"{nubmer_in_stock}, Advert successfully posted with ID: {created_advert_id}"
                     self._create_basic_report(message=message)
-                    self.set_plus_by_number_in_stock(row.get("номер на складі"))
+                    self.set_char_by_number_in_stock(number_in_stock=nubmer_in_stock, char="+")
                     excel_file_path = EXCEL_FILE_PATH
                     self.excel_handler.set_otomoto_id_by_storage_id(df=self.working_data_table,
                                                                     otomoto_id=created_advert_id,
-                                                                    storage_id=row.get("номер на складі"),
+                                                                    storage_id=nubmer_in_stock,
                                                                     excel_file_path=excel_file_path)
 
             except Exception as e:
@@ -283,7 +283,7 @@ class OtomotoManager:
             in_stock_numbers.append(line.strip())
 
         df1 = df[(df['номер на складі'].astype(str).isin(in_stock_numbers)) & (df['наявність на складі'] == 1)].reset_index(drop=True)
-        df1.to_excel('D:\API-Spaceplus\\tmp\df1.xlsx', index=False)  # Збереження у файл
+        # df1.to_excel('D:\API-Spaceplus\\tmp\df1.xlsx', index=False)  # Збереження у файл
         print(df1)
         return df1
 

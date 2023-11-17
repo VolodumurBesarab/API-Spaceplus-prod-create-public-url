@@ -2,6 +2,8 @@ import json
 import requests
 import math
 
+from requests import Response
+
 from modules.Images.images_api import ImagesApi
 from modules.Images.s3_link_generator import S3LinkGenerator
 from modules.auth_manager import AuthManager
@@ -214,6 +216,11 @@ class OtomotoApi:
             print("Текст помилки:", response.text)
         return collection_id
 
+    def delete_advert(self, advert_id) -> Response:
+        url = self.base_url + f"/adverts/{advert_id}"
+        response = requests.delete(url=url, headers=self._get_basic_headers(self.get_token()))
+        return response
+
     def create_otomoto_advert(self, product_id, title, description: str, price, new_used, manufacturer) -> str:
         if len(str(description)) < 30:
             return f"Error: {product_id}'s description must be more then 30 symbol"
@@ -254,3 +261,4 @@ class OtomotoApi:
         else:
             error = ("Error:", response.status_code, response.text)
             return str(error)
+

@@ -216,25 +216,60 @@ class OtomotoManager:
         self.one_drive_manager.upload_file_to_onedrive(file_path=uploaded_list_path,
                                                        path_after_current_day="Lists")
 
-    def create_page(self):
-        file_content = self.excel_handler.get_exel_file(self.file_name)
-        # create file
-        self.excel_handler.create_file_on_data(file_content=file_content, file_name=self.file_name)
-        self.excel_handler.create_file_on_data(file_content=file_content, file_name="Excel working data table.xlsx")
+    # def create_page(self):
+    #     file_content = self.excel_handler.get_exel_file(self.file_name)
+    #     # create file
+    #     self.excel_handler.create_file_on_data(file_content=file_content, file_name=self.file_name)
+    #     self.excel_handler.create_file_on_data(file_content=file_content, file_name="Excel working data table.xlsx")
+    #
+    #     main_excel_file_path = self.excel_handler.get_file_path(file_name=self.file_name)
+    #     self.df1 = pd.read_excel(main_excel_file_path)  # file to read
+    #     # self.df2 = pd.read_excel(main_excel_file_path) # file to write
+    #     self.working_data_table = self.read_selected_rows_from_excel(file_path=main_excel_file_path,
+    #                                                                  rows_to_skip=ROWS_TO_SKIP,
+    #                                                                  rows_to_read=ROWS_TO_READ)
+    #     # print(self.working_data_table.values)
+    #     in_stock, out_of_stock, invalid_quantity = self.create_lists_of_produts(self.working_data_table)
+    #     list_check_need_to_edit, list_ready_to_create = self.create_list_need_to_create(in_stock)
+    #     print(f"adverts to create:", len(list_ready_to_create))
+    #     self._create_basic_report(message=f"adverts to create: {len(list_ready_to_create)}")
+    #     self._create_basic_report(message=str(list_ready_to_create))
+    #     self._post_adverts(list_ready_to_create)
 
-        main_excel_file_path = self.excel_handler.get_file_path(file_name=self.file_name)
-        self.df1 = pd.read_excel(main_excel_file_path)  # file to read
-        # self.df2 = pd.read_excel(main_excel_file_path) # file to write
-        self.working_data_table = self.read_selected_rows_from_excel(file_path=main_excel_file_path,
-                                                                     rows_to_skip=ROWS_TO_SKIP,
-                                                                     rows_to_read=ROWS_TO_READ)
-        # print(self.working_data_table.values)
-        in_stock, out_of_stock, invalid_quantity = self.create_lists_of_produts(self.working_data_table)
-        list_check_need_to_edit, list_ready_to_create = self.create_list_need_to_create(in_stock)
-        print(f"adverts to create:", len(list_ready_to_create))
-        self._create_basic_report(message=f"adverts to create: {len(list_ready_to_create)}")
-        self._create_basic_report(message=str(list_ready_to_create))
-        self._post_adverts(list_ready_to_create)
+    def delete_adverts(self, df: DataFrame):
+        list_need_to_delete_path = "/tmp/list_need_to_delete.txt"
+        if not os.path.exists(list_need_to_delete_path):
+            self.one_drive_manager.download_file_to_tmp(
+                path=f"/Holland/Reports/{self.one_drive_manager.current_day}/Lists/list_need_to_delete.txt",
+                file_name="list_need_to_delete.txt")
+        with open(list_need_to_delete_path,  "r+") as file:
+            lines = file.readlines()
+
+        for line in lines:
+            original_line = line.strip()
+            filtered_df = df[(df['номер на складі'] == original_line) & (df['ID otomoto'].notna())]
+            if not filtered_df.empty:
+                id_otomoto_value = filtered_df.iloc[0]['ID otomoto']
+                response = self.otomoto_api.delete_advert(id_otomoto_value)
+                if response.status_code == 204:
+                    updated_line = original_line + " +\n"
+                    file.write(updated_line)
+                else:
+                    updated_line = original_line + " -\n"
+                    file.write(updated_line)
+            else:
+                file.write(line)
+        self.one_drive_manager.upload_file_to_onedrive(file_path=list_need_to_delete_path ,path_after_current_day="Lists")
+
+
+        # with open(file_path, "r") as file:
+        #     lines = file.readlines()
+        #
+        # with open(file_path, "w") as file:
+        #     for line in lines:
+        #         if number_in_stock in line:
+        #             line = line.rstrip('\n ') + char + '\n'
+        #         file.write(line)
 
     def create_lists(self):
         file_content = self.excel_handler.get_exel_file(self.file_name)
@@ -285,7 +320,6 @@ class OtomotoManager:
 
         df1 = df[(df['номер на складі'].astype(str).isin(in_stock_numbers)) & (df['наявність на складі'] == 1)].reset_index(drop=True)
         # df1.to_excel('/tmp/df_from_ready_to_create.xlsx', index=False)  # Збереження у файл
-        print(df1)
         return df1
 
     def create_next_twenty_adverts(self):
@@ -300,11 +334,13 @@ class OtomotoManager:
         df1 = pd.read_excel(main_excel_file_path)  # file to read
         self.create_lists()
         twenty_adverts_from_ready_to_create = self.create_df_from_ready_to_create(df1, adverts_create_in_one_time=4)
-        print(f"adverts to create:", len(twenty_adverts_from_ready_to_create))
-        self._create_basic_report(message=f"adverts to create: {len(twenty_adverts_from_ready_to_create)}")
-        self._create_basic_report(message=str(twenty_adverts_from_ready_to_create))
-        self._post_adverts(list_ready_to_create=twenty_adverts_from_ready_to_create)
-
+        if not twenty_adverts_from_ready_to_create.empty:
+            print(f"adverts to create:", len(twenty_adverts_from_ready_to_create))
+            self._create_basic_report(message=f"adverts to create: {len(twenty_adverts_from_ready_to_create)}")
+            self._create_basic_report(message=str(twenty_adverts_from_ready_to_create))
+            self._post_adverts(list_ready_to_create=twenty_adverts_from_ready_to_create)
+        else:
+            self.delete_adverts(df1)
         print("Page created")
         return self
 

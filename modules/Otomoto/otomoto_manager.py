@@ -56,7 +56,7 @@ class OtomotoManager:
             advert_dict = {}
         return list_of_adverts_dict
 
-    def set_char_by_number_in_stock(self, number_in_stock, char):
+    def set_char_by_number_in_stock(self, number_in_stock: str, char):
         file_path = "/tmp/ready_to_create.txt"
         if not os.path.isfile(file_path):
             self.one_drive_manager.download_file_to_tmp(
@@ -132,12 +132,12 @@ class OtomotoManager:
                 if "Error:" in created_advert_id:
                     message = f"{nubmer_in_stock}, {created_advert_id}"
                     self._create_basic_report(message=message)
-                    self.set_char_by_number_in_stock(number_in_stock=nubmer_in_stock, char="-")
+                    self.set_char_by_number_in_stock(number_in_stock=str(nubmer_in_stock), char="-")
                     # list_of_errors.append((item.get("номер на складі"), created_advert_id))
                 else:
                     message = f"{nubmer_in_stock}, Advert successfully posted with ID: {created_advert_id}"
                     self._create_basic_report(message=message)
-                    self.set_char_by_number_in_stock(number_in_stock=nubmer_in_stock, char="+")
+                    self.set_char_by_number_in_stock(number_in_stock=str(nubmer_in_stock), char="+")
                     # excel_file_path = EXCEL_FILE_PATH
                     # self.excel_handler.set_otomoto_id_by_storage_id(df=self.working_data_table,
                     #                                                 otomoto_id=created_advert_id,
@@ -274,17 +274,17 @@ class OtomotoManager:
         counter = 0
         in_stock_numbers = []
         for line in lines:
-            if counter >= adverts_create_in_one_time:
+            if counter >= adverts_create_in_one_time + 1:
                 break
 
-            if "+" or "-" in line:
+            if '+' in line or '-' in line:
                 continue
             else:
                 counter += 1
             in_stock_numbers.append(line.strip())
 
         df1 = df[(df['номер на складі'].astype(str).isin(in_stock_numbers)) & (df['наявність на складі'] == 1)].reset_index(drop=True)
-        # df1.to_excel('D:\API-Spaceplus\\tmp\df1.xlsx', index=False)  # Збереження у файл
+        # df1.to_excel('/tmp/df_from_ready_to_create.xlsx', index=False)  # Збереження у файл
         print(df1)
         return df1
 
@@ -366,5 +366,5 @@ class OtomotoManager:
         self.one_drive_manager.upload_file_to_onedrive(file_path=successfully_file_path)
         self.one_drive_manager.upload_file_to_onedrive(file_path=errors_file_path)
 
-otomotomanager = OtomotoManager(excel_file_name=r"Final_exel_file.xlsx", sheet_name="OtoMoto")
-otomotomanager.create_next_twenty_adverts()
+# otomotomanager = OtomotoManager(excel_file_name=r"Final_exel_file.xlsx", sheet_name="OtoMoto")
+# otomotomanager.create_next_twenty_adverts()

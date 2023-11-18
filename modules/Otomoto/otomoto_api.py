@@ -217,7 +217,7 @@ class OtomotoApi:
         return collection_id
 
     def delete_advert(self, advert_id) -> Response:
-        url = self.base_url + f"/adverts/{advert_id}"
+        url = self.base_url + f"adverts/{advert_id}"
         response = requests.delete(url=url, headers=self._get_basic_headers(self.get_token()))
         return response
 

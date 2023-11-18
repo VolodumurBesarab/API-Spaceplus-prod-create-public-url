@@ -153,7 +153,7 @@ class ExcelHandler:
             else:
                 print(f"Count of same id is {len(matching_rows)} ")
                 print(matching_rows)
-        new_excel_file = "/tmp/Final_exel_file.xlsx"
+        new_excel_file = f"/tmp/Final_exel_file {self.onedrive_manager.current_day}.xlsx"
         try:
             df.to_excel(new_excel_file, index=False, sheet_name="OtoMoto")
         except Exception as e:

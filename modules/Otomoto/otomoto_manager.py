@@ -11,8 +11,8 @@ from modules.auth_manager import AuthManager
 from modules.excel_handler import ExcelHandler
 from modules.onedrive_manager import OneDriveManager
 
-ROWS_TO_SKIP = 2236
-ROWS_TO_READ = 1
+ROWS_TO_SKIP = None
+ROWS_TO_READ = None
 DATETIME = datetime.now().strftime("%d-%m-%Y %H-%M-%S")
 REPORT_FILE_PATH = f"/tmp/Reports/report {DATETIME}.txt"
 # EXCEL_FILE_PATH = f"/tmp/New tested file {ROWS_TO_SKIP+1}-{ROWS_TO_READ+ROWS_TO_SKIP}.xlsx"
@@ -236,30 +236,40 @@ class OtomotoManager:
     #     self._create_basic_report(message=str(list_ready_to_create))
     #     self._post_adverts(list_ready_to_create)
 
-    def delete_adverts(self, df: DataFrame):
+    def delete_adverts(self, df: DataFrame) -> bool:
+        is_any_deleted = False
         list_need_to_delete_path = "/tmp/list_need_to_delete.txt"
         if not os.path.exists(list_need_to_delete_path):
             self.one_drive_manager.download_file_to_tmp(
                 path=f"/Holland/Reports/{self.one_drive_manager.current_day}/Lists/list_need_to_delete.txt",
                 file_name="list_need_to_delete.txt")
-        with open(list_need_to_delete_path,  "r+") as file:
+        with open(list_need_to_delete_path, "r+") as file:
             lines = file.readlines()
+            file.seek(0)
 
-        for line in lines:
-            original_line = line.strip()
-            filtered_df = df[(df['номер на складі'] == original_line) & (df['ID otomoto'].notna())]
-            if not filtered_df.empty:
-                id_otomoto_value = filtered_df.iloc[0]['ID otomoto']
-                response = self.otomoto_api.delete_advert(id_otomoto_value)
-                if response.status_code == 204:
-                    updated_line = original_line + " +\n"
-                    file.write(updated_line)
-                else:
-                    updated_line = original_line + " -\n"
-                    file.write(updated_line)
-            else:
-                file.write(line)
-        self.one_drive_manager.upload_file_to_onedrive(file_path=list_need_to_delete_path ,path_after_current_day="Lists")
+            with open(list_need_to_delete_path, "w") as file:
+                for line in lines:
+                    if "+" in line or "-" in line or "номер на складі" in line:
+                        continue
+                    else:
+                        is_any_deleted = True
+                        original_line = str(line.strip())
+                        filtered_df = df[(df['номер на складі'].astype(str) == original_line) & (df['ID otomoto'].notna())]
+                        if not filtered_df.empty:
+                            id_otomoto_value = str(int(filtered_df.iloc[0]['ID otomoto']))
+                            response = self.otomoto_api.delete_advert(id_otomoto_value)
+                            if response.status_code == 204:
+                                updated_line = original_line + " +\n"
+                                file.write(updated_line)
+                            else:
+                                updated_line = original_line + " -\n"
+                                file.write(updated_line)
+                        else:
+                            file.write(line)
+            self.one_drive_manager.upload_file_to_onedrive(file_path=list_need_to_delete_path,
+                                                           path_after_current_day="Lists")
+        return is_any_deleted
+        # update excel file
 
 
         # with open(file_path, "r") as file:
@@ -323,6 +333,7 @@ class OtomotoManager:
         return df1
 
     def create_next_twenty_adverts(self):
+        is_any_deleted = False
         file_content = self.excel_handler.get_exel_file(self.file_name)
         # create file
         self.excel_handler.create_file_on_data(file_content=file_content, file_name=self.file_name)
@@ -333,15 +344,17 @@ class OtomotoManager:
                                                     file_name="Final_exel_file")
         df1 = pd.read_excel(main_excel_file_path)  # file to read
         self.create_lists()
-        twenty_adverts_from_ready_to_create = self.create_df_from_ready_to_create(df1, adverts_create_in_one_time=4)
+        twenty_adverts_from_ready_to_create = self.create_df_from_ready_to_create(df1)
         if not twenty_adverts_from_ready_to_create.empty:
             print(f"adverts to create:", len(twenty_adverts_from_ready_to_create))
             self._create_basic_report(message=f"adverts to create: {len(twenty_adverts_from_ready_to_create)}")
             self._create_basic_report(message=str(twenty_adverts_from_ready_to_create))
             self._post_adverts(list_ready_to_create=twenty_adverts_from_ready_to_create)
         else:
-            self.delete_adverts(df1)
-        print("Page created")
+            is_any_deleted = self.delete_adverts(df1)
+        if twenty_adverts_from_ready_to_create.empty and not is_any_deleted:
+            print("Create general report logic here")
+        print("Working is done")
         return self
 
     def create_list_to_create_in_s3(self):

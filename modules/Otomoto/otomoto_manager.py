@@ -259,15 +259,18 @@ class OtomotoManager:
                             id_otomoto_value = str(int(filtered_df.iloc[0]['ID otomoto']))
                             response = self.otomoto_api.delete_advert(id_otomoto_value)
                             if response.status_code == 204:
+                                self._create_basic_report(message=f"{id_otomoto_value} + is deleted")
                                 updated_line = original_line + " +\n"
                                 file.write(updated_line)
                             else:
                                 updated_line = original_line + " -\n"
+                                self._create_basic_report(message=f"{id_otomoto_value} + is not deleted")
                                 file.write(updated_line)
                         else:
                             file.write(line)
-            self.one_drive_manager.upload_file_to_onedrive(file_path=list_need_to_delete_path,
-                                                           path_after_current_day="Lists")
+        self.one_drive_manager.upload_file_to_onedrive(file_path=list_need_to_delete_path,
+                                                       path_after_current_day="Lists")
+        self.one_drive_manager.upload_file_to_onedrive(file_path=REPORT_FILE_PATH)
         return is_any_deleted
         # update excel file
 
@@ -385,7 +388,8 @@ class OtomotoManager:
                                                  rows_to_skip=None)
 
     def create_reports_from_base(self):
-        folder_path = "/tmp/text_reports"
+        folder_path = "D:\API-Spaceplus\\tmp\\text_reports3"
+        # folder_path = "/tmp/text_reports"
 
         successfully_lines = []
         error_lines = []
@@ -416,4 +420,5 @@ class OtomotoManager:
         self.one_drive_manager.upload_file_to_onedrive(file_path=errors_file_path)
 
 # otomotomanager = OtomotoManager(excel_file_name=r"Final_exel_file.xlsx", sheet_name="OtoMoto")
+# otomotomanager.create_reports_from_base()
 # otomotomanager.create_next_twenty_adverts()

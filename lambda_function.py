@@ -10,7 +10,7 @@ def lambda_handler(event, context):
     # otomoto_manager.create_next_twenty_adverts()
 
     excel_handler = ExcelHandler()
-    excel_handler.update_excel_from_success_report()
+    excel_handler.update_excel_from_success_report(current_day="21-11-2023")
     return {
         'statusCode': 200,
         'body': json.dumps('Hello from Lambda!')

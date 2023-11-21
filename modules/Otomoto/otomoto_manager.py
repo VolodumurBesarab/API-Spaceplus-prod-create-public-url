@@ -358,6 +358,7 @@ class OtomotoManager:
             is_any_deleted = self.delete_adverts(df1)
         if twenty_adverts_from_ready_to_create.empty and not is_any_deleted:
             self.create_reports_from_base()
+            self.excel_handler.update_excel_from_success_report(self.one_drive_manager.current_day)
         print("Working is done")
         return self
 

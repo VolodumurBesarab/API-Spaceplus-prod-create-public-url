@@ -16,7 +16,7 @@ class OneDriveManager:
         self.default_header = self.auth_manager.get_default_header(access_token=self.access_token)
         self.current_day = DATETIME
 
-    def upload_file_to_onedrive(self, file_path, rows_to_skip=None, rows_to_read=None, current_day=DATETIME, path_after_current_day = None):
+    def upload_file_to_onedrive(self, file_path, rows_to_skip=None, rows_to_read=None, current_day=DATETIME, path_after_current_day=None, is_in_root=False):
         if rows_to_skip is None and rows_to_read is None:
             uploading_file_name = os.path.basename(file_path)
         else:
@@ -27,7 +27,8 @@ class OneDriveManager:
             upload_url = self.endpoint + f"drive/items/root:/Holland/Reports/{current_day}/{uploading_file_name}:/content"
         else:
             upload_url = self.endpoint + f"drive/items/root:/Holland/Reports/{current_day}/{path_after_current_day}/{uploading_file_name}:/content"
-
+        if is_in_root:
+            upload_url = self.endpoint + f"drive/items/root:/Holland:/content"
 
         access_token = self.access_token
         headers_octet_stream = {

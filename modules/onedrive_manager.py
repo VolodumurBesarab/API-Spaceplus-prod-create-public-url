@@ -86,7 +86,7 @@ class OneDriveManager:
         if response.status_code == 200:
             files = response.json().get("value", [])
             for file in files:
-                if "report" in file.get("name", "").lower():
+                if "basic_report" in file.get("name", "").lower():
                     file_name = file.get("name")
                     file_id = file.get("id")
                     # download_url = self.endpoint + f"drive/items/{file_id}/content"

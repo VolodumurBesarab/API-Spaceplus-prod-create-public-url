@@ -6,7 +6,7 @@ from modules.onedrive_manager import OneDriveManager
 
 
 def lambda_handler(event, context):
-    otomoto_manager = OtomotoManager(excel_file_name=r"Final_exel_file 18-11-2023.xlsx", sheet_name="OtoMoto")
+    otomoto_manager = OtomotoManager(excel_file_name=r"Final_exel_file 20-11-2023.xlsx", sheet_name="OtoMoto")
     otomoto_manager.create_next_twenty_adverts()
 
     # excel_handler = ExcelHandler()

@@ -149,7 +149,7 @@ class ExcelHandler:
             if len(matching_rows) == 0:
                 print(f"storage_id {storage_id}")
             elif len(matching_rows) == 1:
-                df.loc[(df['номер на складі'] == storage_id) & (df['наявність на складі'] == 1), 'ID otomoto'] = otomoto_id
+                df.loc[(df['номер на складі'] == storage_id) & (df['наявність на складі'] == 1), 'ID otomoto'] = float(otomoto_id)
             else:
                 print(f"Count of same id is {len(matching_rows)} ")
                 print(matching_rows)
@@ -159,8 +159,6 @@ class ExcelHandler:
         except Exception as e:
             print(e)
         self.onedrive_manager.upload_file_to_onedrive(file_path=new_excel_file)
-
-
 
 # excelhandler = ExcelHandler()
 # excelhandler.update_excel_from_success_report(current_day="Second start program reports")

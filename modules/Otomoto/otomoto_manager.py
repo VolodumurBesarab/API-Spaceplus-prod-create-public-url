@@ -80,7 +80,7 @@ class OtomotoManager:
                 os.makedirs(reports_folder)
 
             if not is_unexpected:
-                full_path = os.path.join(reports_folder, f"report{date.today()}.txt")
+                full_path = os.path.join(reports_folder, f"basic_report{date.today()}.txt")
             else:
                 full_path = os.path.join(reports_folder, f"unexpected report{date.today()}.txt")
 
@@ -356,7 +356,7 @@ class OtomotoManager:
         else:
             is_any_deleted = self.delete_adverts(df1)
         if twenty_adverts_from_ready_to_create.empty and not is_any_deleted:
-            print("Create general report logic here")
+            self.create_reports_from_base()
         print("Working is done")
         return self
 
@@ -388,8 +388,10 @@ class OtomotoManager:
                                                  rows_to_skip=None)
 
     def create_reports_from_base(self):
-        folder_path = "D:\API-Spaceplus\\tmp\\text_reports3"
-        # folder_path = "/tmp/text_reports"
+        # folder_path = "D:\API-Spaceplus\\tmp\\text_reports4"
+        self.one_drive_manager.download_reports_to_tmp()
+
+        folder_path = "/tmp/text_reports"
 
         successfully_lines = []
         error_lines = []

@@ -103,10 +103,10 @@ class ExcelHandler:
         return df
 
     def update_excel_from_success_report(self, current_day=None):
-        self.onedrive_manager.download_file_to_tmp(path="/Holland/Reports/Second start program reports/successfully.txt",
+        self.onedrive_manager.download_file_to_tmp(path=f"/Holland/Reports/{current_day}/successfully.txt",
                                                    file_name="successfully.txt")
 
-        self.onedrive_manager.download_file_to_tmp(path="/Holland/Volodumurs_tested_file.xlsx",
+        self.onedrive_manager.download_file_to_tmp(path="/Holland/Final_exel_file 21-11-2023.xlsx",
                                                    file_name="Data_otomoto.xlsx")
 
         if os.path.isfile("/tmp/successfully.txt"):
@@ -160,5 +160,5 @@ class ExcelHandler:
             print(e)
         self.onedrive_manager.upload_file_to_onedrive(file_path=new_excel_file)
 
-# excelhandler = ExcelHandler()
-# excelhandler.update_excel_from_success_report(current_day="Second start program reports")
+excelhandler = ExcelHandler()
+excelhandler.update_excel_from_success_report(current_day="Second start program reports")

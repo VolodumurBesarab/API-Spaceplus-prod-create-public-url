@@ -14,7 +14,7 @@ from modules.onedrive_manager import OneDriveManager
 ROWS_TO_SKIP = None
 ROWS_TO_READ = None
 DATETIME = datetime.now().strftime("%d-%m-%Y %H-%M-%S")
-REPORT_FILE_PATH = f"/tmp/Reports/report {DATETIME}.txt"
+REPORT_FILE_PATH = f"/tmp/Reports/basic_report {DATETIME}.txt"
 # EXCEL_FILE_PATH = f"/tmp/New tested file {ROWS_TO_SKIP+1}-{ROWS_TO_READ+ROWS_TO_SKIP}.xlsx"
 EXCEL_FILE_PATH = f"/tmp/Excel working data table.xlsx"
 
@@ -262,6 +262,7 @@ class OtomotoManager:
                                 self._create_basic_report(message=f"{id_otomoto_value} + is deleted")
                                 updated_line = original_line + " +\n"
                                 file.write(updated_line)
+                                df.loc[filtered_df.index, 'ID otomoto'] = None
                             else:
                                 updated_line = original_line + " -\n"
                                 self._create_basic_report(message=f"{id_otomoto_value} + is not deleted")

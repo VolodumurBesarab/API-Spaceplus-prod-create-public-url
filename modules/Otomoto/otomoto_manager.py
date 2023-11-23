@@ -1,3 +1,4 @@
+import json
 from datetime import datetime
 import os
 from datetime import date
@@ -236,13 +237,13 @@ class OtomotoManager:
     #     self._create_basic_report(message=str(list_ready_to_create))
     #     self._post_adverts(list_ready_to_create)
 
+    # rewrite to dict
     def delete_adverts(self, df: DataFrame) -> bool:
         is_any_deleted = False
         list_need_to_delete_path = "/tmp/list_need_to_delete.txt"
         if not os.path.exists(list_need_to_delete_path):
-            self.one_drive_manager.download_file_to_tmp(
-                path=f"/Holland/Reports/{self.one_drive_manager.current_day}/Lists/list_need_to_delete.txt",
-                file_name="list_need_to_delete.txt")
+            self.one_drive_manager.download_file_to_tmp(path=f"/Holland/Reports/{self.one_drive_manager.current_day}/Lists/list_need_to_delete.txt",
+                                                        file_name="list_need_to_delete.txt")
         with open(list_need_to_delete_path, "r+") as file:
             lines = file.readlines()
             file.seek(0)
@@ -253,18 +254,19 @@ class OtomotoManager:
                         continue
                     else:
                         is_any_deleted = True
-                        original_line = str(line.strip())
-                        filtered_df = df[(df['номер на складі'].astype(str) == original_line) & (df['ID otomoto'].notna())]
+                        number_in_stock = str(line.strip())
+                        filtered_df = df[(df['номер на складі'].astype(str) == number_in_stock) & (df['ID otomoto'].notna())]
                         if not filtered_df.empty:
                             id_otomoto_value = str(int(filtered_df.iloc[0]['ID otomoto']))
-                            response = self.otomoto_api.delete_advert(id_otomoto_value)
+                            response = self.otomoto_api.delete_advert(advert_id=id_otomoto_value,
+                                                                      number_in_stock=number_in_stock)
                             if response.status_code == 204:
                                 self._create_basic_report(message=f"{id_otomoto_value} + is deleted")
-                                updated_line = original_line + " +\n"
+                                updated_line = number_in_stock + " +\n"
                                 file.write(updated_line)
                                 df.loc[filtered_df.index, 'ID otomoto'] = None
                             else:
-                                updated_line = original_line + " -\n"
+                                updated_line = number_in_stock + " -\n"
                                 self._create_basic_report(message=f"{id_otomoto_value} + is not deleted")
                                 file.write(updated_line)
                         else:
@@ -272,6 +274,8 @@ class OtomotoManager:
         self.one_drive_manager.upload_file_to_onedrive(file_path=list_need_to_delete_path,
                                                        path_after_current_day="Lists")
         self.one_drive_manager.upload_file_to_onedrive(file_path=REPORT_FILE_PATH)
+        self.one_drive_manager.upload_file_to_onedrive(file_path="/tmp/adverts_dict.json",
+                                                       onedrive_path="Holland/API-Spaceplus")
         return is_any_deleted
         # update excel file
 
@@ -346,9 +350,12 @@ class OtomotoManager:
         main_excel_file_path = self.excel_handler.get_file_path(file_name=self.file_name)
         self.one_drive_manager.download_file_to_tmp(path="/Holland/Final_exel_file.xlsx",
                                                     file_name="Final_exel_file")
+        self.one_drive_manager.download_file_to_tmp(path="/Holland/API-Spaceplus/adverts_dict.json",
+                                                    file_name="adverts_dict.json")
         df1 = pd.read_excel(main_excel_file_path)  # file to read
         self.create_lists()
         twenty_adverts_from_ready_to_create = self.create_df_from_ready_to_create(df1)
+        # add variable for twenty_adverts_from_ready_to_create.empty
         if not twenty_adverts_from_ready_to_create.empty:
             print(f"adverts to create:", len(twenty_adverts_from_ready_to_create))
             self._create_basic_report(message=f"adverts to create: {len(twenty_adverts_from_ready_to_create)}")
@@ -389,6 +396,37 @@ class OtomotoManager:
                                                  rows_to_read=None,
                                                  rows_to_skip=None)
 
+    def convert_text_to_dict(self, successfully_file_path: str) -> dict:
+        with open(successfully_file_path, "r") as success_file:
+            lines = success_file.readlines()
+
+        otomoto_ids = {}
+
+        for line in lines:
+            if "del" in line:
+                continue
+            elif not line.strip():
+                break
+            parts = line.split(", ")
+            storage_id = parts[0].strip()
+
+            parts = line.split("ID: ")
+            otomoto_id = parts[1].strip()
+
+            if storage_id not in otomoto_ids:
+                otomoto_ids[str(storage_id)] = str(otomoto_id)
+            else:
+                print(F"Cant add {storage_id} : {otomoto_id} to dict")
+        return otomoto_ids
+
+    def merge_and_save_one_drive_dict(self, successfully_file_path, json_file_path):
+        successfully_file_dict = self.convert_text_to_dict(successfully_file_path=successfully_file_path)
+        with open(json_file_path, "r") as json_file:
+            data = json.load(json_file)
+        merged_dict = {**successfully_file_dict, **data}
+        with open(json_file_path, "w") as output_file:
+            json.dump(merged_dict, output_file)
+
     def create_reports_from_base(self):
         # folder_path = "D:\API-Spaceplus\\tmp\\text_reports4"
         self.one_drive_manager.download_reports_to_tmp()
@@ -411,7 +449,8 @@ class OtomotoManager:
                         elif "Unexpected" in line:
                             error_lines.append(line)
 
-        # Записуємо результати у відповідні файли
+        # Відредагувати дікшинарі
+
         successfully_file_path = "/tmp/successfully.txt"
         with open(successfully_file_path, 'w') as success_file:
             success_file.writelines(successfully_lines)
@@ -420,6 +459,10 @@ class OtomotoManager:
         with open(errors_file_path, 'w') as error_file:
             error_file.writelines(error_lines)
 
+        json_file_path = "/tmp/adverts_dict.json"
+        self.merge_and_save_one_drive_dict(successfully_file_path=successfully_file_path, json_file_path=json_file_path)
+
+        self.one_drive_manager.upload_file_to_onedrive(file_path=json_file_path, onedrive_path="/Holland/API-Spaceplus")
         self.one_drive_manager.upload_file_to_onedrive(file_path=successfully_file_path)
         self.one_drive_manager.upload_file_to_onedrive(file_path=errors_file_path)
 

@@ -16,19 +16,21 @@ class OneDriveManager:
         self.default_header = self.auth_manager.get_default_header(access_token=self.access_token)
         self.current_day = DATETIME
 
-    def upload_file_to_onedrive(self, file_path, rows_to_skip=None, rows_to_read=None, current_day=DATETIME, path_after_current_day=None, is_in_root=False):
+    def upload_file_to_onedrive(self, file_path, rows_to_skip=None, rows_to_read=None, current_day=DATETIME, path_after_current_day=None, onedrive_path=None):
         if rows_to_skip is None and rows_to_read is None:
             uploading_file_name = os.path.basename(file_path)
         else:
             base_name, extension = os.path.splitext(file_path)
             new_file_path = f"{base_name} {rows_to_skip + 1}-{rows_to_skip + rows_to_read}{extension}"
             uploading_file_name = os.path.basename(new_file_path)
-        if path_after_current_day is None:
-            upload_url = self.endpoint + f"drive/items/root:/Holland/Reports/{current_day}/{uploading_file_name}:/content"
+        # looks bad, refactor
+        if onedrive_path is not None:
+            upload_url = self.endpoint + f"drive/items/root:/{onedrive_path}/{uploading_file_name}:/content"
         else:
-            upload_url = self.endpoint + f"drive/items/root:/Holland/Reports/{current_day}/{path_after_current_day}/{uploading_file_name}:/content"
-        if is_in_root:
-            upload_url = self.endpoint + f"drive/items/root:/Holland:/content"
+            if path_after_current_day is None:
+                upload_url = self.endpoint + f"drive/items/root:/Holland/Reports/{current_day}/{uploading_file_name}:/content"
+            else:
+                upload_url = self.endpoint + f"drive/items/root:/Holland/Reports/{current_day}/{path_after_current_day}/{uploading_file_name}:/content"
 
         access_token = self.access_token
         headers_octet_stream = {
@@ -94,6 +96,7 @@ class OneDriveManager:
                     self.download_file_to_tmp(path=file_id, file_name=file_name, is_report=True)
         else:
             print(f"Error in download_reports_to_tmp {response.status_code} - {response.text}")
+
 
     def is_list_folder_created(self, current_day=DATETIME):
         upload_url = self.endpoint + f"drive/items/root:/Holland/Reports/{current_day}:/children"

@@ -1,4 +1,6 @@
 import json
+import os
+
 import requests
 import math
 
@@ -216,9 +218,26 @@ class OtomotoApi:
             print("Текст помилки:", response.text)
         return collection_id
 
-    def delete_advert(self, advert_id) -> Response:
+    def delete_and_save_in_json(self, json_file_path, key_to_delete):
+        with open(json_file_path, 'r') as file:
+            data = json.load(file)
+
+        if key_to_delete in data:
+            del data[key_to_delete]
+            print(f'Об\'єкт з ключем "{key_to_delete}" видалено.')
+
+            with open(json_file_path, 'w') as file:
+                json.dump(data, file, indent=4)
+                print('Зміни успішно збережено у файлі.')
+        else:
+            print(f'Ключ "{key_to_delete}" не знайдено в файлі.')
+
+    def delete_advert(self, advert_id, number_in_stock) -> Response:
         url = self.base_url + f"adverts/{advert_id}"
         response = requests.delete(url=url, headers=self._get_basic_headers(self.get_token()))
+        if response.status_code == 204:
+            json_file_path = "/tmp/adverts_dict.json"
+            self.delete_and_save_in_json(json_file_path=json_file_path, key_to_delete=number_in_stock)
         return response
 
     def create_otomoto_advert(self, product_id, title, description: str, price, new_used, manufacturer) -> str:

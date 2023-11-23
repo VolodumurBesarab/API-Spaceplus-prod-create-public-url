@@ -178,13 +178,15 @@ class OtomotoManager:
     def create_list_need_to_create(self, in_stock: list[DataFrame]) -> tuple[list[DataFrame], list[DataFrame]]:
         list_check_need_to_edit = []  # Ліст для товарів з непорожнім полем "ID otomoto"
         list_ready_to_create = []  # Ліст для товарів з порожнім полем "ID otomoto"
+        with open('/tmp/adverts_dict.json', 'r') as json_file:
+            adverts_dict = json.load(json_file)
 
-        for item in in_stock:
-            if pd.isna(item['ID otomoto']) or item['ID otomoto'] == 0:
-                list_ready_to_create.append(item)
+        for in_stock_id in in_stock:
+            otomoto_id = in_stock_id["наявність на складі"]
+            if otomoto_id in adverts_dict:
+                list_check_need_to_edit.append(in_stock_id)
             else:
-                list_check_need_to_edit.append(item)
-
+                list_ready_to_create.append(in_stock_id)
         return list_check_need_to_edit, list_ready_to_create
 
     def create_list_need_to_delete(self, out_of_stock: list[DataFrame]) -> list[DataFrame]:

@@ -176,8 +176,8 @@ class OtomotoManager:
             print(e)
 
     def create_list_need_to_create(self, in_stock: list[DataFrame]) -> tuple[list[DataFrame], list[DataFrame]]:
-        list_check_need_to_edit = []  # Ліст для товарів з непорожнім полем "ID otomoto"
-        list_ready_to_create = []  # Ліст для товарів з порожнім полем "ID otomoto"
+        list_check_need_to_edit = []
+        list_ready_to_create = []
         with open('/tmp/adverts_dict.json', 'r') as json_file:
             adverts_dict = json.load(json_file)
 
@@ -191,12 +191,19 @@ class OtomotoManager:
 
     def create_list_need_to_delete(self, out_of_stock: list[DataFrame]) -> list[DataFrame]:
         list_need_to_delete = []
+        with open('/tmp/adverts_dict.json', 'r') as json_file:
+            adverts_dict = json.load(json_file)
+
+        # for item in out_of_stock:
+        #     id_otomoto = item['ID otomoto']
+        #     if pd.notna(id_otomoto) and id_otomoto != '0' and id_otomoto != '' and id_otomoto != 0:
+        #         list_need_to_delete.append(item)
+        # print(list_need_to_delete)
 
         for item in out_of_stock:
-            id_otomoto = item['ID otomoto']
-            if pd.notna(id_otomoto) and id_otomoto != '0' and id_otomoto != '' and id_otomoto != 0:
+            in_stock_id = item['наявність на складі']
+            if in_stock_id in adverts_dict:
                 list_need_to_delete.append(item)
-        print(list_need_to_delete)
         return list_need_to_delete
 
     def read_selected_rows_from_excel(self, file_path, rows_to_skip: int, rows_to_read: int):

@@ -179,30 +179,26 @@ class OtomotoManager:
         list_check_need_to_edit = []
         list_ready_to_create = []
         with open('/tmp/adverts_dict.json', 'r') as json_file:
-            adverts_dict = json.load(json_file)
+            adverts_dict: dict = json.load(json_file)
 
-        for in_stock_id in in_stock:
-            otomoto_id = in_stock_id["наявність на складі"]
-            if otomoto_id in adverts_dict:
-                list_check_need_to_edit.append(in_stock_id)
+        for item in in_stock:
+            in_stock_id = str(item["номер на складі"])
+            if in_stock_id in adverts_dict.keys():
+                list_check_need_to_edit.append(item)
             else:
-                list_ready_to_create.append(in_stock_id)
+                list_ready_to_create.append(item)
         return list_check_need_to_edit, list_ready_to_create
 
-    def create_list_need_to_delete(self, out_of_stock: list[DataFrame]) -> list[DataFrame]:
+    def create_list_need_to_delete(self, out_of_stock: list[DataFrame], whole_table: DataFrame) -> list[DataFrame]:
         list_need_to_delete = []
         with open('/tmp/adverts_dict.json', 'r') as json_file:
-            adverts_dict = json.load(json_file)
-
-        # for item in out_of_stock:
-        #     id_otomoto = item['ID otomoto']
-        #     if pd.notna(id_otomoto) and id_otomoto != '0' and id_otomoto != '' and id_otomoto != 0:
-        #         list_need_to_delete.append(item)
-        # print(list_need_to_delete)
+            adverts_dict: dict = json.load(json_file)
 
         for item in out_of_stock:
-            in_stock_id = item['наявність на складі']
-            if in_stock_id in adverts_dict:
+            in_stock_id = str(item['номер на складі'])
+            if in_stock_id in adverts_dict.keys():
+                if any((whole_table['номер на складі'].astype(str) == int(in_stock_id)) & (whole_table['наявність на складі'] == 1)):
+                    continue
                 list_need_to_delete.append(item)
         return list_need_to_delete
 
@@ -313,7 +309,7 @@ class OtomotoManager:
         if not self.one_drive_manager.is_list_folder_created():
             self.one_drive_manager.create_lists_folder()
             in_stock, out_of_stock, invalid_quantity = self.create_lists_of_produts(self.df1)
-            list_need_to_delete = self.create_list_need_to_delete(out_of_stock=out_of_stock)
+            list_need_to_delete = self.create_list_need_to_delete(out_of_stock=out_of_stock, whole_table=self.df1)
             list_check_need_to_edit, list_ready_to_create = self.create_list_need_to_create(in_stock)
 
             ready_to_create_path = "/tmp/ready_to_create.txt"
@@ -365,16 +361,16 @@ class OtomotoManager:
         self.create_lists()
         twenty_adverts_from_ready_to_create = self.create_df_from_ready_to_create(df1)
         # add variable for twenty_adverts_from_ready_to_create.empty
-        if not twenty_adverts_from_ready_to_create.empty:
-            print(f"adverts to create:", len(twenty_adverts_from_ready_to_create))
-            self._create_basic_report(message=f"adverts to create: {len(twenty_adverts_from_ready_to_create)}")
-            self._create_basic_report(message=str(twenty_adverts_from_ready_to_create))
-            self._post_adverts(list_ready_to_create=twenty_adverts_from_ready_to_create)
-        else:
-            is_any_deleted = self.delete_adverts(df1)
-        if twenty_adverts_from_ready_to_create.empty and not is_any_deleted:
-            self.create_reports_from_base()
-            self.excel_handler.update_excel_from_success_report(self.one_drive_manager.current_day)
+        # if not twenty_adverts_from_ready_to_create.empty:
+        #     print(f"adverts to create:", len(twenty_adverts_from_ready_to_create))
+        #     self._create_basic_report(message=f"adverts to create: {len(twenty_adverts_from_ready_to_create)}")
+        #     self._create_basic_report(message=str(twenty_adverts_from_ready_to_create))
+        #     self._post_adverts(list_ready_to_create=twenty_adverts_from_ready_to_create)
+        # else:
+        #     is_any_deleted = self.delete_adverts(df1)
+        # if twenty_adverts_from_ready_to_create.empty and not is_any_deleted:
+        #     self.create_reports_from_base()
+        #     self.excel_handler.update_excel_from_success_report(self.one_drive_manager.current_day)
         print("Working is done")
         return self
 

@@ -197,7 +197,7 @@ class OtomotoManager:
         for item in out_of_stock:
             in_stock_id = str(item['номер на складі'])
             if in_stock_id in adverts_dict.keys():
-                if any((whole_table['номер на складі'].astype(str) == int(in_stock_id)) & (whole_table['наявність на складі'] == 1)):
+                if any((whole_table['номер на складі'].astype(str) == in_stock_id) & (whole_table['наявність на складі'] == 1)):
                     continue
                 list_need_to_delete.append(item)
         return list_need_to_delete
@@ -222,78 +222,81 @@ class OtomotoManager:
         self.one_drive_manager.upload_file_to_onedrive(file_path=uploaded_list_path,
                                                        path_after_current_day="Lists")
 
-    # def create_page(self):
-    #     file_content = self.excel_handler.get_exel_file(self.file_name)
-    #     # create file
-    #     self.excel_handler.create_file_on_data(file_content=file_content, file_name=self.file_name)
-    #     self.excel_handler.create_file_on_data(file_content=file_content, file_name="Excel working data table.xlsx")
-    #
-    #     main_excel_file_path = self.excel_handler.get_file_path(file_name=self.file_name)
-    #     self.df1 = pd.read_excel(main_excel_file_path)  # file to read
-    #     # self.df2 = pd.read_excel(main_excel_file_path) # file to write
-    #     self.working_data_table = self.read_selected_rows_from_excel(file_path=main_excel_file_path,
-    #                                                                  rows_to_skip=ROWS_TO_SKIP,
-    #                                                                  rows_to_read=ROWS_TO_READ)
-    #     # print(self.working_data_table.values)
-    #     in_stock, out_of_stock, invalid_quantity = self.create_lists_of_produts(self.working_data_table)
-    #     list_check_need_to_edit, list_ready_to_create = self.create_list_need_to_create(in_stock)
-    #     print(f"adverts to create:", len(list_ready_to_create))
-    #     self._create_basic_report(message=f"adverts to create: {len(list_ready_to_create)}")
-    #     self._create_basic_report(message=str(list_ready_to_create))
-    #     self._post_adverts(list_ready_to_create)
-
     # rewrite to dict
-    def delete_adverts(self, df: DataFrame) -> bool:
-        is_any_deleted = False
-        list_need_to_delete_path = "/tmp/list_need_to_delete.txt"
-        if not os.path.exists(list_need_to_delete_path):
-            self.one_drive_manager.download_file_to_tmp(path=f"/Holland/Reports/{self.one_drive_manager.current_day}/Lists/list_need_to_delete.txt",
-                                                        file_name="list_need_to_delete.txt")
-        with open(list_need_to_delete_path, "r+") as file:
-            lines = file.readlines()
-            file.seek(0)
-
-            with open(list_need_to_delete_path, "w") as file:
-                for line in lines:
-                    if "+" in line or "-" in line or "номер на складі" in line:
-                        continue
-                    else:
-                        is_any_deleted = True
-                        number_in_stock = str(line.strip())
-                        filtered_df = df[(df['номер на складі'].astype(str) == number_in_stock) & (df['ID otomoto'].notna())]
-                        if not filtered_df.empty:
-                            id_otomoto_value = str(int(filtered_df.iloc[0]['ID otomoto']))
-                            response = self.otomoto_api.delete_advert(advert_id=id_otomoto_value,
-                                                                      number_in_stock=number_in_stock)
-                            if response.status_code == 204:
-                                self._create_basic_report(message=f"{id_otomoto_value} + is deleted")
-                                updated_line = number_in_stock + " +\n"
-                                file.write(updated_line)
-                                df.loc[filtered_df.index, 'ID otomoto'] = None
-                            else:
-                                updated_line = number_in_stock + " -\n"
-                                self._create_basic_report(message=f"{id_otomoto_value} + is not deleted")
-                                file.write(updated_line)
-                        else:
-                            file.write(line)
-        self.one_drive_manager.upload_file_to_onedrive(file_path=list_need_to_delete_path,
-                                                       path_after_current_day="Lists")
-        self.one_drive_manager.upload_file_to_onedrive(file_path=REPORT_FILE_PATH)
-        self.one_drive_manager.upload_file_to_onedrive(file_path="/tmp/adverts_dict.json",
-                                                       onedrive_path="Holland/API-Spaceplus")
-        return is_any_deleted
+    # def delete_adverts(self, df: DataFrame) -> bool:
+    #     is_any_deleted = False
+    #     list_need_to_delete_path = "/tmp/list_need_to_delete.txt"
+    #     if not os.path.exists(list_need_to_delete_path):
+    #         self.one_drive_manager.download_file_to_tmp(path=f"/Holland/Reports/{self.one_drive_manager.current_day}/Lists/list_need_to_delete.txt",
+    #                                                     file_name="list_need_to_delete.txt")
+    #     with open(list_need_to_delete_path, "r+") as file:
+    #         lines = file.readlines()
+    #         file.seek(0)
+    #
+    #         with open(list_need_to_delete_path, "w") as file:
+    #             for line in lines:
+    #                 if "+" in line or "-" in line or "номер на складі" in line:
+    #                     continue
+    #                 else:
+    #                     is_any_deleted = True
+    #                     number_in_stock = str(line.strip())
+    #                     filtered_df = df[(df['номер на складі'].astype(str) == number_in_stock) & (df['ID otomoto'].notna())]
+    #                     if not filtered_df.empty:
+    #                         id_otomoto_value = str(int(filtered_df.iloc[0]['ID otomoto']))
+    #                         response = self.otomoto_api.delete_advert(advert_id=id_otomoto_value,
+    #                                                                   number_in_stock=number_in_stock)
+    #                         if response.status_code == 204:
+    #                             self._create_basic_report(message=f"{id_otomoto_value} + is deleted")
+    #                             updated_line = number_in_stock + " +\n"
+    #                             file.write(updated_line)
+    #                             df.loc[filtered_df.index, 'ID otomoto'] = None
+    #                         else:
+    #                             updated_line = number_in_stock + " -\n"
+    #                             self._create_basic_report(message=f"{id_otomoto_value} + is not deleted")
+    #                             file.write(updated_line)
+    #                     else:
+    #                         file.write(line)
+    #     self.one_drive_manager.upload_file_to_onedrive(file_path=list_need_to_delete_path,
+    #                                                    path_after_current_day="Lists")
+    #     self.one_drive_manager.upload_file_to_onedrive(file_path=REPORT_FILE_PATH)
+    #     self.one_drive_manager.upload_file_to_onedrive(file_path="/tmp/adverts_dict.json",
+    #                                                    onedrive_path="Holland/API-Spaceplus")
+    #     return is_any_deleted
         # update excel file
 
+    def find_current_line_in_json(self, json_file_path, current_line):
+        try:
+            with open(json_file_path, 'r') as json_file:
+                data = json.load(json_file)
 
-        # with open(file_path, "r") as file:
-        #     lines = file.readlines()
-        #
-        # with open(file_path, "w") as file:
-        #     for line in lines:
-        #         if number_in_stock in line:
-        #             line = line.rstrip('\n ') + char + '\n'
-        #         file.write(line)
+            for key, value in data.items():
+                if current_line == value:
+                    return key
 
+        except Exception as e:
+            print(f'Cant find in json: {e}')
+
+    def delete_adverts(self) -> bool:
+        is_deleted = False
+        if not os.path.exists("/tmp/list_need_to_delete.txt"):
+            self.one_drive_manager.download_file_to_tmp(path=f"/Holland/Reports/{self.one_drive_manager.current_day}/Lists/list_need_to_delete.txt",
+                                                        file_name="list_need_to_delete.txt")
+
+        if not os.path.exists("/tmp/adverts_dict.json"):
+            self.one_drive_manager.download_file_to_tmp(path="/Holland/API-Spaceplus/adverts_dict.json",
+                                                        file_name="adverts_dict.json")
+
+        with open("/tmp/list_need_to_delete.txt", "r") as otomoto_id_del:
+            lines = otomoto_id_del.readlines()
+        for line in lines:
+            current_line = line.strip()
+            number_in_stock = self.find_current_line_in_json(json_file_path="/tmp/adverts_dict.json",
+                                                             current_line=current_line)
+            response = self.otomoto_api.delete_advert(advert_id=current_line, number_in_stock=number_in_stock)
+        self.one_drive_manager.upload_file_to_onedrive(file_path="/tmp/adverts_dict.json",
+                                                       onedrive_path="Holland/API-Spaceplus")
+
+        return is_deleted
     def create_lists(self):
         file_content = self.excel_handler.get_exel_file(self.file_name)
         # create file
@@ -361,16 +364,16 @@ class OtomotoManager:
         self.create_lists()
         twenty_adverts_from_ready_to_create = self.create_df_from_ready_to_create(df1)
         # add variable for twenty_adverts_from_ready_to_create.empty
-        # if not twenty_adverts_from_ready_to_create.empty:
-        #     print(f"adverts to create:", len(twenty_adverts_from_ready_to_create))
-        #     self._create_basic_report(message=f"adverts to create: {len(twenty_adverts_from_ready_to_create)}")
-        #     self._create_basic_report(message=str(twenty_adverts_from_ready_to_create))
-        #     self._post_adverts(list_ready_to_create=twenty_adverts_from_ready_to_create)
-        # else:
-        #     is_any_deleted = self.delete_adverts(df1)
-        # if twenty_adverts_from_ready_to_create.empty and not is_any_deleted:
-        #     self.create_reports_from_base()
-        #     self.excel_handler.update_excel_from_success_report(self.one_drive_manager.current_day)
+        if not twenty_adverts_from_ready_to_create.empty:
+            print(f"adverts to create:", len(twenty_adverts_from_ready_to_create))
+            self._create_basic_report(message=f"adverts to create: {len(twenty_adverts_from_ready_to_create)}")
+            self._create_basic_report(message=str(twenty_adverts_from_ready_to_create))
+            self._post_adverts(list_ready_to_create=twenty_adverts_from_ready_to_create)
+        else:
+            is_any_deleted = self.delete_adverts(df1)
+        if twenty_adverts_from_ready_to_create.empty and not is_any_deleted:
+            self.create_reports_from_base()
+            self.excel_handler.update_excel_from_success_report(self.one_drive_manager.current_day)
         print("Working is done")
         return self
 

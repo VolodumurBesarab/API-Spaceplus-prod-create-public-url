@@ -280,4 +280,3 @@ class OtomotoApi:
         else:
             error = ("Error:", response.status_code, response.text)
             return str(error)
-

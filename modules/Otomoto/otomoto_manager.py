@@ -288,11 +288,23 @@ class OtomotoManager:
 
         with open("/tmp/list_need_to_delete.txt", "r") as otomoto_id_del:
             lines = otomoto_id_del.readlines()
+
+        updated_lines = []
+
         for line in lines:
             current_line = line.strip()
             number_in_stock = self.find_current_line_in_json(json_file_path="/tmp/adverts_dict.json",
                                                              current_line=current_line)
             response = self.otomoto_api.delete_advert(advert_id=current_line, number_in_stock=number_in_stock)
+            print(f"{response.status_code} : {current_line}")
+            if response.status_code == 204:
+                is_deleted = True
+                updated_lines.append(f"{current_line} +")
+            else:
+                updated_lines.append(f"{current_line} -")
+
+        with open("/tmp/list_need_to_delete.txt", "w") as otomoto_id_del:
+            otomoto_id_del.writelines(updated_lines)
         self.one_drive_manager.upload_file_to_onedrive(file_path="/tmp/adverts_dict.json",
                                                        onedrive_path="Holland/API-Spaceplus")
 
@@ -373,7 +385,7 @@ class OtomotoManager:
             is_any_deleted = self.delete_adverts()
         if twenty_adverts_from_ready_to_create.empty and not is_any_deleted:
             self.create_reports_from_base()
-            self.excel_handler.update_excel_from_success_report(self.one_drive_manager.current_day)
+            # self.excel_handler.update_excel_from_success_report(self.one_drive_manager.current_day)
         print("Working is done")
         return self
 

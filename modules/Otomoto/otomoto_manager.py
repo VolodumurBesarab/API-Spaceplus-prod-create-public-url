@@ -234,6 +234,9 @@ class OtomotoManager:
         if not os.path.exists("/tmp/list_need_to_delete.txt"):
             self.one_drive_manager.download_file_to_tmp(path=f"/Holland/Reports/{self.one_drive_manager.current_day}/Lists/list_need_to_delete.txt",
                                                         file_name="list_need_to_delete.txt")
+        if not os.path.exists("/tmp/list_need_to_delete.txt"):
+            self.one_drive_manager.download_file_to_tmp(path=f"/Holland/Reports/{self.one_drive_manager.current_day}/Lists/list_need_to_delete.txt",
+                                                        file_name="list_need_to_delete.txt")
 
         if not os.path.exists("/tmp/adverts_dict.json"):
             self.one_drive_manager.download_file_to_tmp(path="/Holland/API-Spaceplus/adverts_dict.json",
@@ -260,6 +263,8 @@ class OtomotoManager:
             otomoto_id_del.writelines(updated_lines)
         self.one_drive_manager.upload_file_to_onedrive(file_path="/tmp/adverts_dict.json",
                                                        onedrive_path="Holland/API-Spaceplus")
+        self.one_drive_manager.upload_file_to_onedrive(file_path="/tmp/list_need_to_delete.txt",
+                                                       path_after_current_day="Lists")
 
         return is_deleted
     def create_lists(self):

@@ -249,15 +249,15 @@ class OtomotoManager:
 
         for line in lines:
             current_line = line.strip()
-            number_in_stock = self.find_current_line_in_json(json_file_path="/tmp/adverts_dict.json",
-                                                             current_line=current_line)
-            response = self.otomoto_api.delete_advert(advert_id=current_line, number_in_stock=number_in_stock)
+            otomoto_id = self.find_current_line_in_json(json_file_path="/tmp/adverts_dict.json",
+                                                        current_line=current_line)
+            response = self.otomoto_api.delete_advert(in_stock_id=current_line, otomoto_id=otomoto_id)
             print(f"{response.status_code} : {current_line}")
             if response.status_code == 204:
                 is_deleted = True
-                updated_lines.append(f"{current_line} +")
+                updated_lines.append(f"{current_line} +\n")
             else:
-                updated_lines.append(f"{current_line} -")
+                updated_lines.append(f"{current_line} -\n")
 
         with open("/tmp/list_need_to_delete.txt", "w") as otomoto_id_del:
             otomoto_id_del.writelines(updated_lines)

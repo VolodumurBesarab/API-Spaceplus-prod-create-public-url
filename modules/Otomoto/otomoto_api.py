@@ -232,12 +232,12 @@ class OtomotoApi:
         else:
             print(f'Ключ "{key_to_delete}" не знайдено в файлі.')
 
-    def delete_advert(self, advert_id, number_in_stock) -> Response:
-        url = self.base_url + f"adverts/{advert_id}"
+    def delete_advert(self, in_stock_id, otomoto_id) -> Response:
+        url = self.base_url + f"adverts/{otomoto_id}"
         response = requests.delete(url=url, headers=self._get_basic_headers(self.get_token()))
         if response.status_code == 204:
             json_file_path = "/tmp/adverts_dict.json"
-            self.delete_and_save_in_json(json_file_path=json_file_path, key_to_delete=number_in_stock)
+            self.delete_and_save_in_json(json_file_path=json_file_path, key_to_delete=in_stock_id)
         return response
 
     def create_otomoto_advert(self, product_id, title, description: str, price, new_used, manufacturer) -> str:

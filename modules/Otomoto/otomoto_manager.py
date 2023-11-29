@@ -115,13 +115,8 @@ class OtomotoManager:
             file.write(message + "\n")
         return file_path
 
-    def _post_adverts(self, list_ready_to_create: DataFrame):
-        # adverts_dict = self._convert_adverts_to_dict(list_ready_to_create)
+    def _post_adverts(self, list_ready_to_create: DataFrame): 
         for index, row in list_ready_to_create.iterrows():
-            # if (item.get("номер на складі") == 0 and item.get("title") == 0 and item.get(
-            #         "description") == 0 and item.get("price") == 0 and item.get("new_used") == 0 and item.get(
-            #     "manufacturer")):
-            #     return
             nubmer_in_stock = row.get("номер на складі")
             try:
                 created_advert_id = self.otomoto_api.create_otomoto_advert(product_id=row.get("номер на складі"),
@@ -222,55 +217,13 @@ class OtomotoManager:
         self.one_drive_manager.upload_file_to_onedrive(file_path=uploaded_list_path,
                                                        path_after_current_day="Lists")
 
-    # rewrite to dict
-    # def delete_adverts(self, df: DataFrame) -> bool:
-    #     is_any_deleted = False
-    #     list_need_to_delete_path = "/tmp/list_need_to_delete.txt"
-    #     if not os.path.exists(list_need_to_delete_path):
-    #         self.one_drive_manager.download_file_to_tmp(path=f"/Holland/Reports/{self.one_drive_manager.current_day}/Lists/list_need_to_delete.txt",
-    #                                                     file_name="list_need_to_delete.txt")
-    #     with open(list_need_to_delete_path, "r+") as file:
-    #         lines = file.readlines()
-    #         file.seek(0)
-    #
-    #         with open(list_need_to_delete_path, "w") as file:
-    #             for line in lines:
-    #                 if "+" in line or "-" in line or "номер на складі" in line:
-    #                     continue
-    #                 else:
-    #                     is_any_deleted = True
-    #                     number_in_stock = str(line.strip())
-    #                     filtered_df = df[(df['номер на складі'].astype(str) == number_in_stock) & (df['ID otomoto'].notna())]
-    #                     if not filtered_df.empty:
-    #                         id_otomoto_value = str(int(filtered_df.iloc[0]['ID otomoto']))
-    #                         response = self.otomoto_api.delete_advert(advert_id=id_otomoto_value,
-    #                                                                   number_in_stock=number_in_stock)
-    #                         if response.status_code == 204:
-    #                             self._create_basic_report(message=f"{id_otomoto_value} + is deleted")
-    #                             updated_line = number_in_stock + " +\n"
-    #                             file.write(updated_line)
-    #                             df.loc[filtered_df.index, 'ID otomoto'] = None
-    #                         else:
-    #                             updated_line = number_in_stock + " -\n"
-    #                             self._create_basic_report(message=f"{id_otomoto_value} + is not deleted")
-    #                             file.write(updated_line)
-    #                     else:
-    #                         file.write(line)
-    #     self.one_drive_manager.upload_file_to_onedrive(file_path=list_need_to_delete_path,
-    #                                                    path_after_current_day="Lists")
-    #     self.one_drive_manager.upload_file_to_onedrive(file_path=REPORT_FILE_PATH)
-    #     self.one_drive_manager.upload_file_to_onedrive(file_path="/tmp/adverts_dict.json",
-    #                                                    onedrive_path="Holland/API-Spaceplus")
-    #     return is_any_deleted
-        # update excel file
-
     def find_current_line_in_json(self, json_file_path, current_line):
         try:
             with open(json_file_path, 'r') as json_file:
                 data = json.load(json_file)
 
             for key, value in data.items():
-                if current_line == value:
+                if str(current_line) == str(value):
                     return key
 
         except Exception as e:

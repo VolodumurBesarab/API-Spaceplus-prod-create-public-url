@@ -217,14 +217,14 @@ class OtomotoManager:
         self.one_drive_manager.upload_file_to_onedrive(file_path=uploaded_list_path,
                                                        path_after_current_day="Lists")
 
-    def find_current_line_in_json(self, json_file_path, current_line):
+    def find_current_line_in_json(self, json_file_path, current_line: str):
         try:
             with open(json_file_path, 'r') as json_file:
                 data = json.load(json_file)
 
             for key, value in data.items():
-                if str(current_line) == str(value):
-                    return key
+                if str(current_line) == str(key):
+                    return value
 
         except Exception as e:
             print(f'Cant find in json: {e}')

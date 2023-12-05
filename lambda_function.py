@@ -12,7 +12,7 @@ def lambda_handler(event, context):
     # otomoto_manager.create_next_twenty_adverts()
     client = boto3.client('lambda')
     response = client.invoke(
-        FunctionName='prod-spaceplus-create-adverts',
+        FunctionName='prod-spaceplus-create-advert',
         InvocationType='Event',
         Payload='{}',
         Qualifier='1',
@@ -25,4 +25,4 @@ def lambda_handler(event, context):
     }
 
 
-# lambda_handler(event=None, context=None)
+lambda_handler(event=None, context=None)

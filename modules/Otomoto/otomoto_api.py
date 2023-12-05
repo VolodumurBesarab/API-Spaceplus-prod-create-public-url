@@ -63,7 +63,7 @@ class OtomotoApi:
 
     def print_adverts_list(self, access_token):
         url = self._get_basic_url()
-        limit = 10
+        limit = 1000
         page = 1
 
         headers = self._get_basic_headers(access_token)
@@ -74,11 +74,12 @@ class OtomotoApi:
         }
 
         response = requests.get(url, headers=headers, params=params)
-
         if response.status_code == 200:
             adverts_data = response.json()
+            ids = [result["id"] for result in adverts_data["results"]]
             # Process the adverts_data as needed
-            print("Adverts data:", adverts_data)
+            # print("Adverts data:", adverts_data)
+            print(ids)
         else:
             print("Error:", response.status_code, response.text)
 
@@ -234,6 +235,7 @@ class OtomotoApi:
 
     def delete_advert(self, in_stock_id, otomoto_id) -> Response:
         url = self.base_url + f"adverts/{otomoto_id}"
+        print(url)
         response = requests.delete(url=url, headers=self._get_basic_headers(self.get_token()))
         if response.status_code == 204:
             json_file_path = "/tmp/adverts_dict.json"

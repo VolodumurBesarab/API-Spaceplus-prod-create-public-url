@@ -3,6 +3,7 @@ from datetime import datetime
 import os
 from datetime import date
 
+import boto3
 import pandas as pd
 from pandas import DataFrame
 
@@ -115,7 +116,7 @@ class OtomotoManager:
             file.write(message + "\n")
         return file_path
 
-    def _post_adverts(self, list_ready_to_create: DataFrame): 
+    def _post_adverts(self, list_ready_to_create: DataFrame):
         for index, row in list_ready_to_create.iterrows():
             nubmer_in_stock = row.get("номер на складі")
             try:
@@ -333,19 +334,27 @@ class OtomotoManager:
         df1 = pd.read_excel(main_excel_file_path)  # file to read
         self.create_lists()
         twenty_adverts_from_ready_to_create = self.create_df_from_ready_to_create(df1)
+        client = boto3.client('lambda')
+        response = client.invoke(
+            FunctionName='prod-spaceplus-create-advetrs',
+            Payload='{}',
+            Qualifier='1',
+        )
+        print(response)
+        print(response.json)
         # add variable for twenty_adverts_from_ready_to_create.empty
-        if not twenty_adverts_from_ready_to_create.empty:
-            print(f"adverts to create:", len(twenty_adverts_from_ready_to_create))
-            self._create_basic_report(message=f"adverts to create: {len(twenty_adverts_from_ready_to_create)}")
-            self._create_basic_report(message=str(twenty_adverts_from_ready_to_create))
-            self._post_adverts(list_ready_to_create=twenty_adverts_from_ready_to_create)
-        else:
-            is_any_deleted = self.delete_adverts()
-        if twenty_adverts_from_ready_to_create.empty and not is_any_deleted:
-            self.create_reports_from_base()
-            # self.excel_handler.update_excel_from_success_report(self.one_drive_manager.current_day)
-        print("Working is done")
-        return self
+        # if not twenty_adverts_from_ready_to_create.empty:
+        #     print(f"adverts to create:", len(twenty_adverts_from_ready_to_create))
+        #     self._create_basic_report(message=f"adverts to create: {len(twenty_adverts_from_ready_to_create)}")
+        #     self._create_basic_report(message=str(twenty_adverts_from_ready_to_create))
+        #     self._post_adverts(list_ready_to_create=twenty_adverts_from_ready_to_create)
+        # else:
+        #     is_any_deleted = self.delete_adverts()
+        # if twenty_adverts_from_ready_to_create.empty and not is_any_deleted:
+        #     self.create_reports_from_base()
+        #     # self.excel_handler.update_excel_from_success_report(self.one_drive_manager.current_day)
+        # print("Working is done")
+        # return self
 
     def create_list_to_create_in_s3(self):
         file_content = self.excel_handler.get_exel_file(self.file_name)

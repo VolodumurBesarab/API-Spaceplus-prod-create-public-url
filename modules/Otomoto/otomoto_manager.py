@@ -1,4 +1,5 @@
 import json
+import math
 from datetime import datetime
 import os
 from datetime import date
@@ -121,13 +122,16 @@ class OtomotoManager:
             nubmer_in_stock = row.get("номер на складі")
             try:
                 # call lambda here
+                manufacturer = row.get("manufacturer")
+                if manufacturer is None or math.isnan(manufacturer):
+                    manufacturer = "oryginalny"
                 advert_dict = {
                     "product_id": row.get("номер на складі"),
                     "title": row.get("title"),
                     "description": row.get("description"),
                     "price": row.get("price"),
                     "new_used": row.get("new_used"),
-                    "manufacturer": row.get("manufacturer"),
+                    "manufacturer": manufacturer,
                 }
                 advert_json = json.dumps(advert_dict)
 
@@ -347,7 +351,7 @@ class OtomotoManager:
                                                     file_name="adverts_dict.json")
         df1 = pd.read_excel(main_excel_file_path)  # file to read
         self.create_lists()
-        twenty_adverts_from_ready_to_create = self.create_drom_ready_to_create(df1)
+        twenty_adverts_from_ready_to_create = self.create_df_from_ready_to_create(df1)
         # add variable for twenty_adverts_from_ready_to_create.empty
         if not twenty_adverts_from_ready_to_create.empty:
             print(f"adverts to create:", len(twenty_adverts_from_ready_to_create))

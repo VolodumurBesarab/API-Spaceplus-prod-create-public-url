@@ -120,26 +120,40 @@ class OtomotoManager:
         for index, row in list_ready_to_create.iterrows():
             nubmer_in_stock = row.get("номер на складі")
             try:
-                created_advert_id = self.otomoto_api.create_otomoto_advert(product_id=row.get("номер на складі"),
-                                                                           title=row.get("title"),
-                                                                           description=row.get("description"),
-                                                                           price=row.get("price"),
-                                                                           new_used=row.get("new_used"),
-                                                                           manufacturer=row.get("manufacturer"))
-                if "Error:" in created_advert_id:
-                    message = f"{nubmer_in_stock}, {created_advert_id}"
-                    self._create_basic_report(message=message)
-                    self.set_char_by_number_in_stock(number_in_stock=str(nubmer_in_stock), char="-")
-                    # list_of_errors.append((item.get("номер на складі"), created_advert_id))
-                else:
-                    message = f"{nubmer_in_stock}, Advert successfully posted with ID: {created_advert_id}"
-                    self._create_basic_report(message=message)
-                    self.set_char_by_number_in_stock(number_in_stock=str(nubmer_in_stock), char="+")
-                    # excel_file_path = EXCEL_FILE_PATH
-                    # self.excel_handler.set_otomoto_id_by_storage_id(df=self.working_data_table,
-                    #                                                 otomoto_id=created_advert_id,
-                    #                                                 storage_id=nubmer_in_stock,
-                    #                                                 excel_file_path=excel_file_path)
+                # call lambda here
+                advert_dict = {
+                    "product_id": row.get("номер на складі"),
+                    "title": row.get("title"),
+                    "description": row.get("description"),
+                    "price": row.get("price"),
+                    "new_used": row.get("new_used"),
+                    "manufacturer": row.get("manufacturer"),
+                }
+                advert_json = json.dumps(advert_dict)
+
+                client = boto3.client('lambda')
+                response = client.invoke(
+                    FunctionName='prod-spaceplus-create-advert',
+                    InvocationType='Event',
+                    Payload=advert_json,
+                )
+                print(response)
+
+                # created_advert_id = self.otomoto_api.create_otomoto_advert(product_id=row.get("номер на складі"),
+                #                                                            title=row.get("title"),
+                #                                                            description=row.get("description"),
+                #                                                            price=row.get("price"),
+                #                                                            new_used=row.get("new_used"),
+                #                                                            manufacturer=row.get("manufacturer"))
+                # if "Error:" in created_advert_id:
+                #     message = f"{nubmer_in_stock}, {created_advert_id}"
+                #     self._create_basic_report(message=message)
+                #     self.set_char_by_number_in_stock(number_in_stock=str(nubmer_in_stock), char="-")
+                #     # list_of_errors.append((item.get("номер на складі"), created_advert_id))
+                # else:
+                #     message = f"{nubmer_in_stock}, Advert successfully posted with ID: {created_advert_id}"
+                #     self._create_basic_report(message=message)
+                #     self.set_char_by_number_in_stock(number_in_stock=str(nubmer_in_stock), char="+")
 
             except Exception as e:
                 print(f"Error with create advert {nubmer_in_stock}: {e}")
@@ -333,7 +347,7 @@ class OtomotoManager:
                                                     file_name="adverts_dict.json")
         df1 = pd.read_excel(main_excel_file_path)  # file to read
         self.create_lists()
-        twenty_adverts_from_ready_to_create = self.create_df_from_ready_to_create(df1)
+        twenty_adverts_from_ready_to_create = self.create_drom_ready_to_create(df1)
         # add variable for twenty_adverts_from_ready_to_create.empty
         if not twenty_adverts_from_ready_to_create.empty:
             print(f"adverts to create:", len(twenty_adverts_from_ready_to_create))

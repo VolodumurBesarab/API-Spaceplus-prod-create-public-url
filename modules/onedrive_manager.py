@@ -48,6 +48,29 @@ class OneDriveManager:
             print(f"Сталася помилка при завантаженні файлу на OneDrive!. {response.text}")
         return response
 
+    def download_basic_reports_to_tmp(self):
+        folder_path = "/tmp/text_reports"
+        if not os.path.exists(folder_path):
+            os.makedirs(folder_path)
+
+        onedrive_path = f"Holland/Reports/{self.current_day}/Base reports"
+        url = self.endpoint + f"drive/items/root:/{onedrive_path}:/children"
+        response = requests.get(url,
+                                headers=self.auth_manager.get_default_header(access_token=self.access_token))
+        response_json = response.json()
+        for item in response_json["value"]:
+            if "basic_report" in item["name"]:
+                download_url = item['@microsoft.graph.downloadUrl']
+                print(f"({item['name']}, {item['@microsoft.graph.downloadUrl']}")
+                local_file_path = f"{folder_path}/{item['name']}"
+                response = requests.get(download_url)
+
+                if response.status_code == 200:
+                    with open(local_file_path, 'wb') as file:
+                        file.write(response.content)
+                else:
+                    print(f"Error with download bacis report. HTTP status code: {response.status_code}")
+
     def get_root_folder_json(self, one_drive_url, headers):
         result = requests.get(url=one_drive_url, headers=headers)
         return result.json()

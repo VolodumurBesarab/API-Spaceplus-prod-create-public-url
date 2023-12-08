@@ -141,7 +141,7 @@ class OtomotoManager:
                     InvocationType='Event',
                     Payload=advert_json,
                 )
-                print(response)
+                print(response["StatusCode"], row.get("номер на складі"))
 
                 # created_advert_id = self.otomoto_api.create_otomoto_advert(product_id=row.get("номер на складі"),
                 #                                                            title=row.get("title"),
@@ -152,42 +152,42 @@ class OtomotoManager:
                 # if "Error:" in created_advert_id:
                 #     message = f"{nubmer_in_stock}, {created_advert_id}"
                 #     self._create_basic_report(message=message)
-                #     self.set_char_by_number_in_stock(number_in_stock=str(nubmer_in_stock), char="-")
+                #      self.set_char_by_number_in_stock(number_in_stock=str(nubmer_in_stock), char="-")
                 #     # list_of_errors.append((item.get("номер на складі"), created_advert_id))
                 # else:
                 #     message = f"{nubmer_in_stock}, Advert successfully posted with ID: {created_advert_id}"
                 #     self._create_basic_report(message=message)
                 #     self.set_char_by_number_in_stock(number_in_stock=str(nubmer_in_stock), char="+")
 
-            except Exception as e:
-                print(f"Error with create advert {nubmer_in_stock}: {e}")
-                self._create_basic_report(f"Unexpected error {nubmer_in_stock} : {e}")
-
-        try:
-            reports_file_name = REPORT_FILE_PATH
-            self.one_drive_manager.upload_file_to_onedrive(file_path="/tmp/ready_to_create.txt",
-                                                           path_after_current_day="Lists")
-
-            self.one_drive_manager.upload_file_to_onedrive(file_path=reports_file_name,
-                                                           rows_to_read=ROWS_TO_READ,
-                                                           rows_to_skip=ROWS_TO_SKIP)
-
-            self.s3_link_generator.upload_file_to_s3(file_path=reports_file_name,
-                                                     rows_to_read=ROWS_TO_READ,
-                                                     rows_to_skip=ROWS_TO_SKIP)
-        except Exception as e:
-            print(e)
-
-        try:
-            file_path = EXCEL_FILE_PATH
-            self.one_drive_manager.upload_file_to_onedrive(file_path=file_path,
-                                                           rows_to_read=ROWS_TO_READ,
-                                                           rows_to_skip=ROWS_TO_SKIP)
-            self.s3_link_generator.upload_file_to_s3(file_path=file_path,
-                                                     rows_to_read=ROWS_TO_READ,
-                                                     rows_to_skip=ROWS_TO_SKIP)
-        except Exception as e:
-            print(e)
+        #     except Exception as e:
+        #         print(f"Error with create advert {nubmer_in_stock}: {e}")
+        #         self._create_basic_report(f"Unexpected error {nubmer_in_stock} : {e}")
+        #
+        # try:
+        #     reports_file_name = REPORT_FILE_PATH
+        #     self.one_drive_manager.upload_file_to_onedrive(file_path="/tmp/ready_to_create.txt",
+        #                                                    path_after_current_day="Lists")
+        #
+        #     self.one_drive_manager.upload_file_to_onedrive(file_path=reports_file_name,
+        #                                                    rows_to_read=ROWS_TO_READ,
+        #                                                    rows_to_skip=ROWS_TO_SKIP)
+        #
+        #     self.s3_link_generator.upload_file_to_s3(file_path=reports_file_name,
+        #                                              rows_to_read=ROWS_TO_READ,
+        #                                              rows_to_skip=ROWS_TO_SKIP)
+        # except Exception as e:
+        #     print(e)
+        #
+        # try:
+        #     file_path = EXCEL_FILE_PATH
+        #     self.one_drive_manager.upload_file_to_onedrive(file_path=file_path,
+        #                                                    rows_to_read=ROWS_TO_READ,
+        #                                                    rows_to_skip=ROWS_TO_SKIP)
+        #     self.s3_link_generator.upload_file_to_s3(file_path=file_path,
+        #                                              rows_to_read=ROWS_TO_READ,
+        #                                              rows_to_skip=ROWS_TO_SKIP)
+        # except Exception as e:
+        #     print(e)
 
     def create_list_need_to_create(self, in_stock: list[DataFrame]) -> tuple[list[DataFrame], list[DataFrame]]:
         list_check_need_to_edit = []
@@ -321,23 +321,23 @@ class OtomotoManager:
         with open('/tmp/ready_to_create.txt', 'r') as file:
             lines = file.readlines()
 
-        counter = 0
+        # counter = 0
         in_stock_numbers = []
         for line in lines:
-            if counter >= adverts_create_in_one_time + 1:
-                break
-
-            if '+' in line or '-' in line:
-                continue
-            else:
-                counter += 1
+            # if counter >= adverts_create_in_one_time + 1:
+            #     break
+            #
+            # if '+' in line or '-' in line:
+            #     continue
+            # else:
+            #     counter += 1
             in_stock_numbers.append(line.strip())
 
         df1 = df[(df['номер на складі'].astype(str).isin(in_stock_numbers)) & (df['наявність на складі'] == 1)].reset_index(drop=True)
         # df1.to_excel('/tmp/df_from_ready_to_create.xlsx', index=False)  # Збереження у файл
         return df1
 
-    def create_next_twenty_adverts(self):
+    def create_all_adverts(self):
         is_any_deleted = False
         file_content = self.excel_handler.get_exel_file(self.file_name)
         # create file
@@ -351,16 +351,16 @@ class OtomotoManager:
                                                     file_name="adverts_dict.json")
         df1 = pd.read_excel(main_excel_file_path)  # file to read
         self.create_lists()
-        twenty_adverts_from_ready_to_create = self.create_df_from_ready_to_create(df1)
-        # add variable for twenty_adverts_from_ready_to_create.empty
-        if not twenty_adverts_from_ready_to_create.empty:
-            print(f"adverts to create:", len(twenty_adverts_from_ready_to_create))
-            self._create_basic_report(message=f"adverts to create: {len(twenty_adverts_from_ready_to_create)}")
-            self._create_basic_report(message=str(twenty_adverts_from_ready_to_create))
-            self._post_adverts(list_ready_to_create=twenty_adverts_from_ready_to_create)
-        else:
-            is_any_deleted = self.delete_adverts()
-        if twenty_adverts_from_ready_to_create.empty and not is_any_deleted:
+        all_adverts_from_ready_to_create = self.create_df_from_ready_to_create(df1)
+        # add variable for all_adverts_from_ready_to_create.empty
+        if not all_adverts_from_ready_to_create.empty:
+            print(f"adverts to create:", len(all_adverts_from_ready_to_create))
+            self._create_basic_report(message=f"adverts to create: {len(all_adverts_from_ready_to_create)}")
+            self._create_basic_report(message=str(all_adverts_from_ready_to_create))
+            self._post_adverts(list_ready_to_create=all_adverts_from_ready_to_create)
+        # else:
+        #     is_any_deleted = self.delete_adverts()
+        if all_adverts_from_ready_to_create.empty and not is_any_deleted:
             self.create_reports_from_base()
             # self.excel_handler.update_excel_from_success_report(self.one_drive_manager.current_day)
         print("Working is done")
@@ -425,8 +425,7 @@ class OtomotoManager:
             json.dump(merged_dict, output_file)
 
     def create_reports_from_base(self):
-        # folder_path = "D:\API-Spaceplus\\tmp\\text_reports4"
-        self.one_drive_manager.download_reports_to_tmp()
+        self.one_drive_manager.download_basic_reports_to_tmp()
 
         folder_path = "/tmp/text_reports"
 
@@ -445,8 +444,6 @@ class OtomotoManager:
                             error_lines.append(line)
                         elif "Unexpected" in line:
                             error_lines.append(line)
-
-        # Відредагувати дікшинарі
 
         successfully_file_path = "/tmp/successfully.txt"
         with open(successfully_file_path, 'w') as success_file:

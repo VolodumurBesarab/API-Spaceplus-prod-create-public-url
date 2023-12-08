@@ -120,28 +120,28 @@ class OtomotoManager:
     def _post_adverts(self, list_ready_to_create: DataFrame):
         for index, row in list_ready_to_create.iterrows():
             nubmer_in_stock = row.get("номер на складі")
-            try:
-                # call lambda here
-                manufacturer = row.get("manufacturer")
-                if manufacturer is None or math.isnan(manufacturer):
-                    manufacturer = "oryginalny"
-                advert_dict = {
-                    "product_id": row.get("номер на складі"),
-                    "title": row.get("title"),
-                    "description": row.get("description"),
-                    "price": row.get("price"),
-                    "new_used": row.get("new_used"),
-                    "manufacturer": manufacturer,
-                }
-                advert_json = json.dumps(advert_dict)
 
-                client = boto3.client('lambda')
-                response = client.invoke(
-                    FunctionName='prod-spaceplus-create-advert',
-                    InvocationType='Event',
-                    Payload=advert_json,
-                )
-                print(response["StatusCode"], row.get("номер на складі"))
+            # call lambda here
+            manufacturer = row.get("manufacturer")
+            if manufacturer is None or math.isnan(manufacturer):
+                manufacturer = "oryginalny"
+            advert_dict = {
+                "product_id": row.get("номер на складі"),
+                "title": row.get("title"),
+                "description": row.get("description"),
+                "price": row.get("price"),
+                "new_used": row.get("new_used"),
+                "manufacturer": manufacturer,
+            }
+            advert_json = json.dumps(advert_dict)
+
+            client = boto3.client('lambda')
+            response = client.invoke(
+                FunctionName='prod-spaceplus-create-advert',
+                InvocationType='Event',
+                Payload=advert_json,
+            )
+            print(response["StatusCode"], row.get("номер на складі"))
 
                 # created_advert_id = self.otomoto_api.create_otomoto_advert(product_id=row.get("номер на складі"),
                 #                                                            title=row.get("title"),
@@ -253,9 +253,6 @@ class OtomotoManager:
         if not os.path.exists("/tmp/list_need_to_delete.txt"):
             self.one_drive_manager.download_file_to_tmp(path=f"/Holland/Reports/{self.one_drive_manager.current_day}/Lists/list_need_to_delete.txt",
                                                         file_name="list_need_to_delete.txt")
-        if not os.path.exists("/tmp/list_need_to_delete.txt"):
-            self.one_drive_manager.download_file_to_tmp(path=f"/Holland/Reports/{self.one_drive_manager.current_day}/Lists/list_need_to_delete.txt",
-                                                        file_name="list_need_to_delete.txt")
 
         if not os.path.exists("/tmp/adverts_dict.json"):
             self.one_drive_manager.download_file_to_tmp(path="/Holland/API-Spaceplus/adverts_dict.json",
@@ -272,10 +269,18 @@ class OtomotoManager:
                                                         current_line=current_line)
             response = self.otomoto_api.delete_advert(in_stock_id=current_line, otomoto_id=otomoto_id)
             print(f"{response.status_code} : {current_line}")
+
+            file_path = "/tmp/deleted_report.txt"
+
+            with open(file_path, 'r') as file:
+                lines = file.readlines()
+
             if response.status_code == 204:
                 is_deleted = True
+                lines.append(f"{current_line}, {otomoto_id}, successfully deleted")
                 updated_lines.append(f"{current_line} +\n")
             else:
+                lines.append(f"{current_line}, {otomoto_id}, not deleted")
                 updated_lines.append(f"{current_line} -\n")
 
         with open("/tmp/list_need_to_delete.txt", "w") as otomoto_id_del:
@@ -284,6 +289,7 @@ class OtomotoManager:
                                                        onedrive_path="Holland/API-Spaceplus")
         self.one_drive_manager.upload_file_to_onedrive(file_path="/tmp/list_need_to_delete.txt",
                                                        path_after_current_day="Lists")
+        self.one_drive_manager.upload_file_to_onedrive(file_path="/tmp/deleted_report.txt")
 
         return is_deleted
     def create_lists(self):
@@ -358,10 +364,11 @@ class OtomotoManager:
             self._create_basic_report(message=f"adverts to create: {len(all_adverts_from_ready_to_create)}")
             self._create_basic_report(message=str(all_adverts_from_ready_to_create))
             self._post_adverts(list_ready_to_create=all_adverts_from_ready_to_create)
-        # else:
-        #     is_any_deleted = self.delete_adverts()
-        if all_adverts_from_ready_to_create.empty and not is_any_deleted:
-            self.create_reports_from_base()
+
+        is_any_deleted = self.delete_adverts()
+
+        # if all_adverts_from_ready_to_create.empty and not is_any_deleted:
+        #     self.create_reports_from_base()
             # self.excel_handler.update_excel_from_success_report(self.one_drive_manager.current_day)
         print("Working is done")
         return self

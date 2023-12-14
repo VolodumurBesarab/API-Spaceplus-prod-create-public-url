@@ -61,7 +61,6 @@ class OneDriveManager:
         for item in response_json["value"]:
             if "basic_report" in item["name"]:
                 download_url = item['@microsoft.graph.downloadUrl']
-                print(f"({item['name']}, {item['@microsoft.graph.downloadUrl']}")
                 local_file_path = f"{folder_path}/{item['name']}"
                 response = requests.get(download_url)
 

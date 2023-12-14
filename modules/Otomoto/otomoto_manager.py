@@ -258,6 +258,11 @@ class OtomotoManager:
             self.one_drive_manager.download_file_to_tmp(path="/Holland/API-Spaceplus/adverts_dict.json",
                                                         file_name="adverts_dict.json")
 
+        deleted_report_path = "/tmp/deleted_report.txt"
+        if not os.path.exists(deleted_report_path):
+            with open(deleted_report_path, 'w') as file:
+                file.writelines("Deleted report")
+
         with open("/tmp/list_need_to_delete.txt", "r") as otomoto_id_del:
             lines = otomoto_id_del.readlines()
 
@@ -270,17 +275,15 @@ class OtomotoManager:
             response = self.otomoto_api.delete_advert(in_stock_id=current_line, otomoto_id=otomoto_id)
             print(f"{response.status_code} : {current_line}")
 
-            file_path = "/tmp/deleted_report.txt"
-
-            with open(file_path, 'r') as file:
-                lines = file.readlines()
+            with open(deleted_report_path, 'r') as file:
+                deleted_report_path_lines = file.readlines()
 
             if response.status_code == 204:
                 is_deleted = True
-                lines.append(f"{current_line}, {otomoto_id}, successfully deleted")
+                deleted_report_path_lines.append(f"{current_line}, {otomoto_id}, successfully deleted")
                 updated_lines.append(f"{current_line} +\n")
             else:
-                lines.append(f"{current_line}, {otomoto_id}, not deleted")
+                deleted_report_path_lines.append(f"{current_line}, {otomoto_id}, not deleted")
                 updated_lines.append(f"{current_line} -\n")
 
         with open("/tmp/list_need_to_delete.txt", "w") as otomoto_id_del:
@@ -289,7 +292,7 @@ class OtomotoManager:
                                                        onedrive_path="Holland/API-Spaceplus")
         self.one_drive_manager.upload_file_to_onedrive(file_path="/tmp/list_need_to_delete.txt",
                                                        path_after_current_day="Lists")
-        self.one_drive_manager.upload_file_to_onedrive(file_path="/tmp/deleted_report.txt")
+        self.one_drive_manager.upload_file_to_onedrive(file_path=deleted_report_path)
 
         return is_deleted
     def create_lists(self):
@@ -368,7 +371,7 @@ class OtomotoManager:
         is_any_deleted = self.delete_adverts()
 
         # if all_adverts_from_ready_to_create.empty and not is_any_deleted:
-        #     self.create_reports_from_base()
+        self.create_reports_from_base()
             # self.excel_handler.update_excel_from_success_report(self.one_drive_manager.current_day)
         print("Working is done")
         return self
@@ -455,17 +458,17 @@ class OtomotoManager:
         successfully_file_path = "/tmp/successfully.txt"
         with open(successfully_file_path, 'w') as success_file:
             success_file.writelines(successfully_lines)
+        self.one_drive_manager.upload_file_to_onedrive(file_path=successfully_file_path)
 
         errors_file_path = "/tmp/errors.txt"
         with open(errors_file_path, 'w') as error_file:
             error_file.writelines(error_lines)
+        self.one_drive_manager.upload_file_to_onedrive(file_path=errors_file_path)
 
         json_file_path = "/tmp/adverts_dict.json"
         self.merge_and_save_one_drive_dict(successfully_file_path=successfully_file_path, json_file_path=json_file_path)
-
         self.one_drive_manager.upload_file_to_onedrive(file_path=json_file_path, onedrive_path="/Holland/API-Spaceplus")
-        self.one_drive_manager.upload_file_to_onedrive(file_path=successfully_file_path)
-        self.one_drive_manager.upload_file_to_onedrive(file_path=errors_file_path)
+
 
 # otomotomanager = OtomotoManager(excel_file_name=r"Final_exel_file.xlsx", sheet_name="OtoMoto")
 # otomotomanager.create_reports_from_base()

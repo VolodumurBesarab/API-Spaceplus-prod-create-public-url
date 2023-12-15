@@ -138,13 +138,15 @@ class OtomotoManager:
             if manufacturer is None or math.isnan(manufacturer):
                 manufacturer = "oryginalny"
 
-            description = f"|{row.get('номер на складі')}| " + row.get("description")
+            description = f"|{str(row.get('номер на складі'))}| " + str(row.get("description"))
 
             manufacturer_id = row.get("manufacturer_id")
-            if manufacturer_id == 0 or manufacturer_id == "" or manufacturer_id is None or math.isnan(manufacturer_id):
+            if isinstance(manufacturer_id, (int, float)):
+                manufacturer_code = None
+            elif manufacturer_id == 0 or manufacturer_id == "" or manufacturer_id is None:
                 manufacturer_code = None
             else:
-                manufacturer_code = row.get("")
+                manufacturer_code = row.get("manufacturer_id")
 
             advert_dict = {
                 "product_id": row.get("номер на складі"),
@@ -207,7 +209,7 @@ class OtomotoManager:
 
         if uploaded_list:
             for df_check in uploaded_list:
-                uploaded_list_values.append(df_check)
+                uploaded_list_values.append(df_check[column_name])
 
         df_uploaded_list_values = pd.DataFrame({column_name: uploaded_list_values})
         df_uploaded_list_values.to_csv(uploaded_list_path, index=False)

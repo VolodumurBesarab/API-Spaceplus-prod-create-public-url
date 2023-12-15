@@ -80,7 +80,7 @@ class OtomotoApi:
             # Process the adverts_data as needed
             # print("Adverts data:", adverts_data)
             print(ids)
-            with open('D:\API-Spaceplus\\tmp\ids.json', 'w') as json_file:
+            with open('D:\API-Spaceplus\\tmp\ids 15-12-23.json', 'w') as json_file:
                 json.dump(ids, json_file)
         else:
             print("Error:", response.status_code, response.text)

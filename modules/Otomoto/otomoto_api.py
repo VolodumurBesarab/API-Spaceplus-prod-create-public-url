@@ -1,5 +1,6 @@
 import json
 import os
+import re
 
 import requests
 import math
@@ -61,9 +62,9 @@ class OtomotoApi:
         url = "https://www.otomoto.pl/api/open/account/adverts"
         return url
 
-    def print_adverts_list(self, access_token):
+    def get_database(self, access_token):
         url = self.get_basic_url()
-        limit = 1000
+        limit = 1250
         page = 1
 
         headers = self.get_basic_headers(access_token)
@@ -72,18 +73,33 @@ class OtomotoApi:
             "limit": limit,
             "page": page
         }
-
+        database = {}
         response = requests.get(url, headers=headers, params=params)
         if response.status_code == 200:
             adverts_data = response.json()
-            ids = [result["id"] for result in adverts_data["results"]]
-            # Process the adverts_data as needed
-            # print("Adverts data:", adverts_data)
-            print(ids)
-            with open('D:\API-Spaceplus\\tmp\ids 15-12-23.json', 'w') as json_file:
-                json.dump(ids, json_file)
+
+            for result in adverts_data["results"]:
+                pattern = re.compile(r'\|(.+?)\|')
+
+                description = result["description"]
+                match = pattern.search(description)
+
+                if match:
+                    additional_text = match.group(1)
+                    description_with_additional_text = description + additional_text
+
+                    # Перевірка чи існує ключ у базі даних
+                    if description_with_additional_text in database:
+                        print(f"Помилка: Ключ '{description_with_additional_text}' вже існує в базі даних.")
+                    else:
+                        in_storage_id = match.group(1)
+                        database[in_storage_id] = result["id"]
+
+            with open("/tmp/adverts_dict.json", "w", encoding="utf-8") as file:
+                json.dump(database, file, ensure_ascii=False, indent=2)
         else:
             print("Error:", response.status_code, response.text)
+        return database
 
     def get_adverts_body(self, otomoto_id) -> Response:
         url = self.get_basic_url() + f"/{otomoto_id}"

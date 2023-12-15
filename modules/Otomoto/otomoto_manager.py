@@ -333,9 +333,8 @@ class OtomotoManager:
         main_excel_file_path = self.excel_handler.get_file_path(file_name=self.file_name)
         self.one_drive_manager.download_file_to_tmp(path="/Holland/Final_exel_file.xlsx",
                                                     file_name="Final_exel_file")
-        self.one_drive_manager.download_file_to_tmp(path="/Holland/API-Spaceplus/adverts_dict.json",
-                                                    file_name="adverts_dict.json")
         df1 = pd.read_excel(main_excel_file_path)  # file to read
+        self.otomoto_api.get_database(self.otomoto_api.get_token())
         self.create_lists()
         all_adverts_from_ready_to_create = self.create_df_from_ready_to_create(df1)
         # add variable for all_adverts_from_ready_to_create.empty

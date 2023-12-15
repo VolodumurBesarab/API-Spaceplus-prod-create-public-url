@@ -48,7 +48,7 @@ class OtomotoApi:
                 print("Error:", response.status_code, response.text)
         return self.access_token
 
-    def _get_basic_headers(self, access_token):
+    def get_basic_headers(self, access_token):
         user_email = "andrewb200590@gmail.com"
         headers = {
             "User-Agent": user_email,
@@ -57,16 +57,16 @@ class OtomotoApi:
         }
         return headers
 
-    def _get_basic_url(self):
+    def get_basic_url(self):
         url = "https://www.otomoto.pl/api/open/account/adverts"
         return url
 
     def print_adverts_list(self, access_token):
-        url = self._get_basic_url()
+        url = self.get_basic_url()
         limit = 1000
         page = 1
 
-        headers = self._get_basic_headers(access_token)
+        headers = self.get_basic_headers(access_token)
 
         params = {
             "limit": limit,
@@ -80,14 +80,24 @@ class OtomotoApi:
             # Process the adverts_data as needed
             # print("Adverts data:", adverts_data)
             print(ids)
+            with open('D:\API-Spaceplus\\tmp\ids.json', 'w') as json_file:
+                json.dump(ids, json_file)
         else:
             print("Error:", response.status_code, response.text)
+
+    def get_adverts_body(self, otomoto_id) -> Response:
+        url = self.get_basic_url() + f"/{otomoto_id}"
+        access_token = self.get_token()
+        headers = self.get_basic_headers(access_token=access_token)
+        response = requests.get(url=url, headers=headers)
+        print(response.json())
+        return response
 
     custom_otomoto_data = {
         "status": "unpaid",
         'title': 'Poprzeczki Belki bagaznik Thule Aerobar 3',
         'description': 'Poprzeczki Thule Aerobar\n108cm-200zł\n120cm-230zł\n127 cm-270zł\n135cm-300zł\n150cm- 350zł\nDostępność proszę sprawdz.\nWystawiam Fakturę VAT marża.\nWysyłka kurierem za pobraniem.',
-        'category_id': 173,
+        'category_id': 163,
         'region_id': 8,
         'city_id': 10119,
         'municipality': 'Lublin',
@@ -110,6 +120,7 @@ class OtomotoApi:
         },
         "params": {
             'tire-brand': 'others',
+            "parts-category": "roof-boxes",
             'delivery': '1',
             'title_parts': 'Poprzeczki Belki bagaznik Thule Aerobar delux',
             'manufacturer': 'Thule',
@@ -204,7 +215,7 @@ class OtomotoApi:
             counter += 1
 
         access_token = self.get_token()
-        headers = self._get_basic_headers(access_token)
+        headers = self.get_basic_headers(access_token)
         collection_id = None
         # Відправка POST-запиту
         response = requests.post(url, headers=headers, data=json.dumps(image_data))
@@ -236,7 +247,7 @@ class OtomotoApi:
     def delete_advert(self, in_stock_id, otomoto_id) -> Response:
         url = self.base_url + f"adverts/{otomoto_id}"
         print(url)
-        response = requests.delete(url=url, headers=self._get_basic_headers(self.get_token()))
+        response = requests.delete(url=url, headers=self.get_basic_headers(self.get_token()))
         if response.status_code == 204:
             json_file_path = "/tmp/adverts_dict.json"
             self.delete_and_save_in_json(json_file_path=json_file_path, key_to_delete=in_stock_id)
@@ -271,9 +282,9 @@ class OtomotoApi:
                                                       photos_collection_id=photos_collection_id)
 
         otomoto_data = self._data_creator(exel_info_dict=exel_info_dict)
-        url = self._get_basic_url()
+        url = self.get_basic_url()
         access_token = self.get_token()
-        headers = self._get_basic_headers(access_token=access_token)
+        headers = self.get_basic_headers(access_token=access_token)
         response = requests.post(url, json=otomoto_data, headers=headers)
 
         if response.status_code == 201:

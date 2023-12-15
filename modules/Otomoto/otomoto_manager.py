@@ -20,6 +20,16 @@ DATETIME = datetime.now().strftime("%d-%m-%Y %H-%M-%S")
 REPORT_FILE_PATH = f"/tmp/Reports/basic_report {DATETIME}.txt"
 # EXCEL_FILE_PATH = f"/tmp/New tested file {ROWS_TO_SKIP+1}-{ROWS_TO_READ+ROWS_TO_SKIP}.xlsx"
 EXCEL_FILE_PATH = f"/tmp/Excel working data table.xlsx"
+PARTS_CATEGORY_DICT = {
+                       "Bagażniki dachowe > Bez relingów": "without-roof-rails",
+                       "Bagażniki dachowe > Na relingi": "for-roof-rails",
+                       "Boksy dachowe": "roof-boxes",
+                       "Części i akcesoria": "car-equipment-and-accessories-other",
+                       "Uchwyty na narty i snowboardy": "ski-handles",
+                       "Uchwyty rowerowe, Uchwyty rowerowe > Na dach": "for-the-roof",
+                       "Uchwyty rowerowe, Uchwyty rowerowe > Na hak": "for-tow-hook",
+                       "Uchwyty rowerowe, Uchwyty rowerowe > Na klapę": "for-trunk-lid"
+                       }
 
 
 class OtomotoManager:
@@ -41,7 +51,7 @@ class OtomotoManager:
         out_of_stock = []
         invalid_quantity = []
         for index, row in df1.iterrows():
-            if row['наявність на складі'] == 0:
+            if row['наявність на складі'] == 0 or row['наявність на складі'] == 2:
                 out_of_stock.append(row)
             elif row['наявність на складі'] == 1:
                 in_stock.append(row)
@@ -119,19 +129,32 @@ class OtomotoManager:
 
     def _post_adverts(self, list_ready_to_create: DataFrame):
         for index, row in list_ready_to_create.iterrows():
-            nubmer_in_stock = row.get("номер на складі")
 
-            # call lambda here
+            # update list
+            parts_type = str(row.get("type"))
+            parts_category = PARTS_CATEGORY_DICT[parts_type.strip()]
+
             manufacturer = row.get("manufacturer")
             if manufacturer is None or math.isnan(manufacturer):
                 manufacturer = "oryginalny"
+
+            description = f"|{row.get('номер на складі')}| " + row.get("description")
+
+            manufacturer_id = row.get("manufacturer_id")
+            if manufacturer_id == 0 or manufacturer_id == "" or manufacturer_id is None or math.isnan(manufacturer_id):
+                manufacturer_code = None
+            else:
+                manufacturer_code = row.get("")
+
             advert_dict = {
                 "product_id": row.get("номер на складі"),
                 "title": row.get("title"),
-                "description": row.get("description"),
+                "description": description,
                 "price": row.get("price"),
                 "new_used": row.get("new_used"),
                 "manufacturer": manufacturer,
+                "parts-category": parts_category,
+                "manufacturer_code": manufacturer_code
             }
             advert_json = json.dumps(advert_dict)
 
@@ -142,52 +165,6 @@ class OtomotoManager:
                 Payload=advert_json,
             )
             print(response["StatusCode"], row.get("номер на складі"))
-
-                # created_advert_id = self.otomoto_api.create_otomoto_advert(product_id=row.get("номер на складі"),
-                #                                                            title=row.get("title"),
-                #                                                            description=row.get("description"),
-                #                                                            price=row.get("price"),
-                #                                                            new_used=row.get("new_used"),
-                #                                                            manufacturer=row.get("manufacturer"))
-                # if "Error:" in created_advert_id:
-                #     message = f"{nubmer_in_stock}, {created_advert_id}"
-                #     self._create_basic_report(message=message)
-                #      self.set_char_by_number_in_stock(number_in_stock=str(nubmer_in_stock), char="-")
-                #     # list_of_errors.append((item.get("номер на складі"), created_advert_id))
-                # else:
-                #     message = f"{nubmer_in_stock}, Advert successfully posted with ID: {created_advert_id}"
-                #     self._create_basic_report(message=message)
-                #     self.set_char_by_number_in_stock(number_in_stock=str(nubmer_in_stock), char="+")
-
-        #     except Exception as e:
-        #         print(f"Error with create advert {nubmer_in_stock}: {e}")
-        #         self._create_basic_report(f"Unexpected error {nubmer_in_stock} : {e}")
-        #
-        # try:
-        #     reports_file_name = REPORT_FILE_PATH
-        #     self.one_drive_manager.upload_file_to_onedrive(file_path="/tmp/ready_to_create.txt",
-        #                                                    path_after_current_day="Lists")
-        #
-        #     self.one_drive_manager.upload_file_to_onedrive(file_path=reports_file_name,
-        #                                                    rows_to_read=ROWS_TO_READ,
-        #                                                    rows_to_skip=ROWS_TO_SKIP)
-        #
-        #     self.s3_link_generator.upload_file_to_s3(file_path=reports_file_name,
-        #                                              rows_to_read=ROWS_TO_READ,
-        #                                              rows_to_skip=ROWS_TO_SKIP)
-        # except Exception as e:
-        #     print(e)
-        #
-        # try:
-        #     file_path = EXCEL_FILE_PATH
-        #     self.one_drive_manager.upload_file_to_onedrive(file_path=file_path,
-        #                                                    rows_to_read=ROWS_TO_READ,
-        #                                                    rows_to_skip=ROWS_TO_SKIP)
-        #     self.s3_link_generator.upload_file_to_s3(file_path=file_path,
-        #                                              rows_to_read=ROWS_TO_READ,
-        #                                              rows_to_skip=ROWS_TO_SKIP)
-        # except Exception as e:
-        #     print(e)
 
     def create_list_need_to_create(self, in_stock: list[DataFrame]) -> tuple[list[DataFrame], list[DataFrame]]:
         list_check_need_to_edit = []
@@ -211,7 +188,8 @@ class OtomotoManager:
         for item in out_of_stock:
             in_stock_id = str(item['номер на складі'])
             if in_stock_id in adverts_dict.keys():
-                if any((whole_table['номер на складі'].astype(str) == in_stock_id) & (whole_table['наявність на складі'] == 1)):
+                if any((whole_table['номер на складі'].astype(str) == in_stock_id) & (
+                        whole_table['наявність на складі'] == 1)):
                     continue
                 list_need_to_delete.append(item)
         return list_need_to_delete
@@ -229,7 +207,7 @@ class OtomotoManager:
 
         if uploaded_list:
             for df_check in uploaded_list:
-                uploaded_list_values.append(df_check[column_name])
+                uploaded_list_values.append(df_check)
 
         df_uploaded_list_values = pd.DataFrame({column_name: uploaded_list_values})
         df_uploaded_list_values.to_csv(uploaded_list_path, index=False)
@@ -251,8 +229,9 @@ class OtomotoManager:
     def delete_adverts(self) -> bool:
         is_deleted = False
         if not os.path.exists("/tmp/list_need_to_delete.txt"):
-            self.one_drive_manager.download_file_to_tmp(path=f"/Holland/Reports/{self.one_drive_manager.current_day}/Lists/list_need_to_delete.txt",
-                                                        file_name="list_need_to_delete.txt")
+            self.one_drive_manager.download_file_to_tmp(
+                path=f"/Holland/Reports/{self.one_drive_manager.current_day}/Lists/list_need_to_delete.txt",
+                file_name="list_need_to_delete.txt")
 
         if not os.path.exists("/tmp/adverts_dict.json"):
             self.one_drive_manager.download_file_to_tmp(path="/Holland/API-Spaceplus/adverts_dict.json",
@@ -295,6 +274,7 @@ class OtomotoManager:
         self.one_drive_manager.upload_file_to_onedrive(file_path=deleted_report_path)
 
         return is_deleted
+
     def create_lists(self):
         file_content = self.excel_handler.get_exel_file(self.file_name)
         # create file
@@ -321,29 +301,24 @@ class OtomotoManager:
             self.upload_list_to_onedrive(uploaded_list=invalid_quantity, uploaded_list_path=invalid_quantity_path)
             self.upload_list_to_onedrive(uploaded_list=list_need_to_delete, uploaded_list_path=list_need_to_delete_path)
         else:
-            self.one_drive_manager.download_file_to_tmp(path=f"/Holland/Reports/{self.one_drive_manager.current_day}/Lists/ready_to_create.txt",
-                                                        file_name="ready_to_create.txt")
-            self.one_drive_manager.download_file_to_tmp(path=f"/Holland/Reports/{self.one_drive_manager.current_day}/Lists/list_need_to_delete.txt",
-                                                        file_name="list_need_to_delete.txt")
+            self.one_drive_manager.download_file_to_tmp(
+                path=f"/Holland/Reports/{self.one_drive_manager.current_day}/Lists/ready_to_create.txt",
+                file_name="ready_to_create.txt")
+            self.one_drive_manager.download_file_to_tmp(
+                path=f"/Holland/Reports/{self.one_drive_manager.current_day}/Lists/list_need_to_delete.txt",
+                file_name="list_need_to_delete.txt")
 
     def create_df_from_ready_to_create(self, df: DataFrame, adverts_create_in_one_time=20) -> DataFrame:
         with open('/tmp/ready_to_create.txt', 'r') as file:
             lines = file.readlines()
 
-        # counter = 0
         in_stock_numbers = []
         for line in lines:
-            # if counter >= adverts_create_in_one_time + 1:
-            #     break
-            #
-            # if '+' in line or '-' in line:
-            #     continue
-            # else:
-            #     counter += 1
             in_stock_numbers.append(line.strip())
 
-        df1 = df[(df['номер на складі'].astype(str).isin(in_stock_numbers)) & (df['наявність на складі'] == 1)].reset_index(drop=True)
-        # df1.to_excel('/tmp/df_from_ready_to_create.xlsx', index=False)  # Збереження у файл
+        df1 = df[
+            (df['номер на складі'].astype(str).isin(in_stock_numbers)) & (df['наявність на складі'] == 1)].reset_index(
+            drop=True)
         return df1
 
     def create_all_adverts(self):
@@ -368,40 +343,13 @@ class OtomotoManager:
             self._create_basic_report(message=str(all_adverts_from_ready_to_create))
             self._post_adverts(list_ready_to_create=all_adverts_from_ready_to_create)
 
-        is_any_deleted = self.delete_adverts()
+        # is_any_deleted = self.delete_adverts()
 
         # if all_adverts_from_ready_to_create.empty and not is_any_deleted:
-        self.create_reports_from_base()
-            # self.excel_handler.update_excel_from_success_report(self.one_drive_manager.current_day)
+        # self.create_reports_from_base()
+        # self.excel_handler.update_excel_from_success_report(self.one_drive_manager.current_day)
         print("Working is done")
         return self
-
-    def create_list_to_create_in_s3(self):
-        file_content = self.excel_handler.get_exel_file(self.file_name)
-        # create file
-        self.excel_handler.create_file_on_data(file_content=file_content, file_name=self.file_name)
-        main_excel_file_path = self.excel_handler.get_file_path(file_name=self.file_name)
-        # need rework without lines as df = pd.read_excel
-        self.working_data_table = self.read_selected_rows_from_excel(file_path=main_excel_file_path,
-                                                                     rows_to_skip=0,
-                                                                     rows_to_read=6400)
-        in_stock, out_of_stock, invalid_quantity = self.create_lists_of_produts(self.working_data_table)
-        list_check_need_to_edit, list_ready_to_create = self.create_list_need_to_create(in_stock)
-
-        dict_ready_to_create = self._convert_adverts_to_dict(list_ready_to_create=list_ready_to_create)
-        test_file_path = "/tmp/my_test_file.txt"
-        count = 0
-        for item in dict_ready_to_create:
-            print(item.get('номер на складі'))
-            with open(test_file_path, "a") as file:
-                file.write(str(item.get('номер на складі')) + "\n")
-            count += 1
-            if count % 25 == 0:
-                with open(test_file_path, "a") as file:
-                    file.write("-" * 50 + "\n")
-        self.s3_link_generator.upload_file_to_s3(file_path=test_file_path,
-                                                 rows_to_read=None,
-                                                 rows_to_skip=None)
 
     def convert_text_to_dict(self, successfully_file_path: str) -> dict:
         with open(successfully_file_path, "r") as success_file:
@@ -468,7 +416,6 @@ class OtomotoManager:
         json_file_path = "/tmp/adverts_dict.json"
         self.merge_and_save_one_drive_dict(successfully_file_path=successfully_file_path, json_file_path=json_file_path)
         self.one_drive_manager.upload_file_to_onedrive(file_path=json_file_path, onedrive_path="/Holland/API-Spaceplus")
-
 
 # otomotomanager = OtomotoManager(excel_file_name=r"Final_exel_file.xlsx", sheet_name="OtoMoto")
 # otomotomanager.create_reports_from_base()

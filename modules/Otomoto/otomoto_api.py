@@ -97,7 +97,7 @@ class OtomotoApi:
         "status": "unpaid",
         'title': 'Poprzeczki Belki bagaznik Thule Aerobar 3',
         'description': 'Poprzeczki Thule Aerobar\n108cm-200zł\n120cm-230zł\n127 cm-270zł\n135cm-300zł\n150cm- 350zł\nDostępność proszę sprawdz.\nWystawiam Fakturę VAT marża.\nWysyłka kurierem za pobraniem.',
-        'category_id': 173,
+        'category_id': 163,
         'region_id': 8,
         'city_id': 10119,
         'municipality': 'Lublin',
@@ -120,6 +120,7 @@ class OtomotoApi:
         },
         "params": {
             'tire-brand': 'others',
+            "parts-category": "roof-boxes",
             'delivery': '1',
             'title_parts': 'Poprzeczki Belki bagaznik Thule Aerobar delux',
             'manufacturer': 'Thule',

@@ -11,6 +11,7 @@ from modules.Images.images_api import ImagesApi
 from modules.Images.s3_link_generator import S3LinkGenerator
 from modules.auth_manager import AuthManager
 from modules.one_drive_photo_manager import OneDrivePhotoManager
+from modules.onedrive_manager import OneDriveManager
 
 
 class OtomotoApi:
@@ -20,6 +21,7 @@ class OtomotoApi:
         self.base_url = "https://www.otomoto.pl/api/open/"
         self.images_api = ImagesApi()
         self.one_drive_photo_manager = OneDrivePhotoManager()
+        self.one_drive_manager = OneDriveManager()
 
     def get_token(self):
         if not self.access_token:
@@ -62,10 +64,56 @@ class OtomotoApi:
         url = "https://www.otomoto.pl/api/open/account/adverts"
         return url
 
-    def get_database(self, access_token):
+    def retrieve_ads_in_batches(self):
         url = self.get_basic_url()
-        limit = 1250
+        access_token = self.get_token()
+        limit = 100
         page = 1
+
+        headers = self.get_basic_headers(access_token)
+
+        database = {"result": {}}
+
+        while True:
+            params = {"limit": limit, "page": page}
+            response = requests.get(url, headers=headers, params=params)
+
+            if response.status_code == 200:
+                adverts_data = response.json()
+                # print(adverts_data)
+                database["result"].update(adverts_data)
+
+                if adverts_data["is_last_page"]:
+                    break
+                else:
+                    page += 1
+            else:
+                print("Error:", response.status_code, response.text)
+                break
+
+        return database
+
+    def get_adverts_count(self) -> int:
+        access_token = self.get_token()
+        url = self.get_basic_url()
+        page = 1
+        limit = 1
+
+        headers = self.get_basic_headers(access_token)
+
+        params = {
+            "limit": limit,
+            "page": page
+        }
+        response = requests.get(url, headers=headers, params=params)
+        return response.json()['total_elements']
+
+    def get_database(self):
+        access_token = self.get_token()
+        url = self.get_basic_url()
+
+        page = 1
+        limit = self.get_adverts_count()
 
         headers = self.get_basic_headers(access_token)
 
@@ -88,15 +136,16 @@ class OtomotoApi:
                     additional_text = match.group(1)
                     description_with_additional_text = description + additional_text
 
-                    # Перевірка чи існує ключ у базі даних
-                    if description_with_additional_text in database:
-                        print(f"Помилка: Ключ '{description_with_additional_text}' вже існує в базі даних.")
+                    if additional_text in database:
+                        print(f"Помилка: Ключ '{additional_text}' вже існує в базі даних з ID:{result['id']}.")
                     else:
-                        in_storage_id = match.group(1)
-                        database[in_storage_id] = result["id"]
+                        database[additional_text] = str(result["id"])
 
-            with open("/tmp/adverts_dict.json", "w", encoding="utf-8") as file:
-                json.dump(database, file, ensure_ascii=False, indent=2)
+            adverts_dict_json_path = "/tmp/adverts_dict.json"
+            with open(adverts_dict_json_path, "w", encoding="utf-8") as file:
+                json.dump(database, file, ensure_ascii=False, indent=4)
+
+            self.one_drive_manager.upload_file_to_onedrive(file_path=adverts_dict_json_path)
         else:
             print("Error:", response.status_code, response.text)
         return database

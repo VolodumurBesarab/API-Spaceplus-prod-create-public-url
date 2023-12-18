@@ -342,11 +342,14 @@ class OtomotoManager:
                                                     file_name="Final_exel_file")
         df1 = pd.read_excel(main_excel_file_path)  # file to read
 
-        self.create_lists()
 
-        all_adverts_from_ready_to_create = self.create_df_from_ready_to_create(df1)
         # add variable for all_adverts_from_ready_to_create.empty
-        if not all_adverts_from_ready_to_create.empty and not self.one_drive_manager.is_list_folder_created():
+        if not self.one_drive_manager.is_list_folder_created():
+
+            self.create_lists()
+
+            all_adverts_from_ready_to_create = self.create_df_from_ready_to_create(df1)
+
             print(f"adverts to create:", len(all_adverts_from_ready_to_create))
             self._create_basic_report(message=f"adverts to create: {len(all_adverts_from_ready_to_create)}")
             self._create_basic_report(message=str(all_adverts_from_ready_to_create))

@@ -69,7 +69,7 @@ class OneDriveManager:
                         with open(local_file_path, 'wb') as file:
                             file.write(response.content)
                     else:
-                        print(f"Error with download bacis report. HTTP status code: {response.status_code}")
+                        print(f"Error with download basic report. HTTP status code: {response.status_code}")
 
     def get_root_folder_json(self, one_drive_url, headers):
         result = requests.get(url=one_drive_url, headers=headers)
@@ -121,16 +121,15 @@ class OneDriveManager:
             print(f"Error in download_reports_to_tmp {response.status_code} - {response.text}")
 
 
-    def is_list_folder_created(self, current_day=DATETIME):
+    def is_list_folder_created(self, current_day=DATETIME) -> bool:
         upload_url = self.endpoint + f"drive/items/root:/Holland/Reports/{current_day}:/children"
-        print(upload_url)
         response = requests.get(url=upload_url,
                                 headers=self.default_header)
         if response.status_code == 200:
             items = response.json().get('value', [])
             return any(item['name'] == 'Lists' and item['folder'] is not None for item in items)
         else:
-            return response.json()
+            return False
 
     def is_current_day_folder_created(self, current_day=DATETIME):
         upload_url = self.endpoint + f"drive/items/root:/Holland/Reports:/children"

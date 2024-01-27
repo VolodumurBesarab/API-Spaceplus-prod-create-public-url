@@ -8,8 +8,9 @@ import boto3
 import pandas as pd
 from pandas import DataFrame
 
-from modules.Images.s3_link_generator import S3LinkGenerator
-from modules.Otomoto.otomoto_api import OtomotoApi
+from modules.reports.reports_generator import ReportsGenerator
+from modules.images.s3_link_generator import S3LinkGenerator
+from modules.otomoto.otomoto_api import OtomotoApi
 from modules.auth_manager import AuthManager
 from modules.excel_handler import ExcelHandler
 from modules.onedrive_manager import OneDriveManager
@@ -17,7 +18,7 @@ from modules.onedrive_manager import OneDriveManager
 ROWS_TO_SKIP = None
 ROWS_TO_READ = None
 DATETIME = datetime.now().strftime("%d-%m-%Y %H-%M-%S")
-REPORT_FILE_PATH = f"/tmp/Reports/general_report {DATETIME}.txt"
+# REPORT_FILE_PATH = f"/tmp/reports/general_report {DATETIME}.txt"
 # EXCEL_FILE_PATH = f"/tmp/New tested file {ROWS_TO_SKIP+1}-{ROWS_TO_READ+ROWS_TO_SKIP}.xlsx"
 EXCEL_FILE_PATH = f"/tmp/Excel working data table.xlsx"
 PARTS_CATEGORY_DICT = {
@@ -45,6 +46,7 @@ class OtomotoManager:
         self.one_drive_manager = OneDriveManager()
         self.s3_link_generator = S3LinkGenerator()
         self.auth_manager = AuthManager()
+        self.reports_generator = ReportsGenerator()
 
     def create_lists_of_produts(self, df1) -> tuple[list[DataFrame], list[DataFrame], list[DataFrame]]:
         in_stock = []
@@ -73,7 +75,7 @@ class OtomotoManager:
         file_path = "/tmp/ready_to_create.txt"
         if not os.path.isfile(file_path):
             self.one_drive_manager.download_file_to_tmp(
-                path=f"/Holland/Reports/{self.one_drive_manager.current_day}/Lists/ready_to_create.txt",
+                path=f"/Holland/reports/{self.one_drive_manager.current_day}/Lists/ready_to_create.txt",
                 file_name="ready_to_create.txt")
 
         with open(file_path, "r") as file:
@@ -87,7 +89,7 @@ class OtomotoManager:
 
     def _create_report(self, list_created_adverts_id, list_of_errors, is_unexpected: bool):
         try:
-            reports_folder = os.path.join(os.getcwd(), "Reports")
+            reports_folder = os.path.join(os.getcwd(), "reports")
 
             if not os.path.exists(reports_folder):
                 os.makedirs(reports_folder)
@@ -113,20 +115,6 @@ class OtomotoManager:
         except Exception as e:
             print(f"Сталася помилка при створенні звіту: {e}")
 
-    def _create_basic_report(self, message: str) -> str:
-        # Шлях до папки та файлу
-        folder_path = "/tmp/Reports"
-        file_path = REPORT_FILE_PATH
-
-        # Перевірка і створення папки, якщо її немає
-        if not os.path.exists(folder_path):
-            os.makedirs(folder_path)
-
-        # Відкриття файлу та запис повідомлення у новий рядок
-        with open(file_path, "a") as file:
-            file.write(message + "\n")
-        return file_path
-
     def _post_adverts(self, list_ready_to_create: DataFrame):
         for index, row in list_ready_to_create.iterrows():
 
@@ -136,7 +124,7 @@ class OtomotoManager:
                 parts_category = PARTS_CATEGORY_DICT[parts_type.strip()]
             except Exception as e:
                 print(e)
-                self._create_basic_report(f"{row.get('номер на складі')} Cant find {parts_type} in dictionary. {e}")
+                self.reports_generator.create_general_report(f"{row.get('номер на складі')} Cant find {parts_type} in dictionary. {e}")
                 break
 
             manufacturer = row.get("manufacturer")
@@ -172,7 +160,7 @@ class OtomotoManager:
                 Payload=advert_json,
             )
             print(response["StatusCode"], row.get("номер на складі"))
-        self.one_drive_manager.upload_file_to_onedrive(file_path=REPORT_FILE_PATH)
+            self.reports_generator.create_general_report(message=f"{response["StatusCode"], row.get("номер на складі")}")
 
     def create_list_need_to_create(self, in_stock: list[DataFrame]) -> tuple[list[DataFrame], list[DataFrame]]:
         list_check_need_to_edit = []
@@ -238,12 +226,12 @@ class OtomotoManager:
         is_deleted = False
         if not os.path.exists("/tmp/list_need_to_delete.txt"):
             self.one_drive_manager.download_file_to_tmp(
-                path=f"/Holland/Reports/{self.one_drive_manager.current_day}/Lists/list_need_to_delete.txt",
+                path=f"/Holland/reports/{self.one_drive_manager.current_day}/Lists/list_need_to_delete.txt",
                 file_name="list_need_to_delete.txt")
 
         if not os.path.exists("/tmp/adverts_dict.json"):
             self.one_drive_manager.download_file_to_tmp(
-                path=f"/Holland/Reports/{self.one_drive_manager.current_day}/adverts_dict.json",
+                path=f"/Holland/reports/{self.one_drive_manager.current_day}/adverts_dict.json",
                 file_name="adverts_dict.jsons")
 
         deleted_report_path = "/tmp/deleted_report.txt"
@@ -308,14 +296,14 @@ class OtomotoManager:
             self.upload_list_to_onedrive(uploaded_list=list_need_to_delete, uploaded_list_path=list_need_to_delete_path)
         else:
             self.one_drive_manager.download_file_to_tmp(
-                path=f"/Holland/Reports/{self.one_drive_manager.current_day}/Lists/ready_to_create.txt",
+                path=f"/Holland/reports/{self.one_drive_manager.current_day}/Lists/ready_to_create.txt",
                 file_name="ready_to_create.txt")
             self.one_drive_manager.download_file_to_tmp(
-                path=f"/Holland/Reports/{self.one_drive_manager.current_day}/Lists/list_need_to_delete.txt",
+                path=f"/Holland/reports/{self.one_drive_manager.current_day}/Lists/list_need_to_delete.txt",
                 file_name="list_need_to_delete.txt")
             self.one_drive_manager.download_file_to_tmp(
-                path=f"/Holland/Reports/{self.one_drive_manager.current_day}/adverts_dict.json",
-                file_name="adverts_dict.jsons")
+                path=f"/Holland/reports/{self.one_drive_manager.current_day}/adverts_dict.json",
+                file_name="adverts_dict.json")
 
     def create_df_from_ready_to_create(self, df: DataFrame, adverts_create_in_one_time=20) -> DataFrame:
         with open('/tmp/ready_to_create.txt', 'r') as file:
@@ -338,12 +326,10 @@ class OtomotoManager:
         self.excel_handler.create_file_on_data(file_content=file_content, file_name="Excel working data table.xlsx")
 
         main_excel_file_path = self.excel_handler.get_file_path(file_name=self.file_name)
-        self.one_drive_manager.download_file_to_tmp(path="/Holland/Final_exel_file.xlsx",
-                                                    file_name="Final_exel_file")
+        # self.one_drive_manager.download_file_to_tmp(path="/Holland/Final_exel_file.xlsx",
+        #                                             file_name="Final_exel_file")
         df1 = pd.read_excel(main_excel_file_path)  # file to read
 
-
-        # add variable for all_adverts_from_ready_to_create.empty
         if not self.one_drive_manager.is_list_folder_created():
 
             self.create_lists()
@@ -351,8 +337,8 @@ class OtomotoManager:
             all_adverts_from_ready_to_create = self.create_df_from_ready_to_create(df1)
 
             print(f"adverts to create:", len(all_adverts_from_ready_to_create))
-            self._create_basic_report(message=f"adverts to create: {len(all_adverts_from_ready_to_create)}")
-            self._create_basic_report(message=str(all_adverts_from_ready_to_create))
+            self.reports_generator.create_general_report(message=f"adverts to create: {len(all_adverts_from_ready_to_create)}")
+
             self._post_adverts(list_ready_to_create=all_adverts_from_ready_to_create)
 
             # self.delete_adverts()

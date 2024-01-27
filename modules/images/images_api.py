@@ -12,7 +12,7 @@ class ImagesApi:
     # Функція для завантаження фото на Imgur і отримання URL
     def _create_list_of_img(self, storage_name) -> tuple[str, list[str]]:
         try:
-            folder_path = os.path.join('Data', 'Images', str(storage_name))
+            folder_path = os.path.join('Data', 'images', str(storage_name))
 
             image_files = os.listdir(folder_path)
             return folder_path, image_files

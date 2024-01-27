@@ -3,7 +3,6 @@ sklad.xlsx
 .idea
 __pycache__
 Data
-Reports
 New tested file.xlsx
 pylint_checker.py
 my_local_test_enter_point.py

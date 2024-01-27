@@ -28,9 +28,9 @@ class OneDriveManager:
             upload_url = self.endpoint + f"drive/items/root:/{onedrive_path}/{uploading_file_name}:/content"
         else:
             if path_after_current_day is None:
-                upload_url = self.endpoint + f"drive/items/root:/Holland/Reports/{current_day}/{uploading_file_name}:/content"
+                upload_url = self.endpoint + f"drive/items/root:/Holland/reports/{current_day}/{uploading_file_name}:/content"
             else:
-                upload_url = self.endpoint + f"drive/items/root:/Holland/Reports/{current_day}/{path_after_current_day}/{uploading_file_name}:/content"
+                upload_url = self.endpoint + f"drive/items/root:/Holland/reports/{current_day}/{path_after_current_day}/{uploading_file_name}:/content"
 
         access_token = self.access_token
         headers_octet_stream = {
@@ -53,7 +53,7 @@ class OneDriveManager:
         if not os.path.exists(folder_path):
             os.makedirs(folder_path)
 
-        onedrive_path = f"Holland/Reports/{self.current_day}/Base reports"
+        onedrive_path = f"Holland/reports/{self.current_day}/Base reports"
         url = self.endpoint + f"drive/items/root:/{onedrive_path}:/children"
         response = requests.get(url,
                                 headers=self.auth_manager.get_default_header(access_token=self.access_token))
@@ -75,7 +75,7 @@ class OneDriveManager:
         result = requests.get(url=one_drive_url, headers=headers)
         return result.json()
 
-    def get_item_id(self, name, path_in_onedrive="/Holland/Reports"):
+    def get_item_id(self, name, path_in_onedrive="/Holland/reports"):
         url = self.endpoint + f"drive/root:{path_in_onedrive}:/children"
         response = requests.get(url=url, headers=self.default_header)
 
@@ -106,7 +106,7 @@ class OneDriveManager:
             print(f"Помилка при завантаженні файлу {file_name}: {response.status_code} - {response.text}")
 
     def download_reports_to_tmp(self, current_day=DATETIME):
-        upload_url = self.endpoint + f"drive/items/root:/Holland/Reports/{current_day}:/children"
+        upload_url = self.endpoint + f"drive/items/root:/Holland/reports/{current_day}:/children"
         response = requests.get(url=upload_url,
                                 headers=self.default_header)
         if response.status_code == 200:
@@ -122,7 +122,7 @@ class OneDriveManager:
 
 
     def is_list_folder_created(self, current_day=DATETIME) -> bool:
-        upload_url = self.endpoint + f"drive/items/root:/Holland/Reports/{current_day}:/children"
+        upload_url = self.endpoint + f"drive/items/root:/Holland/reports/{current_day}:/children"
         response = requests.get(url=upload_url,
                                 headers=self.default_header)
         if response.status_code == 200:
@@ -132,7 +132,7 @@ class OneDriveManager:
             return False
 
     def is_current_day_folder_created(self, current_day=DATETIME):
-        upload_url = self.endpoint + f"drive/items/root:/Holland/Reports:/children"
+        upload_url = self.endpoint + f"drive/items/root:/Holland/reports:/children"
         response = requests.get(url=upload_url,
                                 headers=self.default_header)
         if response.status_code == 200:
@@ -142,7 +142,7 @@ class OneDriveManager:
             return response.json()
 
     def create_current_day_folder(self, current_day=DATETIME):
-        create_url = self.endpoint + f"drive/items/root:/Holland/Reports:children"
+        create_url = self.endpoint + f"drive/items/root:/Holland/reports:children"
         payload = {
             "name": current_day,
             "folder": {},
@@ -152,7 +152,7 @@ class OneDriveManager:
         return response.json()
 
     def create_lists_folder(self, current_day=DATETIME):
-        create_url = self.endpoint + f"drive/items/root:/Holland/Reports/{current_day}:children"
+        create_url = self.endpoint + f"drive/items/root:/Holland/reports/{current_day}:children"
         payload = {
             "name": "Lists",
             "folder": {},

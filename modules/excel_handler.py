@@ -4,6 +4,7 @@ import pandas as pd
 import requests
 from pandas import DataFrame
 
+from modules.reports.reports_generator import ReportsGenerator
 from modules.auth_manager import AuthManager
 from modules.onedrive_manager import OneDriveManager
 
@@ -12,6 +13,7 @@ class ExcelHandler:
     def __init__(self):
         self.onedrive_manager = OneDriveManager()
         self.auth_manager = AuthManager()
+        self.reports_generator = ReportsGenerator()
 
         self.endpoint = self.auth_manager.get_endpoint()
         self.access_token = self.auth_manager.get_access_token_default_scopes()
@@ -54,28 +56,18 @@ class ExcelHandler:
         one_drive_url = self.endpoint + "drive/root:/Holland/" + name
         exel_file = self.onedrive_manager.get_root_folder_json(one_drive_url=one_drive_url,
                                                                headers=self.headers)
-        # exel_file = None
         file_content = None
-        # for file in root_folder_onedrive['value']:
-        #     if file['name'] == name:
-        #         exel_file = file
-        #         break
-            # rework this
-            # else:
-            #     print("Name of exel file not found")
-            #     print(file['name'])
 
         if exel_file:
-            # Отримайте URL для звернення до вмісту файлу
             file_url = exel_file['@microsoft.graph.downloadUrl']
 
-            # Зробіть GET-запит до Microsoft Graph API для отримання вмісту файлу
             response = requests.get(url=file_url)
 
-            # Перевірте, чи успішно отримано вміст файлу
             if response.status_code == 200:
                 file_content = response.content
+
                 print("excel file download successful")
+                self.reports_generator.create_general_report(message="excel file download successful")
         return file_content
 
     def get_file_path(self, file_name) -> str:
@@ -99,7 +91,7 @@ class ExcelHandler:
             if pd.isna(current_otomoto_id):
                 df.loc[df['номер на складі'] == storage_id, 'ID otomoto'] = str(otomoto_id)
         # df.to_excel('New tested file.xlsx', index=False)
-        df.to_excel(excel_file_path, index=False, sheet_name="Otomoto")
+        df.to_excel(excel_file_path, index=False, sheet_name="otomoto")
         return df
 
     def update_excel_from_success_report(self, current_day=None):

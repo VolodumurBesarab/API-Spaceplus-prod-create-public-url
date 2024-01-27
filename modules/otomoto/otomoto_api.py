@@ -1,5 +1,4 @@
 import json
-import os
 import re
 
 import requests
@@ -7,8 +6,9 @@ import math
 
 from requests import Response
 
-from modules.Images.images_api import ImagesApi
-from modules.Images.s3_link_generator import S3LinkGenerator
+from modules.reports.reports_generator import ReportsGenerator
+from modules.images.images_api import ImagesApi
+from modules.images.s3_link_generator import S3LinkGenerator
 from modules.auth_manager import AuthManager
 from modules.one_drive_photo_manager import OneDrivePhotoManager
 from modules.onedrive_manager import OneDriveManager
@@ -17,6 +17,7 @@ from modules.onedrive_manager import OneDriveManager
 class OtomotoApi:
     def __init__(self):
         self.auth_manager = AuthManager()
+        self.reports_generator = ReportsGenerator()
         self.access_token = None
         self.base_url = "https://www.otomoto.pl/api/open/"
         self.images_api = ImagesApi()
@@ -106,7 +107,12 @@ class OtomotoApi:
             "page": page
         }
         response = requests.get(url, headers=headers, params=params)
-        return response.json()['total_elements']
+        if response.status_code == 200:
+            adverts_count = response.json()['total_elements']
+        else:
+            adverts_count = 1000
+        self.reports_generator.create_general_report(message=f"adverts in database: {adverts_count}")
+        return adverts_count
 
     def get_database(self):
         access_token = self.get_token()
@@ -146,8 +152,10 @@ class OtomotoApi:
                 json.dump(database, file, ensure_ascii=False, indent=4)
 
             self.one_drive_manager.upload_file_to_onedrive(file_path=adverts_dict_json_path)
+            self.reports_generator.create_general_report(message=f"Database created")
         else:
             print("Error:", response.status_code, response.text)
+            self.reports_generator.create_general_report(message=f"Database do not created")
         return database
 
     def get_adverts_body(self, otomoto_id) -> Response:

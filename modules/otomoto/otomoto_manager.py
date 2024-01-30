@@ -160,7 +160,7 @@ class OtomotoManager:
                 Payload=advert_json,
             )
             print(response["StatusCode"], row.get("номер на складі"))
-            self.reports_generator.create_general_report(message=f"{response["StatusCode"], row.get("номер на складі")}")
+            self.reports_generator.create_general_report(message=f"{response['StatusCode'], row.get('номер на складі')}")
 
     def create_list_need_to_create(self, in_stock: list[DataFrame]) -> tuple[list[DataFrame], list[DataFrame]]:
         list_check_need_to_edit = []
@@ -224,15 +224,15 @@ class OtomotoManager:
 
     def delete_adverts(self) -> bool:
         is_deleted = False
-        if not os.path.exists("/tmp/list_need_to_delete.txt"):
-            self.one_drive_manager.download_file_to_tmp(
-                path=f"/Holland/reports/{self.one_drive_manager.current_day}/Lists/list_need_to_delete.txt",
-                file_name="list_need_to_delete.txt")
+        # if not os.path.exists("/tmp/list_need_to_delete.txt"):
+        #     self.one_drive_manager.download_file_to_tmp(
+        #         path=f"/Holland/reports/{self.one_drive_manager.current_day}/Lists/list_need_to_delete.txt",
+        #         file_name="list_need_to_delete.txt")
 
-        if not os.path.exists("/tmp/adverts_dict.json"):
-            self.one_drive_manager.download_file_to_tmp(
-                path=f"/Holland/reports/{self.one_drive_manager.current_day}/adverts_dict.json",
-                file_name="adverts_dict.jsons")
+        # if not os.path.exists("/tmp/adverts_dict.json"):
+        #     self.one_drive_manager.download_file_to_tmp(
+        #         path=f"/Holland/reports/{self.one_drive_manager.current_day}/adverts_dict.json",
+        #         file_name="adverts_dict.jsons")
 
         deleted_report_path = "/tmp/deleted_report.txt"
         if not os.path.exists(deleted_report_path):
@@ -250,6 +250,7 @@ class OtomotoManager:
                                                         current_line=current_line)
             response = self.otomoto_api.delete_advert(in_stock_id=current_line, otomoto_id=otomoto_id)
             print(f"{response.status_code} : {current_line}")
+            self.reports_generator.create_general_report(message=f"Deleted status code: {response.status_code}, {current_line}")
 
             with open(deleted_report_path, 'r') as file:
                 deleted_report_path_lines = file.readlines()
@@ -319,18 +320,15 @@ class OtomotoManager:
         return df1
 
     def create_all_adverts(self):
-        is_any_deleted = False
-        file_content = self.excel_handler.get_exel_file(self.file_name)
-        # create file
-        self.excel_handler.create_file_on_data(file_content=file_content, file_name=self.file_name)
-        self.excel_handler.create_file_on_data(file_content=file_content, file_name="Excel working data table.xlsx")
-
-        main_excel_file_path = self.excel_handler.get_file_path(file_name=self.file_name)
-        # self.one_drive_manager.download_file_to_tmp(path="/Holland/Final_exel_file.xlsx",
-        #                                             file_name="Final_exel_file")
-        df1 = pd.read_excel(main_excel_file_path)  # file to read
-
         if not self.one_drive_manager.is_list_folder_created():
+            file_content = self.excel_handler.get_exel_file(self.file_name)
+            # create file
+            self.excel_handler.create_file_on_data(file_content=file_content, file_name=self.file_name)
+            self.excel_handler.create_file_on_data(file_content=file_content, file_name="Excel working data table.xlsx")
+
+            main_excel_file_path = self.excel_handler.get_file_path(file_name=self.file_name)
+
+            df1 = pd.read_excel(main_excel_file_path)  # file to read
 
             self.create_lists()
 
@@ -341,7 +339,7 @@ class OtomotoManager:
 
             self._post_adverts(list_ready_to_create=all_adverts_from_ready_to_create)
 
-            # self.delete_adverts()
+            self.delete_adverts()
         else:
             self.create_reports_from_base()
         print("Working is done")

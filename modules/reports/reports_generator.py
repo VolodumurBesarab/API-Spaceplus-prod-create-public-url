@@ -1,8 +1,7 @@
 import os
-from modules.otomoto.otomoto_manager import DATETIME
 from modules.onedrive_manager import OneDriveManager
 
-REPORT_FILE_PATH = f"/tmp/reports/general_report {DATETIME}.txt"
+REPORT_FILE_PATH = f"/tmp/reports/general_report.txt"
 
 
 class ReportsGenerator:

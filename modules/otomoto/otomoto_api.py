@@ -1,5 +1,6 @@
 import json
 import re
+import time
 
 import requests
 import math
@@ -114,7 +115,7 @@ class OtomotoApi:
         self.reports_generator.create_general_report(message=f"adverts in database: {adverts_count}")
         return adverts_count
 
-    def get_database(self):
+    def get_database(self, max_retries=3, delay=5):
         access_token = self.get_token()
         url = self.get_basic_url()
 
@@ -127,35 +128,46 @@ class OtomotoApi:
             "limit": limit,
             "page": page
         }
+
         database = {}
-        response = requests.get(url, headers=headers, params=params)
-        if response.status_code == 200:
-            adverts_data = response.json()
+        attempts = 0
 
-            for result in adverts_data["results"]:
-                pattern = re.compile(r'\|(.+?)\|')
+        while attempts < max_retries:
+            try:
+                response = requests.get(url, headers=headers, params=params)
+                if response.status_code == 200:
+                    adverts_data = response.json()
 
-                description = result["description"]
-                match = pattern.search(description)
+                    for result in adverts_data["results"]:
+                        pattern = re.compile(r'\|(.+?)\|')
 
-                if match:
-                    additional_text = match.group(1)
-                    description_with_additional_text = description + additional_text
+                        description = result["description"]
+                        match = pattern.search(description)
 
-                    if additional_text in database:
-                        print(f"Помилка: Ключ '{additional_text}' вже існує в базі даних з ID:{result['id']}.")
-                    else:
-                        database[additional_text] = str(result["id"])
+                        if match:
+                            additional_text = match.group(1)
+                            description_with_additional_text = description + additional_text
 
-            adverts_dict_json_path = "/tmp/adverts_dict.json"
-            with open(adverts_dict_json_path, "w", encoding="utf-8") as file:
-                json.dump(database, file, ensure_ascii=False, indent=4)
+                            if additional_text in database:
+                                print(f"Помилка: Ключ '{additional_text}' вже існує в базі даних з ID:{result['id']}.")
+                            else:
+                                database[additional_text] = str(result["id"])
 
-            self.one_drive_manager.upload_file_to_onedrive(file_path=adverts_dict_json_path)
-            self.reports_generator.create_general_report(message=f"Database created")
-        else:
-            print("Error:", response.status_code, response.text)
-            self.reports_generator.create_general_report(message=f"Database do not created")
+                    adverts_dict_json_path = "/tmp/adverts_dict.json"
+                    with open(adverts_dict_json_path, "w", encoding="utf-8") as file:
+                        json.dump(database, file, ensure_ascii=False, indent=4)
+
+                    self.one_drive_manager.upload_file_to_onedrive(file_path=adverts_dict_json_path)
+                    self.reports_generator.create_general_report(message=f"Database created")
+                else:
+                    print("Error:", response.status_code, response.text)
+                    self.reports_generator.create_general_report(message=f"Database do not created")
+
+            except Exception as e:
+                attempts += 1
+                self.reports_generator.create_general_report(message=f"Error to get database: {e}")
+                if attempts < max_retries:
+                    time.sleep(delay)
         return database
 
     def get_adverts_body(self, otomoto_id) -> Response:

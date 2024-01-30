@@ -135,6 +135,7 @@ class OtomotoApi:
         while attempts < max_retries:
             try:
                 response = requests.get(url, headers=headers, params=params)
+                self.reports_generator.create_general_report(message=f"{response.json()}")
                 if response.status_code == 200:
                     adverts_data = response.json()
 

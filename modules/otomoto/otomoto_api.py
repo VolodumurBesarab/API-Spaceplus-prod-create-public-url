@@ -131,8 +131,9 @@ class OtomotoApi:
 
         database = {}
 
+        response = requests.get(url, headers=headers, params=params)
+
         try:
-            response = requests.get(url, headers=headers, params=params)
             if response.status_code == 200:
                 adverts_data = response.json()
 
@@ -162,6 +163,7 @@ class OtomotoApi:
                 self.reports_generator.create_general_report(message=f"Database do not created")
         except Exception as e:
             self.reports_generator.create_general_report(message=f"Error to get database: {e}")
+            self.reports_generator.create_general_report(message=f"{response.json()}")
         return database
 
     def get_adverts_body(self, otomoto_id) -> Response:

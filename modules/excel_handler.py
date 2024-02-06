@@ -52,27 +52,30 @@ class ExcelHandler:
     #
     #     print("Excel файл успішно збережено!")
 
-    def get_exel_file(self, name: str):
-        one_drive_url = self.endpoint + "drive/root:/Holland/" + name
-        exel_file = self.onedrive_manager.get_root_folder_json(one_drive_url=one_drive_url,
-                                                               headers=self.headers)
-        file_content = None
-
-        if exel_file:
-            file_url = exel_file['@microsoft.graph.downloadUrl']
-
-            response = requests.get(url=file_url)
-
-            if response.status_code == 200:
-                file_content = response.content
-
-                print("excel file download successful")
-                self.reports_generator.create_general_report(message="excel file download successful")
-        return file_content
-
     def get_file_path(self, file_name) -> str:
         save_path = "/tmp/" + file_name
         return save_path
+
+    def get_exel_file(self, name: str):
+        file_content = None
+        if os.path.exists(self.get_file_path(name)):
+            one_drive_url = self.endpoint + "drive/root:/Holland/" + name
+            exel_file = self.onedrive_manager.get_root_folder_json(one_drive_url=one_drive_url,
+                                                                   headers=self.headers)
+
+            if exel_file:
+                file_url = exel_file['@microsoft.graph.downloadUrl']
+
+                response = requests.get(url=file_url)
+
+                if response.status_code == 200:
+                    file_content = response.content
+
+                    print("excel file download successful")
+                    self.reports_generator.create_general_report(message="excel file download successful")
+        return file_content
+
+
 
     def create_file_on_data(self, file_content, file_name):
         save_path = self.get_file_path(file_name=file_name)

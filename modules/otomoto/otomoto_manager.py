@@ -288,9 +288,9 @@ class OtomotoManager:
             list_need_to_delete = self.create_list_need_to_delete(out_of_stock=out_of_stock, whole_table=self.df1)
             list_check_need_to_edit, list_ready_to_create = self.create_list_need_to_create(in_stock)
 
-            ready_to_create_path = "/tmp/ready_to_create.txt"
-            invalid_quantity_path = "/tmp/invalid_quantity.txt"
-            list_need_to_delete_path = "/tmp/list_need_to_delete.txt"
+            ready_to_create_path = "/tmp/ready_to_create_otomoto.txt"
+            invalid_quantity_path = "/tmp/invalid_quantity_otomoto.txt"
+            list_need_to_delete_path = "/tmp/list_need_to_delete_otomoto.txt"
 
             self.upload_list_to_onedrive(uploaded_list=list_ready_to_create, uploaded_list_path=ready_to_create_path)
             self.upload_list_to_onedrive(uploaded_list=invalid_quantity, uploaded_list_path=invalid_quantity_path)

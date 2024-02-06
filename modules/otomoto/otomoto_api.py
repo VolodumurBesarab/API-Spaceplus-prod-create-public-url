@@ -152,7 +152,7 @@ class OtomotoApi:
                         else:
                             database[additional_text] = str(result["id"])
 
-                adverts_dict_json_path = "/tmp/adverts_dict.json"
+                adverts_dict_json_path = "/tmp/adverts_dict_otomoto.json"
                 with open(adverts_dict_json_path, "w", encoding="utf-8") as file:
                     json.dump(database, file, ensure_ascii=False, indent=4)
 

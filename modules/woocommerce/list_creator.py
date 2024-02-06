@@ -1,3 +1,5 @@
+import json
+import os.path
 from typing import Tuple, List
 
 import pandas as pd
@@ -9,6 +11,8 @@ from modules.otomoto.otomoto_manager import OtomotoManager
 
 EXCEL_FILE_NAME = r"otomoto.xlsx"
 SHEET_NAME = "Spaceplus"
+ADVERTS_DICT_JSON = "adverts_dict_woocommerce.json"
+ADVERTS_DICT_JSON_PATH = "/tmp/adverts_dict_woocommerce.json"
 
 
 class ListCreator:
@@ -17,7 +21,7 @@ class ListCreator:
         self.one_drive_manager = OneDriveManager()
         self.excel_handler = ExcelHandler()
 
-    def create_lists_of_produts(self, df1: DataFrame) -> tuple[list[Series], list[Series], list[Series]]:
+    def create_lists_of_produts(self, df1: DataFrame) -> tuple[list[DataFrame], list[DataFrame], list[DataFrame]]:
         in_stock = []
         out_of_stock = []
         invalid_quantity = []
@@ -29,6 +33,41 @@ class ListCreator:
             else:
                 invalid_quantity.append(row)
         return in_stock, out_of_stock, invalid_quantity
+
+    def create_list_need_to_delete(self, out_of_stock: list[DataFrame], whole_table: DataFrame) -> list[DataFrame]:
+        list_need_to_delete = []
+
+        # if not os.path.exists(ADVERTS_DICT_JSON_PATH):
+        print(f"/Holland/reports/{self.one_drive_manager.get_current_day()}/{ADVERTS_DICT_JSON}")
+        self.one_drive_manager.download_file_to_tmp(
+            path=f"/Holland/reports/{self.one_drive_manager.get_current_day()}/{ADVERTS_DICT_JSON}",
+            file_name=ADVERTS_DICT_JSON)
+
+        with open(ADVERTS_DICT_JSON_PATH, 'r') as json_file:
+            adverts_dict: dict = json.load(json_file)
+
+        for item in out_of_stock:
+            in_stock_id = str(item['stock number'])
+            if in_stock_id in adverts_dict.keys():
+                if any((whole_table['stock number'].astype(str) == in_stock_id) & (
+                        whole_table['stock availability'] == 1)):
+                    continue
+                list_need_to_delete.append(item)
+        return list_need_to_delete
+
+    def create_list_need_to_create(self, in_stock: list[DataFrame]) -> tuple[list[DataFrame], list[DataFrame]]:
+        list_check_need_to_edit = []
+        list_ready_to_create = []
+        with open(ADVERTS_DICT_JSON_PATH, 'r') as json_file:
+            adverts_dict: dict = json.load(json_file)
+
+        for item in in_stock:
+            in_stock_id = str(item["stock number"])
+            if in_stock_id in adverts_dict.keys():
+                list_check_need_to_edit.append(item)
+            else:
+                list_ready_to_create.append(item)
+        return list_check_need_to_edit, list_ready_to_create
 
     def get_excel(self) -> DataFrame:
         df1 = None
@@ -44,14 +83,28 @@ class ListCreator:
             self.excel_handler.create_file_on_data(file_content=file_content, file_name=EXCEL_FILE_NAME)
 
             main_excel_file_path = self.excel_handler.get_file_path(file_name=EXCEL_FILE_NAME)
-            # df1 = pd.read_excel(main_excel_file_path)  # file to read
             df1 = pd.read_excel(io=main_excel_file_path, sheet_name=SHEET_NAME)
         return df1
 
     def create_lists(self):
         df1 = self.get_excel()
         in_stock, out_of_stock, invalid_quantity = self.create_lists_of_produts(df1=df1)
+        list_need_to_delete = self.create_list_need_to_delete(out_of_stock=out_of_stock, whole_table=df1)
+        list_check_need_to_edit, list_ready_to_create = self.create_list_need_to_create(in_stock=in_stock)
+
+        ready_to_create_path = "/tmp/ready_to_create_otomoto.txt"
+        invalid_quantity_path = "/tmp/invalid_quantity_otomoto.txt"
+        list_need_to_delete_path = "/tmp/list_need_to_delete_otomoto.txt"
+
+        self.one_drive_manager.upload_list_to_onedrive(uploaded_list=list_ready_to_create, uploaded_list_path=ready_to_create_path)
+        self.one_drive_manager.upload_list_to_onedrive(uploaded_list=invalid_quantity, uploaded_list_path=invalid_quantity_path)
+        self.one_drive_manager.upload_list_to_onedrive(uploaded_list=list_need_to_delete, uploaded_list_path=list_need_to_delete_path)
+
+        print("in stock")
         print(len(in_stock))
+        print("need to create")
+        print(len(list_ready_to_create))
+        # print(len(in_stock))
         # print(in_stock["stock number"])
 
 list_creator = ListCreator()

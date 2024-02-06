@@ -300,7 +300,7 @@ class OtomotoManager:
                 path=f"/Holland/reports/{self.one_drive_manager.current_day}/Lists/ready_to_create.txt",
                 file_name="ready_to_create.txt")
             self.one_drive_manager.download_file_to_tmp(
-                path=f"/Holland/reports/{self.one_drive_manager.current_day}/Lists/list_need_to_delete.txt",
+                path=f"/Holland/reports/{self.one_drive_manager.get_current_day()}/Lists/list_need_to_delete.txt",
                 file_name="list_need_to_delete.txt")
             self.one_drive_manager.download_file_to_tmp(
                 path=f"/Holland/reports/{self.one_drive_manager.current_day}/adverts_dict.json",

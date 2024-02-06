@@ -16,6 +16,9 @@ class OneDriveManager:
         self.default_header = self.auth_manager.get_default_header(access_token=self.access_token)
         self.current_day = DATETIME
 
+    def get_current_day(self) -> DATETIME:
+        return DATETIME
+
     def upload_file_to_onedrive(self, file_path, rows_to_skip=None, rows_to_read=None, current_day=DATETIME, path_after_current_day=None, onedrive_path=None):
         if rows_to_skip is None and rows_to_read is None:
             uploading_file_name = os.path.basename(file_path)

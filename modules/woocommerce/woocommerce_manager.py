@@ -1,3 +1,4 @@
+import json
 import os
 import re
 
@@ -6,6 +7,7 @@ from requests import Response
 
 from dotenv import load_dotenv
 
+from modules.onedrive_manager import OneDriveManager
 from modules.reports.reports_generator import ReportsGenerator
 
 load_dotenv()
@@ -14,6 +16,7 @@ load_dotenv()
 class WoocommerceManager:
     def __init__(self):
         self.reports_generator = ReportsGenerator()
+        self.one_drive_manager = OneDriveManager()
         try:
             self.CONSUMER_KEY_WC = os.getenv("CONSUMER_KEY_WC")
             self.CONSUMER_SECRET_WC = os.getenv("CONSUMER_SECRET_WC")
@@ -28,16 +31,15 @@ class WoocommerceManager:
         woocommerce_endpoint = 'products'
         url = f'{self.WC_URL}{woocommerce_endpoint}'
         auth = (self.CONSUMER_KEY_WC, self.CONSUMER_SECRET_WC)
+        woocommerce_data_base = None
 
-        response = requests.get(
-            url=f'{self.WC_URL}{woocommerce_endpoint}',
-            auth=(self.CONSUMER_KEY_WC, self.CONSUMER_SECRET_WC)
-        )
+        response = requests.get(url=url, auth=auth)
         if response.status_code == 200:
-            self.create_database_in_onedrive(response=response)
+            woocommerce_data_base = self.create_database_in_onedrive(response=response)
         else:
             print('Підключення не вдалось. Перевірте ключі та URL.')
-        pass
+
+        return woocommerce_data_base
 
     def create_database_in_onedrive(self, response: Response):
         adverts_data = response.json()
@@ -50,14 +52,20 @@ class WoocommerceManager:
 
             if match:
                 # print(advert["id"], match.group(1))
-                adverts[advert["id"]] = match.group(1)
+                adverts[match.group(1)] = advert["id"]
             else:
                 message = f"{advert['id']} have not id 'номер на складі'"
                 print(message)
                 # self.reports_generator.create_general_report(message=message)
-        print(adverts)
-        pass
+        return adverts
 
+    def save_database_woocommerce_on_onedrive(self, woocommerce_data_base):
+        adverts_dict_json_path = "/tmp/adverts_dict_woocommerce.json"
+        with open(adverts_dict_json_path, "w", encoding="utf-8") as file:
+            json.dump(woocommerce_data_base, file, ensure_ascii=False, indent=4)
+
+        self.one_drive_manager.upload_file_to_onedrive(file_path=adverts_dict_json_path)
 
 woocommerce_manager = WoocommerceManager()
-woocommerce_manager.get_database()
+data_base = woocommerce_manager.get_database()
+woocommerce_manager.save_database_woocommerce_on_onedrive(woocommerce_data_base=data_base)

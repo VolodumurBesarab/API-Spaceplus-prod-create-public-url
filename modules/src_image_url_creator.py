@@ -61,7 +61,8 @@ class SrcImageUrlCreator:
             photos_url_list = self.s3_link_generator.generate_public_urls(path_to_save_photos=path_to_save_photos)
 
             if photos_url_list is None or photos_url_list == []:
-                return f"Error: can't find folder {product_id}, or folder is empty"
+                # return f"Error: can't find folder {product_id}, or folder is empty"
+                self.reports_generator.create_general_report(message="Error: can't find folder {product_id}, or folder is empty")
 
             formatted_photos_url_list = self.get_string_need_format(photos_url_list)
 

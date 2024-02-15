@@ -50,7 +50,6 @@ class S3LinkGenerator:
     def generate_public_urls(self, path_to_save_photos: str):
         file_list = self._get_list_and_upload_photos(path_to_save_photos=path_to_save_photos)
 
-
         public_urls = []
 
         for file_path in file_list:

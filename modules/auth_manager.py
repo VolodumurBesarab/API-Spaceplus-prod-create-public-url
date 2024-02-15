@@ -19,7 +19,7 @@ class AuthManager:
 
     def __init__(self):
         if not self.__initialized:
-            secrets_file_path = r'D:\API-Spaceplus\secrets.json'
+            secrets_file_path = r'C:\Users\Meskalitos\PycharmProjects\API-Spaceplus\secrets.json'
             if os.path.exists(secrets_file_path):
                 with open(secrets_file_path) as secrets:
                     self.secrets = json.load(secrets)

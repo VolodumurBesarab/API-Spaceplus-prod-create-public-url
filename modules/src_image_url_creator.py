@@ -22,6 +22,13 @@ class SrcImageUrlCreator:
                 in_stock.append(row['номер на складі'])
         return in_stock
 
+    def get_string_need_format(self, lists_of_ids:list[str]) -> str:
+        result = ""
+        for advert_id in lists_of_ids:
+            result = result + f"{advert_id}|"
+        result = result[:-1]
+        return result
+
     def generate_links(self):
         file_content = self.excel_handler.get_exel_file(self.file_name)
         # create file
@@ -37,8 +44,9 @@ class SrcImageUrlCreator:
 
         print(lists_of_ids)
 
-        test_id = "30501"
-        test_lists_of_ids = [test_id]
+        test_id_1 = "30501"
+        test_id_2 = "30506"
+        test_lists_of_ids = [test_id_1, test_id_2]
 
         for product_id in test_lists_of_ids:
 
@@ -55,8 +63,10 @@ class SrcImageUrlCreator:
             if photos_url_list is None or photos_url_list == []:
                 return f"Error: can't find folder {product_id}, or folder is empty"
 
-            self.reports_generator.create_general_report(message=f"Advert id {product_id}: {photos_url_list}")
-            print(f"Advert id {product_id}: {photos_url_list}")
+            formatted_photos_url_list = self.get_string_need_format(photos_url_list)
+
+            self.reports_generator.create_general_report(message=f"Advert id {product_id}: {formatted_photos_url_list}")
+            print(f"Advert id {product_id}: {formatted_photos_url_list}")
 
 # src_image_url_creator = SrcImageUrlCreator()
 # src_image_url_creator.generate_links()

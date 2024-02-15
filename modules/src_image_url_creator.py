@@ -19,7 +19,7 @@ class SrcImageUrlCreator:
         for index, row in df1.iterrows():
             if row['наявність на складі'] == 1 or row['наявність на складі'] == "1":
                 # convert to str
-                in_stock.append(row['номер на складі'])
+                in_stock.append(str(row['номер на складі']))
         return in_stock
 
     def get_string_need_format(self, lists_of_ids:list[str]) -> str:

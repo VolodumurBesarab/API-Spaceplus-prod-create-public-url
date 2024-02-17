@@ -132,6 +132,7 @@ class OtomotoApi:
         database = {}
 
         response = requests.get(url, headers=headers, params=params)
+        self.reports_generator.create_json_in_onedrive(json=response.json())
 
         try:
             if response.status_code == 200:

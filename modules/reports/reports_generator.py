@@ -1,3 +1,4 @@
+import json
 import os
 from modules.onedrive_manager import OneDriveManager
 
@@ -21,15 +22,15 @@ class ReportsGenerator:
         self.one_drive_manager.upload_file_to_onedrive(file_path=REPORT_FILE_PATH)
         return file_path
 
-    def create_json_in_onedrive(self, json: str) -> str:
+    def create_json_in_onedrive(self, json_data) -> str:
             folder_path = "/tmp/"
             file_path = f"/tmp/response.json"
 
             if not os.path.exists(folder_path):
                 os.makedirs(folder_path)
 
-            with open(file_path, "a") as file:
-                file.write(json + "\n")
+            with open(file_path, "w") as json_file:
+                json.dump(json_data, json_file, indent=4)
 
             self.one_drive_manager.upload_file_to_onedrive(file_path=file_path)
             return file_path

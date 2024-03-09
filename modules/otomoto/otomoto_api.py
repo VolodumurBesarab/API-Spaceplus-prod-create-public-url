@@ -131,7 +131,16 @@ class OtomotoApi:
 
         database = {}
 
-        response = requests.get(url, headers=headers, params=params)
+        # response = requests.get(url, headers=headers, params=params)
+        for attempt in range(3):
+            try:
+                response = requests.get(url, headers=headers, params=params)
+                json_data = response.json()
+                break
+            except Exception as e:
+                self.reports_generator.create_general_report(message=f"Error when get response in Otomoto: {e}")
+                if attempt < 2:
+                    time.sleep(5)
 
         try:
             if response.status_code == 200:
@@ -350,7 +359,7 @@ class OtomotoApi:
         s3_link_generator = S3LinkGenerator()
         photos_url_list = s3_link_generator.generate_public_urls(path_to_save_photos=path_to_save_photos)
 
-        if photos_url_list is None or photos_url_list == []:
+        if not photos_url_list:
             return f"Error: can't find folder {product_id}, or folder is empty"
 
         photos_collection_id = self.create_otomoto_images_collection(photos_url_list=photos_url_list)

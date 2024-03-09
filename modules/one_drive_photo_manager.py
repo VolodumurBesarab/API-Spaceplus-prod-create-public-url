@@ -29,17 +29,9 @@ class OneDrivePhotoManager:
         else:
             return None
 
-    def download_files_from_folder(self, folder_id, folder_name):
+    def create_list_to_download(self, folder_id):
         list_to_download = []
         # project_folder = os.getcwd()
-        tmp = "/tmp/"
-        if not os.path.exists(tmp + "Photos"):
-            os.mkdir(tmp + "Photos")
-            print("Photos in tmp created")
-        photos_path = tmp + "Photos"
-        path_to_save_photos = os.path.join(photos_path, folder_name)
-        if not os.path.exists(path_to_save_photos):
-            os.mkdir(path_to_save_photos)
         url = os.path.join(self.endpoint, f"drive/items/{folder_id}/children")
         response = requests.get(url=url, headers=self.headers)
         response_data = response.json()
@@ -48,6 +40,18 @@ class OneDrivePhotoManager:
                 file_id = item['id']
                 file_name = item['name']
                 list_to_download.append((file_id, file_name))
+        return list_to_download
+
+    def download_files_from_folder(self, folder_id, folder_name):
+        list_to_download = self.create_list_to_download(folder_id=folder_id)
+        tmp = "/tmp/"
+        if not os.path.exists(tmp + "Photos"):
+            os.mkdir(tmp + "Photos")
+            print("Photos in tmp created")
+        photos_path = tmp + "Photos"
+        path_to_save_photos = os.path.join(photos_path, folder_name)
+        if not os.path.exists(path_to_save_photos):
+            os.mkdir(path_to_save_photos)
 
         for photo_id, name in list_to_download:
             url = os.path.join(self.endpoint, f"drive/items/{photo_id}/content")

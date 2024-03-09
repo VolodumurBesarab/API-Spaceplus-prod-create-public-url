@@ -19,13 +19,9 @@ class OneDriveManager:
     def get_current_day(self) -> DATETIME:
         return DATETIME
 
-    def upload_file_to_onedrive(self, file_path, rows_to_skip=None, rows_to_read=None, current_day=DATETIME, path_after_current_day=None, onedrive_path=None):
-        if rows_to_skip is None and rows_to_read is None:
-            uploading_file_name = os.path.basename(file_path)
-        else:
-            base_name, extension = os.path.splitext(file_path)
-            new_file_path = f"{base_name} {rows_to_skip + 1}-{rows_to_skip + rows_to_read}{extension}"
-            uploading_file_name = os.path.basename(new_file_path)
+    def upload_file_to_onedrive(self, file_path, current_day=DATETIME, path_after_current_day=None, onedrive_path=None):
+        uploading_file_name = os.path.basename(file_path)
+
         # looks bad, refactor
         if onedrive_path is not None:
             upload_url = self.endpoint + f"drive/items/root:/{onedrive_path}/{uploading_file_name}:/content"

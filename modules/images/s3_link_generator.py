@@ -38,7 +38,6 @@ class S3LinkGenerator:
             s3.upload_file(file_path, S3_BUCKET_NAME, file_name)
             try:
                 s3.head_object(Bucket=S3_BUCKET_NAME, Key=file_name)
-                # print(f"Файл {file_name} успішно завантажено на S3.")
             except Exception as e:
                 print(f"Помилка: {e}. Файл {file_name} не був знайдений на S3.")
 
@@ -47,9 +46,11 @@ class S3LinkGenerator:
     def _del_photos(self):
         pass
 
-    def generate_public_urls(self, path_to_save_photos: str):
-        file_list = self._get_list_and_upload_photos(path_to_save_photos=path_to_save_photos)
+    def convert_urls_to_woocommerce_format(self, urls: list[str]) -> list[dict[str, str]]:
+        return [{"src": url} for url in urls]
 
+    def generate_public_urls(self, path_to_save_photos: str) -> list[str]:
+        file_list = self._get_list_and_upload_photos(path_to_save_photos=path_to_save_photos)
 
         public_urls = []
 
@@ -61,7 +62,4 @@ class S3LinkGenerator:
                 ExpiresIn=3600  # Тут ви можете вказати термін дії посилання в секундах (наприклад, 1 година)
             )
             public_urls.append(url)
-        if public_urls:
-            return public_urls
-        else:
-            return None
+        return public_urls

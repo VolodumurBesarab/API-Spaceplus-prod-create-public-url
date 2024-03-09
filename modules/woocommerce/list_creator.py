@@ -8,6 +8,7 @@ from pandas import DataFrame, Series
 from modules.excel_handler import ExcelHandler
 from modules.onedrive_manager import OneDriveManager
 from modules.otomoto.otomoto_manager import OtomotoManager
+from modules.reports.reports_generator import ReportsGenerator
 
 EXCEL_FILE_NAME = r"otomoto.xlsx"
 SHEET_NAME = "Spaceplus"
@@ -20,6 +21,7 @@ class ListCreator:
         # otomoto_manager = OtomotoManager(excel_file_name="otomoto.xlsx", sheet_name=None)
         self.one_drive_manager = OneDriveManager()
         self.excel_handler = ExcelHandler()
+        self.reports_generator = ReportsGenerator()
 
     def create_lists_of_produts(self, df1: DataFrame) -> tuple[list[DataFrame], list[DataFrame], list[DataFrame]]:
         in_stock = []
@@ -71,23 +73,21 @@ class ListCreator:
 
     def get_excel(self) -> DataFrame:
         df1 = None
-        # if not self.one_drive_manager.is_current_day_folder_created():
-        #     self.one_drive_manager.create_current_day_folder()
-        #
-        # if not self.one_drive_manager.is_list_folder_created():
-        #     self.one_drive_manager.create_lists_folder()
-        if True:
+        if not self.one_drive_manager.is_current_day_folder_created():
+            self.one_drive_manager.create_current_day_folder()
 
-            file_content = self.excel_handler.get_exel_file(EXCEL_FILE_NAME)
+        if not self.one_drive_manager.is_list_folder_created():
+            self.one_drive_manager.create_lists_folder()
 
-            self.excel_handler.create_file_on_data(file_content=file_content, file_name=EXCEL_FILE_NAME)
+        file_content = self.excel_handler.get_exel_file(EXCEL_FILE_NAME)
 
-            main_excel_file_path = self.excel_handler.get_file_path(file_name=EXCEL_FILE_NAME)
-            df1 = pd.read_excel(io=main_excel_file_path, sheet_name=SHEET_NAME)
+        self.excel_handler.create_file_on_data(file_content=file_content, file_name=EXCEL_FILE_NAME)
+
+        main_excel_file_path = self.excel_handler.get_file_path(file_name=EXCEL_FILE_NAME)
+        df1 = pd.read_excel(io=main_excel_file_path, sheet_name=SHEET_NAME)
         return df1
 
-    def create_lists(self):
-        df1 = self.get_excel()
+    def create_lists(self, df: DataFrame):
         in_stock, out_of_stock, invalid_quantity = self.create_lists_of_produts(df1=df1)
         list_need_to_delete = self.create_list_need_to_delete(out_of_stock=out_of_stock, whole_table=df1)
         list_check_need_to_edit, list_ready_to_create = self.create_list_need_to_create(in_stock=in_stock)
@@ -96,16 +96,14 @@ class ListCreator:
         invalid_quantity_path = "/tmp/invalid_quantity_otomoto.txt"
         list_need_to_delete_path = "/tmp/list_need_to_delete_otomoto.txt"
 
-        self.one_drive_manager.upload_list_to_onedrive(uploaded_list=list_ready_to_create, uploaded_list_path=ready_to_create_path)
-        self.one_drive_manager.upload_list_to_onedrive(uploaded_list=invalid_quantity, uploaded_list_path=invalid_quantity_path)
-        self.one_drive_manager.upload_list_to_onedrive(uploaded_list=list_need_to_delete, uploaded_list_path=list_need_to_delete_path)
+        self.one_drive_manager.upload_file_to_onedrive(path_after_current_day="Lists", file_path=ready_to_create_path)
+        self.reports_generator.create_general_report(message=f"{ready_to_create_path} created successfully")
 
-        print("in stock")
-        print(len(in_stock))
-        print("need to create")
-        print(len(list_ready_to_create))
-        # print(len(in_stock))
-        # print(in_stock["stock number"])
+        self.one_drive_manager.upload_file_to_onedrive(path_after_current_day="Lists", file_path=invalid_quantity_path)
+        self.reports_generator.create_general_report(message=f"{invalid_quantity_path} created successfully")
 
-list_creator = ListCreator()
-list_creator.create_lists()
+        self.one_drive_manager.upload_file_to_onedrive(path_after_current_day="Lists", file_path=list_need_to_delete_path)
+        self.reports_generator.create_general_report(message=f"{list_need_to_delete_path} created successfully")
+
+# list_creator = ListCreator()
+# list_creator.create_lists()

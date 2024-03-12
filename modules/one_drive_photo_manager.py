@@ -1,15 +1,68 @@
-import requests as requests
+import os
+import requests
+
+from modules.auth_manager import AuthManager
 
 NL_FOLDER_ID = "01GK3VGRXOWQGPB72LHVB2WIIN642U4NKK"
+STOCK_PHOTOS_ID = "01GK3VGRXIBVXNE7ZPRBFI67KLJQLR6ZFG"
 
 
 class OneDrivePhotoManager:
-    def __init__(self, endpoint: str, headers, access_token):
-        self.endpoint = endpoint
-        self.headers = headers
-        self.access_token = access_token
+    def __init__(self):
+        self.auth_manager = AuthManager()
+        self.endpoint = self.auth_manager.get_endpoint()
+        self.access_token = self.auth_manager.get_access_token_default_scopes()
+        self.headers = self.auth_manager.get_default_header(access_token=self.access_token)
 
-    def get_photos(self, folder_name: str):
+    def get_stock_photos_folder_id(self):
+        url = os.path.join(self.endpoint, "drive/root:/Holland/stock-photos/")
+        response = requests.get(url=url, headers=self.headers)
+        response_data = response.json()
+        return response_data['id']
+
+    def find_folder_by_name(self, parent_folder_id, folder_name):
+        url = os.path.join(self.endpoint, f"drive/items/{parent_folder_id}/children?$filter=name eq '{folder_name}'")
+        response = requests.get(url=url, headers=self.headers)
+        response_data = response.json()
+        if 'value' in response_data and len(response_data['value']) > 0:
+            return response_data['value'][0]['id']  # Повертаємо ідентифікатор знайденої папки
+        else:
+            return None
+
+    def download_files_from_folder(self, folder_id, folder_name):
+        list_to_download = []
+        # project_folder = os.getcwd()
+        tmp = "/tmp/"
+        if not os.path.exists(tmp + "Photos"):
+            os.mkdir(tmp + "Photos")
+            print("Photos in tmp created")
+        photos_path = tmp + "Photos"
+        path_to_save_photos = os.path.join(photos_path, folder_name)
+        if not os.path.exists(path_to_save_photos):
+            os.mkdir(path_to_save_photos)
+        url = os.path.join(self.endpoint, f"drive/items/{folder_id}/children")
+        response = requests.get(url=url, headers=self.headers)
+        response_data = response.json()
+        if 'value' in response_data:
+            for item in response_data['value']:
+                file_id = item['id']
+                file_name = item['name']
+                list_to_download.append((file_id, file_name))
+
+        for photo_id, name in list_to_download:
+            url = os.path.join(self.endpoint, f"drive/items/{photo_id}/content")
+            response = requests.get(url=url, headers=self.headers)
+            if response.status_code == 200:
+                # file_path = os.path.join(project_folder, "Data", "Photos", name)
+                file_path = os.path.join(path_to_save_photos, name)
+                with open(file_path, 'wb') as file:
+                    file.write(response.content)
+                # print(f"Завантажено: {name}")
+            else:
+                print(f"Не вдалося завантажити: {name}. Status code = {response.status_code}")
+        return path_to_save_photos
+
+    def get_photos_public_url(self, folder_name: str):
         response = requests.get(url=self.endpoint + f"drive/items/{NL_FOLDER_ID}/children",
                                 headers=self.headers)
         photo_id_list = []
@@ -41,7 +94,7 @@ class OneDrivePhotoManager:
         else:
             print(f"Сталася помилка при отриманні вмісту папки root/NL: {response.text}")
 
-        print(photo_id_list)
+        # print(photo_id_list)
 
         create_link_payload = {
             "type": "view",
@@ -59,8 +112,6 @@ class OneDrivePhotoManager:
         if create_link_response.status_code == 200:
             create_link_response_json = create_link_response.json()
             created_link = create_link_response_json["link"]["webUrl"]
-            # test = requests.get(created_link).content
-            # print(test)
 
         for item_id in photo_id_list:
             create_link_url = self.endpoint + f"drive/items/{item_id}/createLink"
@@ -71,10 +122,3 @@ class OneDrivePhotoManager:
                 create_link_response_json = create_link_response.json()
                 created_link = create_link_response_json["link"]["webUrl"]
                 print(created_link)
-                # print(create_link_response_json)
-
-                # image_data = {
-                #     "file": ("image.jpg", requests.get(created_link).content, "image/jpeg")
-                # }
-                #
-                # print(image_data)

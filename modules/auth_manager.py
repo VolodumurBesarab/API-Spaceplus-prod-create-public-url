@@ -35,12 +35,6 @@ class AuthManager:
                 self.authority_url = self.secrets.get("authority_url")
 
             else:
-                self.otomoto_url = os.environ["otomoto_url"]
-                self.otomoto_client_id = os.environ["otomoto_client_id"]
-                self.otomoto_client_secret = os.environ["otomoto_client_secret"]
-                self.otomoto_username = os.environ["otomoto_username"]
-                self.otomoto_password = os.environ["otomoto_password"]
-
                 self.application_id = os.environ["VLAD_APPLICATION_ID"]
                 self.client_secret = os.environ["VLAD_CLIENT_SECRET"]
                 self.authority_url = os.environ["authority_url"]

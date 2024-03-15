@@ -1,6 +1,8 @@
-import json
 import os
+import json
+
 from modules.onedrive_manager import OneDriveManager
+
 
 REPORT_FILE_PATH = f"/tmp/reports/general_report.txt"
 

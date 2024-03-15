@@ -54,12 +54,17 @@ class S3LinkGenerator:
 
         for file_path in file_list:
             s3_object_key = os.path.basename(file_path)
-            url = S3.generate_presigned_url(
+            url_with_params = S3.generate_presigned_url(
                 ClientMethod="get_object",
-                Params={"Bucket": S3_BUCKET_NAME, "Key": s3_object_key},
+                Params={"Bucket": S3_BUCKET_NAME,
+                        "Key": s3_object_key},
                 ExpiresIn=3600  # Тут ви можете вказати термін дії посилання в секундах (наприклад, 1 година)
             )
+            url, params = url_with_params.split('?', 1)
             public_urls.append(url)
+            # need create logs
+            print(f"Created {s3_object_key} url: {url}")
+
         if public_urls:
             return public_urls
         else:

@@ -44,9 +44,11 @@ class SrcImageUrlCreator:
 
         print(lists_of_ids)
 
-        test_id_1 = "30501"
-        test_id_2 = "30506"
-        test_lists_of_ids = [test_id_1, test_id_2]
+        # test_id_1 = "15505"
+        # test_id_2 = "50429"
+        test_lists_of_ids = ["11120"]
+
+
 
         for product_id in test_lists_of_ids:
 
@@ -62,7 +64,7 @@ class SrcImageUrlCreator:
 
             if photos_url_list is None or photos_url_list == []:
                 # return f"Error: can't find folder {product_id}, or folder is empty"
-                self.reports_generator.create_general_report(message="Error: can't find folder {product_id}, or folder is empty")
+                self.reports_generator.create_general_report(message=f"Error: can't find folder {product_id}, or folder is empty")
 
             formatted_photos_url_list = self.get_string_need_format(photos_url_list)
 
